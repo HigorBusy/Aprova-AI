@@ -14,15 +14,19 @@
 
 html {
   scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
   min-height: 100vh;
   margin: 0;
   background:
-    radial-gradient(circle at top left, rgba(37, 99, 235, 0.10), transparent 34rem),
+    radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 34rem),
+    radial-gradient(circle at bottom right, rgba(22, 163, 74, 0.06), transparent 28rem),
     linear-gradient(180deg, #f8f6ef 0%, #fffdfa 46%, #eef7f0 100%);
   color: rgb(var(--foreground));
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 button,
@@ -34,12 +38,14 @@ select {
 
 button {
   touch-action: manipulation;
+  cursor: pointer;
 }
 
 .glass {
   background: rgba(255, 255, 255, 0.72);
   border: 1px solid rgba(255, 255, 255, 0.72);
   backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
 }
 
 .safe-bottom {
@@ -57,6 +63,44 @@ button {
   }
 }
 
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .animate-float-in {
   animation: floatIn 280ms ease-out both;
 }
+
+.animate-scale-in {
+  animation: scaleIn 200ms ease-out both;
+}
+
+.animate-slide-up {
+  animation: slideUp 350ms ease-out both;
+}
+
+/* Staggered children animation */
+.stagger-children > *:nth-child(1) { animation-delay: 0ms; }
+.stagger-children > *:nth-child(2) { animation-delay: 60ms; }
+.stagger-children > *:nth-child(3) { animation-delay: 120ms; }
+.stagger-children > *:nth-child(4) { animation-delay: 180ms; }
+.stagger-children > *:nth-child(5) { animation-delay: 240ms; }
+.stagger-children > *:nth-child(6) { animation-delay: 300ms; }
