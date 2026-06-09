@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ImagePlus, Lock, Sparkles } from "lucide-react";
+import { BrainCircuit, ImagePlus, Lock } from "lucide-react";
 import { Card, Button } from "@/components/ui";
 import type { MentorMessage } from "@/lib/types";
 
@@ -19,9 +19,9 @@ export function Mentor({ messages, onSend }: MentorProps) {
     onSend({
       id: crypto.randomUUID(),
       role: "student",
-      text: text.trim() || "Enviei uma imagem da questão.",
+      text: text.trim() || "Enviei uma imagem do bloqueio.",
       fileName,
-      createdAt: new Date().toISOString(),
+      createdAt: new Date().toISOString()
     });
     setText("");
     setFileName(undefined);
@@ -29,15 +29,14 @@ export function Mentor({ messages, onSend }: MentorProps) {
 
   return (
     <div className="grid gap-4 animate-float-in">
-      {/* Chat Area */}
       <Card>
         <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="text-sm font-bold text-ocean">Mentor ENEM</p>
-            <h2 className="text-xl font-black">Dúvida rápida</h2>
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-cyan">estrategista IA</p>
+            <h2 className="text-xl font-black text-white">Comandante de avanço</h2>
           </div>
-          <span className="grid h-10 w-10 place-items-center rounded-lg bg-violet-50 text-grape">
-            <Sparkles className="h-5 w-5" />
+          <span className="grid h-10 w-10 place-items-center rounded-lg border border-violet-300/20 bg-violet-400/10 text-violet-200">
+            <BrainCircuit className="h-5 w-5" />
           </span>
         </div>
 
@@ -45,33 +44,30 @@ export function Mentor({ messages, onSend }: MentorProps) {
           {messages.map((message) => (
             <div
               key={message.id}
-              className={`rounded-xl p-3 text-sm font-semibold ${
+              className={`rounded-lg border p-3 text-sm font-semibold ${
                 message.role === "student"
-                  ? "bg-blue-50 text-blue-900"
-                  : "bg-white/80 text-slate-700 border border-slate-100"
+                  ? "border-cyan/20 bg-cyan/10 text-cyan"
+                  : "border-white/10 bg-white/[0.055] text-slate-200"
               }`}
             >
               <p>{message.text}</p>
               {message.fileName && (
-                <span className="mt-2 block text-xs text-slate-500">
-                  Imagem: {message.fileName}
-                </span>
+                <span className="mt-2 block text-xs text-slate-500">Imagem: {message.fileName}</span>
               )}
             </div>
           ))}
         </div>
       </Card>
 
-      {/* Input Area */}
       <Card>
         <textarea
           value={text}
           onChange={(event) => setText(event.target.value)}
-          placeholder="Escreva sua dúvida..."
-          className="min-h-28 w-full resize-none rounded-lg border border-slate-200 bg-white px-3 py-3 font-semibold outline-none transition focus:border-ocean focus:ring-2 focus:ring-blue-100"
+          placeholder="Descreva o bloqueio, a matéria ou o erro que precisa virar estratégia..."
+          className="min-h-28 w-full resize-none rounded-lg border border-white/10 bg-white/[0.06] px-3 py-3 font-semibold text-white outline-none placeholder:text-slate-500 focus:border-cyan"
         />
         <div className="mt-3 flex items-center gap-2">
-          <label className="inline-flex min-h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-sm font-bold transition hover:border-blue-200 hover:bg-blue-50">
+          <label className="inline-flex min-h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/[0.06] px-3 text-sm font-bold text-white transition hover:border-cyan/50">
             <ImagePlus className="h-4 w-4" />
             Foto
             <input
@@ -82,12 +78,12 @@ export function Mentor({ messages, onSend }: MentorProps) {
             />
           </label>
           <Button className="flex-1" onClick={handleSend}>
-            Enviar
+            Orientar
           </Button>
         </div>
         <p className="mt-3 flex items-center gap-2 text-xs font-bold text-slate-500">
-          <Lock className="h-4 w-4 text-reward" />
-          Premium libera mentor IA completo e análises extras.
+          <Lock className="h-4 w-4 text-amber-300" />
+          A versão premium libera análises profundas e plano de ataque adaptativo.
         </p>
       </Card>
     </div>
