@@ -1,65 +1,80 @@
-import type { Achievement, Area, DailyTask, Difficulty, Level, ProfileKind, QuizAnswers, StudyState, StudyTime, Topic } from "@/lib/types";
+import type {
+  Achievement,
+  Area,
+  DailyTask,
+  Difficulty,
+  Level,
+  ProfileKind,
+  QuizAnswers,
+  StudyState,
+  StudyTime,
+  Topic
+} from "@/lib/types";
 
 export const difficulties: Array<{ id: Difficulty; label: string; detail: string }> = [
-  { id: "start", label: "😵 Não sei por onde começar", detail: "Clareza para o primeiro passo." },
-  { id: "routine", label: "⏰ Falta rotina", detail: "Consistência diária acima de intensidade." },
-  { id: "subjects", label: "📚 Dificuldade em várias matérias", detail: "Blocos pequenos por assunto." },
-  { id: "motivation", label: "🧠 Desanimo rápido", detail: "Progresso visível e recompensas." }
+  { id: "start", label: "Preciso de um ponto de partida", detail: "O primeiro avanço precisa ser óbvio." },
+  { id: "routine", label: "Eu perco consistência", detail: "Seu sistema precisa proteger a sequência." },
+  { id: "subjects", label: "Tenho territórios fracos", detail: "Vamos expor onde atacar primeiro." },
+  { id: "motivation", label: "Eu negocio com a procrastinação", detail: "O app vai transformar presença em identidade." }
 ];
 
 export const studyTimes: Array<{ id: StudyTime; label: string; minutes: number }> = [
-  { id: "30m", label: "⏱️ 30 minutos", minutes: 30 },
-  { id: "1h", label: "🕐 1 hora", minutes: 60 },
-  { id: "2h", label: "🕑 2 horas", minutes: 120 },
-  { id: "3h", label: "🔥 3 horas+", minutes: 180 }
+  { id: "30m", label: "30 minutos de presença real", minutes: 30 },
+  { id: "1h", label: "1 hora de avanço", minutes: 60 },
+  { id: "2h", label: "2 horas de campanha", minutes: 120 },
+  { id: "3h", label: "3 horas ou mais de domínio", minutes: 180 }
 ];
 
 export const areas: Array<{ id: Area; label: string; subject: string }> = [
-  { id: "math", label: "🔢 Matemática", subject: "Matemática" },
-  { id: "essay", label: "✍️ Redação", subject: "Redação" },
-  { id: "nature", label: "🧬 Natureza", subject: "Natureza" },
-  { id: "humanities", label: "🌍 Humanas", subject: "Humanas" },
-  { id: "languages", label: "📖 Linguagens", subject: "Linguagens" }
+  { id: "math", label: "Matemática", subject: "Matemática" },
+  { id: "essay", label: "Redação", subject: "Redação" },
+  { id: "nature", label: "Natureza", subject: "Natureza" },
+  { id: "humanities", label: "Humanas", subject: "Humanas" },
+  { id: "languages", label: "Linguagens", subject: "Linguagens" }
 ];
 
 export const levels: Array<{ id: Level; label: string }> = [
-  { id: "zero", label: "🌱 Começando do zero" },
-  { id: "basic", label: "🧱 Sei o básico" },
-  { id: "messy", label: "⚡ Estudo sem organização" },
-  { id: "improve", label: "🎯 Quero melhorar" }
+  { id: "zero", label: "Ainda estou no começo" },
+  { id: "basic", label: "Tenho base, falta direção" },
+  { id: "messy", label: "Tenho esforço, falta sistema" },
+  { id: "improve", label: "Quero competir em outro nível" }
 ];
 
 export const dailyPhrases = [
-  "Você não precisa estar motivado. Precisa cumprir.",
-  "Quem vence o ENEM não espera vontade.",
-  "Hoje é mais um dia para ficar menos perdido."
+  "A concorrência está estudando agora.",
+  "Seu futuro não liga para sua motivação.",
+  "Hoje é um dia que não volta.",
+  "Quem passa não negocia com a procrastinação.",
+  "A aprovação não premia intenção. Premia repetição.",
+  "Você não precisa se sentir pronto para agir como aprovado."
 ];
 
 export const subjects = ["Matemática", "Redação", "Linguagens", "Humanas", "Natureza"];
 
 export const defaultTopics: Topic[] = [
   { id: "math-1", subject: "Matemática", title: "Razão, proporção e porcentagem", status: "Não iniciado" },
-  { id: "math-2", subject: "Matemática", title: "Funções e gráficos", status: "Não iniciado" },
-  { id: "essay-1", subject: "Redação", title: "Repertório, tese e proposta", status: "Não iniciado" },
-  { id: "lang-1", subject: "Linguagens", title: "Interpretação de textos", status: "Não iniciado" },
-  { id: "hum-1", subject: "Humanas", title: "Brasil República", status: "Não iniciado" },
-  { id: "nat-1", subject: "Natureza", title: "Ecologia e ciclos", status: "Não iniciado" }
+  { id: "math-2", subject: "Matemática", title: "Funções e leitura de gráficos", status: "Não iniciado" },
+  { id: "essay-1", subject: "Redação", title: "Tese, repertório e projeto de texto", status: "Não iniciado" },
+  { id: "essay-2", subject: "Redação", title: "Argumentação e intervenção", status: "Não iniciado" },
+  { id: "lang-1", subject: "Linguagens", title: "Interpretação e intenção comunicativa", status: "Não iniciado" },
+  { id: "hum-1", subject: "Humanas", title: "Brasil República e cidadania", status: "Não iniciado" },
+  { id: "nat-1", subject: "Natureza", title: "Ecologia e ciclos biogeoquímicos", status: "Não iniciado" }
 ];
 
 export const defaultTasks: DailyTask[] = [
-  { id: "study-topic", title: "Estudar tema", xp: 10, done: false },
-  { id: "questions", title: "Resolver questões", xp: 10, done: false },
-  { id: "review", title: "Revisar erros", xp: 10, done: false },
-  { id: "log-hours", title: "Registrar horas", xp: 10, done: false },
-  { id: "note", title: "Fazer anotação", xp: 10, done: false }
+  { id: "study-topic", title: "Avançar no território prioritário", xp: 15, done: false },
+  { id: "questions", title: "Vencer 10 questões", xp: 20, done: false },
+  { id: "review", title: "Corrigir os próprios erros", xp: 15, done: false },
+  { id: "log-hours", title: "Registrar presença real", xp: 10, done: false },
+  { id: "note", title: "Consolidar uma descoberta", xp: 10, done: false }
 ];
 
 export const achievements: Achievement[] = [
-  { id: "first-task", title: "Primeira tarefa", description: "Conclua uma tarefa diária.", target: 1, metric: "tasks", rewardXp: 20, icon: "✅" },
-  { id: "first-week", title: "Primeira semana", description: "Mantenha 7 dias de sequência.", target: 7, metric: "streak", rewardXp: 100, icon: "🔥" },
-  { id: "ten-hours", title: "10 horas", description: "Acumule 10 horas de estudo.", target: 10, metric: "hours", rewardXp: 80, icon: "⏳" },
-  { id: "thirty-hours", title: "30 horas", description: "Acumule 30 horas de estudo.", target: 30, metric: "hours", rewardXp: 160, icon: "🚀" },
-  { id: "hundred-questions", title: "100 questões", description: "Registre 100 questões resolvidas.", target: 100, metric: "questions", rewardXp: 120, icon: "🎯" }
+  { id: "first-task", title: "Primeiro avanço", description: "Execute sua primeira ação de missão.", target: 1, metric: "tasks", rewardXp: 20, icon: "✓" },
+  { id: "first-week", title: "Sequência protegida", description: "Mantenha 7 dias seguidos de presença.", target: 7, metric: "streak", rewardXp: 100, icon: "🔥" },
+  { id: "ten-hours", title: "Motor ligado", description: "Acumule 10 horas de avanço.", target: 10, metric: "hours", rewardXp: 80, icon: "⚡" },
+  { id: "thirty-hours", title: "Modo competição", description: "Acumule 30 horas de campanha.", target: 30, metric: "hours", rewardXp: 160, icon: "◆" },
+  { id: "hundred-questions", title: "Pressão aplicada", description: "Registre 100 questões vencidas.", target: 100, metric: "questions", rewardXp: 120, icon: "◎" }
 ];
 
 export function todayKey(date = new Date()) {
@@ -68,7 +83,7 @@ export function todayKey(date = new Date()) {
 
 export function initialState(): StudyState {
   return {
-    name: "Estudante",
+    name: "Candidato",
     profileKind: null,
     dailyGoalMinutes: 60,
     studiedMinutesToday: 0,
@@ -82,8 +97,15 @@ export function initialState(): StudyState {
     questionCount: 0,
     topics: defaultTopics,
     tasks: defaultTasks,
-    notifications: ["Faltam poucos minutos para bater sua meta de hoje."],
-    mentorMessages: [{ id: "welcome", role: "mentor", text: "Manda sua dúvida ou uma foto da questão. Por enquanto sou um mentor placeholder.", createdAt: new Date().toISOString() }]
+    notifications: ["A missão de hoje ainda está aberta. Feche o dia antes que ele feche você."],
+    mentorMessages: [
+      {
+        id: "welcome",
+        role: "mentor",
+        text: "Relate seu bloqueio. Eu vou devolver uma estratégia de avanço, não uma resposta pronta.",
+        createdAt: new Date().toISOString()
+      }
+    ]
   };
 }
 
@@ -103,12 +125,13 @@ export function prioritySubject(area?: Area) {
 }
 
 export function rankFromXp(xp: number) {
-  if (xp >= 2200) return "Lendário";
-  if (xp >= 1400) return "Elite ENEM";
-  if (xp >= 850) return "Avançado";
-  if (xp >= 420) return "Focado";
-  if (xp >= 120) return "Constante";
-  return "Iniciante";
+  if (xp >= 3000) return "Lendário";
+  if (xp >= 2200) return "Aprovado";
+  if (xp >= 1500) return "Elite";
+  if (xp >= 900) return "Competidor";
+  if (xp >= 450) return "Estrategista";
+  if (xp >= 120) return "Persistente";
+  return "Sobrevivente";
 }
 
 export function metricValue(achievement: Achievement, state: StudyState) {
