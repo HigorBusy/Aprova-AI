@@ -3,9 +3,9 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: light;
-  --background: 248 246 239;
-  --foreground: 23 32 51;
+  color-scheme: dark;
+  --background: 6 9 19;
+  --foreground: 248 250 252;
 }
 
 * {
@@ -14,19 +14,20 @@
 
 html {
   scroll-behavior: smooth;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
   min-height: 100vh;
   margin: 0;
   background:
-    radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 34rem),
-    radial-gradient(circle at bottom right, rgba(22, 163, 74, 0.06), transparent 28rem),
-    linear-gradient(180deg, #f8f6ef 0%, #fffdfa 46%, #eef7f0 100%);
+    radial-gradient(circle at 20% 0%, rgba(37, 99, 235, 0.28), transparent 24rem),
+    radial-gradient(circle at 80% 12%, rgba(34, 197, 94, 0.16), transparent 18rem),
+    linear-gradient(180deg, #050816 0%, #070b18 44%, #0a0f1f 100%);
   color: rgb(var(--foreground));
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+::selection {
+  background: rgba(34, 211, 238, 0.35);
 }
 
 button,
@@ -38,14 +39,26 @@ select {
 
 button {
   touch-action: manipulation;
-  cursor: pointer;
+}
+
+input,
+textarea,
+select {
+  color-scheme: dark;
 }
 
 .glass {
-  background: rgba(255, 255, 255, 0.72);
-  border: 1px solid rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.105), rgba(255, 255, 255, 0.045));
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  backdrop-filter: blur(22px);
+}
+
+.mission-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 34px 34px;
 }
 
 .safe-bottom {
@@ -55,7 +68,7 @@ button {
 @keyframes floatIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(12px);
   }
   to {
     opacity: 1;
@@ -63,44 +76,43 @@ button {
   }
 }
 
-@keyframes scaleIn {
-  from {
+@keyframes rewardPop {
+  0% {
     opacity: 0;
-    transform: scale(0.95);
+    transform: translate(-50%, 14px) scale(0.92);
   }
-  to {
+  18% {
     opacity: 1;
-    transform: scale(1);
+    transform: translate(-50%, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -36px) scale(0.98);
   }
 }
 
-@keyframes slideUp {
-  from {
+@keyframes sparkRise {
+  0% {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(10px) scale(0.8);
   }
-  to {
+  25% {
     opacity: 1;
-    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-46px) scale(1.08);
   }
 }
 
 .animate-float-in {
-  animation: floatIn 280ms ease-out both;
+  animation: floatIn 320ms ease-out both;
 }
 
-.animate-scale-in {
-  animation: scaleIn 200ms ease-out both;
+.reward-pop {
+  animation: rewardPop 1500ms ease-out both;
 }
 
-.animate-slide-up {
-  animation: slideUp 350ms ease-out both;
+.spark-rise {
+  animation: sparkRise 1300ms ease-out both;
 }
-
-/* Staggered children animation */
-.stagger-children > *:nth-child(1) { animation-delay: 0ms; }
-.stagger-children > *:nth-child(2) { animation-delay: 60ms; }
-.stagger-children > *:nth-child(3) { animation-delay: 120ms; }
-.stagger-children > *:nth-child(4) { animation-delay: 180ms; }
-.stagger-children > *:nth-child(5) { animation-delay: 240ms; }
-.stagger-children > *:nth-child(6) { animation-delay: 300ms; }
