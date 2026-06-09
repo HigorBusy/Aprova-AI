@@ -9,15 +9,17 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        canvas: "#f8f6ef",
-        ink: "#172033",
+        canvas: "#060913",
+        ink: "#f8fafc",
         ocean: "#2563eb",
-        mint: "#16a34a",
+        cyan: "#22d3ee",
+        mint: "#22c55e",
         reward: "#f97316",
         grape: "#7c3aed"
       },
       boxShadow: {
-        soft: "0 18px 60px rgba(23, 32, 51, 0.10)"
+        soft: "0 22px 70px rgba(0, 0, 0, 0.36)",
+        glow: "0 0 28px rgba(37, 99, 235, 0.36)"
       }
     }
   },
