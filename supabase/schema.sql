@@ -109,6 +109,19 @@ create table if not exists public.streaks (
   created_at timestamptz not null default now()
 );
 
+create index if not exists study_goals_user_id_idx on public.study_goals (user_id);
+create index if not exists daily_progress_user_id_idx on public.daily_progress (user_id);
+create index if not exists subjects_user_id_idx on public.subjects (user_id);
+create index if not exists topics_user_id_idx on public.topics (user_id);
+create index if not exists topics_subject_id_idx on public.topics (subject_id);
+create index if not exists tasks_user_id_idx on public.tasks (user_id);
+create index if not exists xp_history_user_id_idx on public.xp_history (user_id);
+create index if not exists achievements_user_id_idx on public.achievements (user_id);
+create index if not exists notifications_user_id_idx on public.notifications (user_id);
+create index if not exists doubt_uploads_user_id_idx on public.doubt_uploads (user_id);
+create index if not exists mentor_messages_user_id_idx on public.mentor_messages (user_id);
+create index if not exists mentor_messages_doubt_upload_id_idx on public.mentor_messages (doubt_upload_id);
+
 grant usage on schema public to anon, authenticated;
 grant select, insert, update, delete on
   public.profiles,
@@ -144,7 +157,9 @@ create policy "profiles_update_own" on public.profiles for update to authenticat
 create policy "study_goals_own" on public.study_goals for all to authenticated using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id);
 create policy "daily_progress_own" on public.daily_progress for all to authenticated using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id);
 create policy "subjects_own_or_seed" on public.subjects for select to authenticated using (user_id is null or (select auth.uid()) = user_id);
-create policy "subjects_write_own" on public.subjects for all to authenticated using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id);
+create policy "subjects_insert_own" on public.subjects for insert to authenticated with check ((select auth.uid()) = user_id);
+create policy "subjects_update_own" on public.subjects for update to authenticated using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id);
+create policy "subjects_delete_own" on public.subjects for delete to authenticated using ((select auth.uid()) = user_id);
 create policy "topics_own" on public.topics for all to authenticated using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id);
 create policy "tasks_own" on public.tasks for all to authenticated using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id);
 create policy "xp_history_own" on public.xp_history for all to authenticated using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id);
