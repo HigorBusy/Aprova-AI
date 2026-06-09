@@ -17,8 +17,8 @@ export function normalizeDailyReset(state: StudyState): StudyState {
     bestStreak: Math.max(state.bestStreak, currentStreak),
     tasks: state.tasks.map((task) => ({ ...task, done: false })),
     notifications: studiedYesterday
-      ? ["Hoje é dia de manter o streak vivo.", ...state.notifications.slice(0, 2)]
-      : ["Você não estudou hoje. Seu streak está em risco.", ...state.notifications.slice(0, 2)],
+      ? ["Você protegeu a sequência. Hoje é dia de subir mais um nível.", ...state.notifications.slice(0, 2)]
+      : ["Você perdeu presença ontem. O sistema não pune: ele chama você de volta.", ...state.notifications.slice(0, 2)]
   };
 }
 
@@ -34,11 +34,14 @@ export function toggleTask(state: StudyState, taskId: string): StudyState {
   return {
     ...state,
     tasks,
-    xp: state.xp + task.xp + (allDone ? 25 : 0),
+    xp: state.xp + task.xp + (allDone ? 35 : 0),
     completedTasks: state.completedTasks + 1,
     questionCount: taskId === "questions" ? state.questionCount + 10 : state.questionCount,
     currentStreak: allDone && state.currentStreak === 0 ? 1 : state.currentStreak,
     bestStreak: Math.max(state.bestStreak, allDone ? 1 : state.currentStreak),
+    notifications: allDone
+      ? ["Missão diária concluída. Você protegeu o dia.", ...state.notifications.slice(0, 2)]
+      : state.notifications
   };
 }
 
@@ -55,10 +58,12 @@ export function addMinutes(state: StudyState, minutes: number): StudyState {
     studiedMinutesToday: newToday,
     totalMinutes: state.totalMinutes + minutes,
     weeklyMinutes,
-    xp: state.xp + (hitGoal ? 25 : 0),
+    xp: state.xp + Math.round(minutes / 3) + (hitGoal ? 30 : 0),
+    currentStreak: newToday > 0 && state.currentStreak === 0 ? 1 : state.currentStreak,
+    bestStreak: Math.max(state.bestStreak, newToday > 0 ? 1 : state.currentStreak),
     notifications: hitGoal
-      ? ["Meta diária concluída. Agora você protegeu o dia.", ...state.notifications.slice(0, 2)]
-      : state.notifications,
+      ? ["Meta diária batida. Isso é evidência, não promessa.", ...state.notifications.slice(0, 2)]
+      : state.notifications
   };
 }
 
@@ -75,7 +80,7 @@ export function changeTopicStatus(
     topics: state.topics.map((topic) =>
       topic.id === topicId ? { ...topic, status } : topic
     ),
-    xp: state.xp + (completedNow ? 50 : 0),
+    xp: state.xp + (completedNow ? 50 : 0)
   };
 }
 
@@ -83,7 +88,7 @@ export function mentorReply(): MentorMessage {
   return {
     id: crypto.randomUUID(),
     role: "mentor",
-    text: "Boa. Separe a dúvida em: conceito, dados do enunciado e primeira tentativa. Quando a IA estiver conectada, eu respondo com resolução passo a passo.",
-    createdAt: new Date().toISOString(),
+    text: "Estratégia: defina o menor avanço verificável, execute sem negociar e registre o resultado. Amanhã o sistema recalibra pelo que você fez, não pelo que prometeu.",
+    createdAt: new Date().toISOString()
   };
 }
