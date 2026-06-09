@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
-import { BarChart3, BookOpen, Home, MessageCircle, Sparkles, Trophy } from "lucide-react";
+import { BarChart3, BrainCircuit, Home, Map, Sparkles, Trophy } from "lucide-react";
 import { Card } from "@/components/ui";
 import { achievements, dailyPhrases, initialState, metricValue, minutesFromStudyTime, prioritySubject, profileFromAnswers, todayKey } from "@/lib/study-data";
 import { loadLocalState, saveLocalState } from "@/lib/local-store";
@@ -16,11 +16,13 @@ import { Progress } from "@/components/progress";
 import { Mentor } from "@/components/mentor";
 import type { QuizAnswers, StudyState } from "@/lib/types";
 
+const enemFirstDay = new Date("2026-11-08T13:30:00-03:00");
+
 const tabs = [
-  { id: "home", label: "Hoje", icon: Home },
-  { id: "subjects", label: "Temas", icon: BookOpen },
-  { id: "progress", label: "Evolução", icon: BarChart3 },
-  { id: "mentor", label: "Mentor", icon: MessageCircle },
+  { id: "home", label: "Missão", icon: Home },
+  { id: "subjects", label: "Mapa", icon: Map },
+  { id: "progress", label: "Evidência", icon: BarChart3 },
+  { id: "mentor", label: "IA", icon: BrainCircuit }
 ] as const;
 
 type TabId = (typeof tabs)[number]["id"];
@@ -66,7 +68,7 @@ export function AprovaApp() {
         id: user.id,
         full_name: state.name,
         quiz_profile: state.profileKind,
-        daily_goal_minutes: state.dailyGoalMinutes,
+        daily_goal_minutes: state.dailyGoalMinutes
       }),
       supabase
         .from("daily_progress")
@@ -76,7 +78,7 @@ export function AprovaApp() {
             progress_date: todayKey(),
             studied_minutes: state.studiedMinutesToday,
             tasks_completed: state.completedTasks,
-            questions_answered: state.questionCount,
+            questions_answered: state.questionCount
           },
           { onConflict: "user_id,progress_date" }
         ),
@@ -87,23 +89,18 @@ export function AprovaApp() {
             user_id: user.id,
             current_streak: state.currentStreak,
             best_streak: state.bestStreak,
-            last_study_date: state.studiedMinutesToday > 0 ? todayKey() : null,
+            last_study_date: state.studiedMinutesToday > 0 ? todayKey() : null
           },
           { onConflict: "user_id" }
-        ),
+        )
     ]);
   }, [user, state]);
 
   const phrase = dailyPhrases[new Date().getDate() % dailyPhrases.length];
-  const progressPercent = Math.round(
-    (state.studiedMinutesToday / state.dailyGoalMinutes) * 100
-  );
-  const completedAchievements = achievements.filter(
-    (item) => metricValue(item, state) >= item.target
-  );
-  const nextAchievement = achievements.find(
-    (item) => metricValue(item, state) < item.target
-  );
+  const daysToEnem = getDaysToEnem();
+  const progressPercent = Math.round((state.studiedMinutesToday / state.dailyGoalMinutes) * 100);
+  const completedAchievements = achievements.filter((item) => metricValue(item, state) >= item.target);
+  const nextAchievement = achievements.find((item) => metricValue(item, state) < item.target);
 
   function updateState(updater: (current: StudyState) => StudyState) {
     setState((current) => updater(current));
@@ -118,23 +115,23 @@ export function AprovaApp() {
       profileKind,
       dailyGoalMinutes,
       notifications: [
-        `Seu foco inicial é ${priority}. Comece pequeno e marque presença hoje.`,
-        ...current.notifications.slice(0, 2),
+        `${priority} virou seu primeiro território de ataque. O avanço começa hoje.`,
+        ...current.notifications.slice(0, 2)
       ],
       topics: current.topics.map((topic) =>
         topic.subject === priority && topic.status === "Não iniciado"
           ? { ...topic, status: "Estudando" as const }
           : topic
-      ),
+      )
     }));
   }
 
   if (!ready) {
     return (
-      <main className="flex min-h-screen items-center justify-center px-5">
+      <main className="mission-grid flex min-h-screen items-center justify-center px-5">
         <Card className="w-full max-w-sm text-center">
-          <Sparkles className="mx-auto h-8 w-8 text-ocean animate-pulse" />
-          <p className="mt-3 font-bold">Preparando seu plano...</p>
+          <Sparkles className="mx-auto h-8 w-8 animate-pulse text-cyan" />
+          <p className="mt-3 font-black text-white">Carregando sistema de evolução...</p>
         </Card>
       </main>
     );
@@ -144,6 +141,7 @@ export function AprovaApp() {
     return (
       <Quiz
         answers={answers}
+        daysToEnem={daysToEnem}
         step={quizStep}
         onAnswer={(next) => setAnswers((current) => ({ ...current, ...next }))}
         onNext={() =>
@@ -155,59 +153,46 @@ export function AprovaApp() {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-md flex-col px-4 pb-28 pt-5">
-      {/* Header */}
+    <main className="mission-grid mx-auto flex min-h-screen w-full max-w-md flex-col px-4 pb-28 pt-5">
       <header className="animate-float-in">
         <div className="flex items-center justify-between gap-3">
-          <div>
-            <p className="text-sm font-bold text-ocean">Aprova.AI</p>
-            <h1 className="text-2xl font-black text-ink">Oi, {state.name}</h1>
+          <div className="min-w-0">
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-cyan">Aprova.AI</p>
+            <h1 className="mt-1 text-2xl font-black text-white">CENTRAL DE MISSÃO</h1>
           </div>
           <Link
             href="/achievements"
-            className="grid h-11 w-11 place-items-center rounded-xl border border-orange-100 bg-orange-50 text-reward shadow-sm transition-all duration-200 hover:shadow-md hover:scale-105 active:scale-95"
+            className="grid h-11 w-11 place-items-center rounded-lg border border-amber-300/20 bg-amber-300/10 text-amber-300 shadow-glow transition active:scale-95"
             aria-label="Conquistas"
           >
             <Trophy className="h-5 w-5" />
           </Link>
         </div>
-        <p className="mt-3 rounded-xl bg-white/70 p-3 text-sm font-semibold text-slate-700 italic">
-          &ldquo;{phrase}&rdquo;
-        </p>
+        <div className="mt-4 rounded-lg border border-white/10 bg-white/[0.055] p-3">
+          <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-400">ordem do dia</p>
+          <p className="mt-1 text-sm font-bold text-white">&ldquo;{phrase}&rdquo;</p>
+        </div>
       </header>
 
-      {/* Tab Content */}
       <div className="mt-5">
         {activeTab === "home" && (
           <Dashboard
             state={state}
             user={user}
+            daysToEnem={daysToEnem}
             progressPercent={progressPercent}
             completedAchievements={completedAchievements.length}
-            nextAchievementTitle={nextAchievement?.title ?? "Tudo desbloqueado"}
-            onTaskToggle={(taskId) =>
-              updateState((current) => toggleTask(current, taskId))
-            }
-            onAddMinutes={(minutes) =>
-              updateState((current) => addMinutes(current, minutes))
-            }
-            onGoalChange={(minutes) =>
-              updateState((current) => ({ ...current, dailyGoalMinutes: minutes }))
-            }
-            onNameChange={(name) =>
-              updateState((current) => ({
-                ...current,
-                name: name.trim() || "Estudante",
-              }))
-            }
+            nextAchievementTitle={nextAchievement?.title ?? "Todas as conquistas liberadas"}
+            onTaskToggle={(taskId) => updateState((current) => toggleTask(current, taskId))}
+            onAddMinutes={(minutes) => updateState((current) => addMinutes(current, minutes))}
+            onGoalChange={(minutes) => updateState((current) => ({ ...current, dailyGoalMinutes: minutes }))}
+            onNameChange={(name) => updateState((current) => ({ ...current, name: name.trim() || "Candidato" }))}
           />
         )}
         {activeTab === "subjects" && (
           <Subjects
             state={state}
-            onStatusChange={(topicId, status) =>
-              updateState((current) => changeTopicStatus(current, topicId, status))
-            }
+            onStatusChange={(topicId, status) => updateState((current) => changeTopicStatus(current, topicId, status))}
           />
         )}
         {activeTab === "progress" && <Progress state={state} />}
@@ -217,15 +202,14 @@ export function AprovaApp() {
             onSend={(message) =>
               updateState((current) => ({
                 ...current,
-                mentorMessages: [...current.mentorMessages, message, mentorReply()],
+                mentorMessages: [...current.mentorMessages, message, mentorReply()]
               }))
             }
           />
         )}
       </div>
 
-      {/* Bottom Navigation */}
-      <nav className="safe-bottom fixed inset-x-0 bottom-0 z-20 border-t border-white/80 bg-white/85 px-3 py-2 backdrop-blur-xl">
+      <nav className="safe-bottom fixed inset-x-0 bottom-0 z-20 border-t border-white/10 bg-canvas/85 px-3 py-2 backdrop-blur-xl">
         <div className="mx-auto grid max-w-md grid-cols-4 gap-2">
           {tabs.map((tab) => {
             const Icon = tab.icon;
@@ -234,10 +218,10 @@ export function AprovaApp() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`rounded-xl px-2 py-2 text-xs font-bold transition-all duration-200 ${
+                className={`rounded-lg px-2 py-2 text-xs font-black transition ${
                   active
-                    ? "bg-blue-50 text-ocean shadow-sm shadow-blue-100"
-                    : "text-slate-500 hover:text-slate-700"
+                    ? "bg-ocean/20 text-cyan shadow-[0_0_22px_rgba(37,99,235,0.24)]"
+                    : "text-slate-500 hover:text-white"
                 }`}
               >
                 <Icon className="mx-auto h-5 w-5" />
@@ -249,4 +233,9 @@ export function AprovaApp() {
       </nav>
     </main>
   );
+}
+
+function getDaysToEnem() {
+  const diff = enemFirstDay.getTime() - new Date().getTime();
+  return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
 }
