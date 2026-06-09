@@ -7,6 +7,7 @@ import type { QuizAnswers } from "@/lib/types";
 
 type QuizProps = {
   answers: QuizAnswers;
+  daysToEnem: number;
   step: number;
   onAnswer: (answer: QuizAnswers) => void;
   onNext: () => void;
@@ -15,7 +16,7 @@ type QuizProps = {
 
 type ScreenOption = { id: string; label: string; detail?: string };
 
-export function Quiz({ answers, step, onAnswer, onNext, onBack }: QuizProps) {
+export function Quiz({ answers, daysToEnem, step, onAnswer, onNext, onBack }: QuizProps) {
   const screens: Array<{
     title: string;
     options: ScreenOption[];
@@ -23,47 +24,56 @@ export function Quiz({ answers, step, onAnswer, onNext, onBack }: QuizProps) {
     select: (id: string) => void;
   }> = [
     {
-      title: "Qual sua maior dificuldade?",
+      title: "Qual inimigo mais rouba sua aprovação?",
       options: difficulties,
       selected: answers.difficulty,
-      select: (id) => onAnswer({ difficulty: id as QuizAnswers["difficulty"] }),
+      select: (id) => onAnswer({ difficulty: id as QuizAnswers["difficulty"] })
     },
     {
-      title: "Quanto consegue estudar por dia?",
+      title: "Quanto tempo você vai transformar em avanço diário?",
       options: studyTimes,
       selected: answers.studyTime,
-      select: (id) => onAnswer({ studyTime: id as QuizAnswers["studyTime"] }),
+      select: (id) => onAnswer({ studyTime: id as QuizAnswers["studyTime"] })
     },
     {
-      title: "Área com maior dificuldade?",
+      title: "Qual território precisa ser conquistado primeiro?",
       options: areas,
       selected: answers.area,
-      select: (id) => onAnswer({ area: id as QuizAnswers["area"] }),
+      select: (id) => onAnswer({ area: id as QuizAnswers["area"] })
     },
     {
-      title: "Seu nível?",
+      title: "Qual é seu ponto de partida?",
       options: levels,
       selected: answers.level,
-      select: (id) => onAnswer({ level: id as QuizAnswers["level"] }),
-    },
+      select: (id) => onAnswer({ level: id as QuizAnswers["level"] })
+    }
   ];
 
   const screen = screens[step];
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-md flex-col px-5 py-6">
+    <main className="mission-grid mx-auto flex min-h-screen w-full max-w-md flex-col px-5 py-6">
       <div className="flex items-center justify-between">
-        <p className="text-sm font-black text-ocean">Aprova.AI</p>
-        <p className="text-sm font-bold text-slate-500">{step + 1}/4</p>
+        <p className="text-xs font-black uppercase tracking-[0.18em] text-cyan">Aprova.AI</p>
+        <p className="text-sm font-black text-slate-400">{step + 1}/4</p>
       </div>
 
-      <ProgressBar value={((step + 1) / 4) * 100} className="mt-4" />
+      <section className="mt-7 rounded-lg border border-ocean/30 bg-ocean/10 p-4 shadow-glow">
+        <p className="text-sm font-black text-white">Sua aprovação começa hoje.</p>
+        <div className="mt-3 flex items-end gap-3">
+          <span className="text-6xl font-black leading-none text-white">{daysToEnem}</span>
+          <span className="pb-2 text-sm font-black uppercase tracking-[0.12em] text-cyan">
+            dias até o ENEM
+          </span>
+        </div>
+        <ProgressBar value={((step + 1) / 4) * 100} className="mt-5" />
+      </section>
 
       <section className="mt-8 flex flex-1 flex-col">
-        <p className="text-sm font-bold uppercase tracking-[0.12em] text-reward">
-          Diagnóstico inicial
+        <p className="text-xs font-black uppercase tracking-[0.16em] text-amber-300">
+          diagnóstico de combate
         </p>
-        <h1 className="mt-3 text-3xl font-black leading-tight text-ink">
+        <h1 className="mt-3 text-3xl font-black leading-tight text-white">
           {screen.title}
         </h1>
 
@@ -72,15 +82,15 @@ export function Quiz({ answers, step, onAnswer, onNext, onBack }: QuizProps) {
             <button
               key={option.id}
               onClick={() => screen.select(option.id)}
-              className={`rounded-xl border p-4 text-left font-bold shadow-sm transition-all duration-200 active:scale-[0.98] ${
+              className={`rounded-lg border p-4 text-left font-bold transition duration-200 active:scale-[0.98] ${
                 screen.selected === option.id
-                  ? "border-ocean bg-blue-50 text-blue-800 shadow-md shadow-blue-200/40"
-                  : "border-white bg-white/80 text-ink hover:border-blue-200 hover:shadow"
+                  ? "border-cyan/70 bg-cyan/20 text-white shadow-[0_0_26px_rgba(34,211,238,0.18)]"
+                  : "border-white/10 bg-white/[0.055] text-slate-200 hover:border-ocean/60"
               }`}
             >
               {option.label}
               {option.detail && (
-                <span className="mt-1 block text-sm font-medium text-slate-500">
+                <span className="mt-1 block text-sm font-semibold text-slate-400">
                   {option.detail}
                 </span>
               )}
@@ -94,7 +104,7 @@ export function Quiz({ answers, step, onAnswer, onNext, onBack }: QuizProps) {
           Voltar
         </GhostButton>
         <Button onClick={onNext} disabled={!screen.selected}>
-          {step === 3 ? "Gerar plano" : "Continuar"}
+          {step === 3 ? "Ativar sistema" : "Continuar"}
           <ChevronRight className="h-4 w-4" />
         </Button>
       </div>
