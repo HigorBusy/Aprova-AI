@@ -65,7 +65,7 @@ export function Stat({
     blue: "text-aura",
     green: "text-emerald-200",
     orange: "text-amber-200",
-    purple: "text-violet-200"
+    purple: "text-aura"
   }[tone];
 
   return (
