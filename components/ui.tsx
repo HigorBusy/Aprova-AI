@@ -73,7 +73,7 @@ export function Stat({
       <p className="text-[0.68rem] font-medium uppercase tracking-[0.14em] text-slate-500">
         {label}
       </p>
-      <p className={clsx("mt-2 text-2xl font-light leading-none", toneClass)}>
+      <p className={clsx("mt-2 break-words text-xl font-light leading-tight sm:text-2xl", toneClass)}>
         {value}
       </p>
     </div>
