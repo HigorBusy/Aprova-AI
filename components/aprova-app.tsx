@@ -147,7 +147,7 @@ export function AprovaApp() {
 
   return (
     <main className="mission-grid min-h-screen bg-canvas text-white lg:grid lg:grid-cols-[284px_1fr]">
-      <aside className="sticky top-0 hidden h-screen flex-col border-r border-white/10 bg-black/35 px-5 py-6 backdrop-blur-2xl lg:flex">
+      <aside className="sticky top-0 hidden h-screen flex-col border-r border-white/10 bg-black/40 px-5 py-6 backdrop-blur-2xl lg:flex">
         <div>
           <div className="flex items-center justify-between gap-3">
             <div>
