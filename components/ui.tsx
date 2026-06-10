@@ -42,7 +42,7 @@ export function GhostButton({
   return (
     <button
       className={clsx(
-        "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-cyan/15 bg-white/[0.055] px-4 py-2 text-sm font-bold text-slate-100 transition duration-200 hover:border-cyan/45 hover:bg-cyan/10 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50",
+        "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-cyan/20 bg-white/[0.055] px-4 py-2 text-sm font-bold text-slate-100 transition duration-200 hover:border-cyan/50 hover:bg-cyan/10 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50",
         className
       )}
       {...props}
@@ -69,7 +69,7 @@ export function Stat({
   }[tone];
 
   return (
-    <div className="rounded-lg border border-white/10 bg-slate-950/35 p-3">
+    <div className="rounded-lg border border-white/10 bg-slate-950/30 p-3">
       <p className="text-[0.68rem] font-bold uppercase tracking-[0.12em] text-slate-500">
         {label}
       </p>
