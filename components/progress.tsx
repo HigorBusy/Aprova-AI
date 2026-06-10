@@ -19,10 +19,13 @@ export function Progress({ state }: ProgressProps) {
   const totalTopics = Math.max(1, state.topics.length);
 
   return (
-    <div className="grid gap-4 animate-float-in">
-      <Card>
+    <div className="grid gap-4 animate-float-in lg:grid-cols-12 lg:gap-5">
+      <Card className="lg:col-span-5">
         <p className="text-xs font-black uppercase tracking-[0.16em] text-cyan">evidência de evolução</p>
-        <h2 className="mt-1 text-2xl font-black text-white">Você está acumulando prova real.</h2>
+        <h2 className="mt-1 text-2xl font-black text-white lg:text-3xl">Você está acumulando prova real.</h2>
+        <p className="mt-2 text-sm font-bold text-slate-400">
+          Menos sensação de esforço solto. Mais sinais concretos de avanço.
+        </p>
         <div className="mt-4 grid grid-cols-2 gap-3">
           <Stat label="horas acumuladas" value={formatHours(state.totalMinutes)} tone="blue" />
           <Stat label="temas concluídos" value={`${concluded}/${totalTopics}`} tone="green" />
@@ -31,12 +34,12 @@ export function Progress({ state }: ProgressProps) {
         </div>
       </Card>
 
-      <Card>
+      <Card className="lg:col-span-7">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-black text-white">Evolução semanal</h2>
           <Activity className="h-5 w-5 text-mint" />
         </div>
-        <div className="mt-4 flex h-36 items-end gap-2">
+        <div className="mt-4 flex h-44 items-end gap-2">
           {state.weeklyMinutes.map((minutes, index) => (
             <div key={`${index}-${minutes}`} className="flex flex-1 flex-col items-center gap-2">
               <div
@@ -49,9 +52,12 @@ export function Progress({ state }: ProgressProps) {
         </div>
       </Card>
 
-      <Card>
+      <Card className="lg:col-span-12">
         <div className="flex items-center justify-between gap-3">
-          <h2 className="text-lg font-black text-white">Calendário de Guerra</h2>
+          <div>
+            <h2 className="text-lg font-black text-white">Calendário de Guerra</h2>
+            <p className="mt-1 text-sm font-bold text-slate-400">Consistência visível, sem calendário poluído.</p>
+          </div>
           <CalendarDays className="h-5 w-5 text-cyan" />
         </div>
         <Heatmap streak={state.currentStreak} weeklyMinutes={state.weeklyMinutes} />
@@ -61,8 +67,8 @@ export function Progress({ state }: ProgressProps) {
 }
 
 function Heatmap({ streak, weeklyMinutes }: { streak: number; weeklyMinutes: number[] }) {
-  const cells = Array.from({ length: 49 }, (_, index) => {
-    const recent = 48 - index;
+  const cells = Array.from({ length: 70 }, (_, index) => {
+    const recent = 69 - index;
     const active = recent < streak || index % 9 === 0 || weeklyMinutes[index % weeklyMinutes.length] > 0;
     return active ? Math.min(4, Math.max(1, Math.ceil((weeklyMinutes[index % weeklyMinutes.length] || 20) / 30))) : 0;
   });
@@ -70,7 +76,7 @@ function Heatmap({ streak, weeklyMinutes }: { streak: number; weeklyMinutes: num
   const classes = ["bg-white/[0.055]", "bg-mint/20", "bg-mint/30", "bg-cyan/50", "bg-ocean"];
 
   return (
-    <div className="mt-4 grid grid-cols-7 gap-2">
+    <div className="mt-4 grid grid-cols-7 gap-2 sm:grid-cols-10 lg:grid-cols-14">
       {cells.map((intensity, index) => (
         <div
           key={`${index}-${intensity}`}
