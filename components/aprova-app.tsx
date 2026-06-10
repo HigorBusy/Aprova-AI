@@ -172,7 +172,7 @@ export function AprovaApp() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex min-h-12 items-center gap-3 rounded-lg px-3 text-left text-sm font-black transition ${
                   active
-                    ? "border border-cyan/25 bg-cyan/12 text-cyan shadow-glow"
+                    ? "border border-cyan/25 bg-cyan/10 text-cyan shadow-glow"
                     : "text-slate-400 hover:bg-white/[0.06] hover:text-white"
                 }`}
               >
