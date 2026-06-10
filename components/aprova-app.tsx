@@ -175,7 +175,7 @@ export function AprovaApp() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex min-h-12 items-center gap-3 rounded-lg px-3 text-left text-sm transition duration-300 ${
                   active
-                    ? "border border-accent/25 bg-accent/10 text-violet-100 shadow-[0_0_28px_rgba(124,58,237,0.14)]"
+                    ? "border border-accent/25 bg-accent/10 text-aura shadow-[0_0_28px_rgba(124,58,237,0.14)]"
                     : "text-slate-500 hover:bg-white/[0.05] hover:text-slate-200"
                 }`}
               >
@@ -239,7 +239,7 @@ export function AprovaApp() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`rounded-lg px-2 py-2 text-xs transition duration-300 ${
                   active
-                    ? "bg-accent/10 text-violet-100"
+                    ? "bg-accent/10 text-aura"
                     : "text-slate-500 hover:text-slate-200"
                 }`}
               >
