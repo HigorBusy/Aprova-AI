@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
-import { BarChart3, Home, Map, Orbit, Sparkles, Trophy } from "lucide-react";
+import { BarChart3, Home, Map, Orbit, Trophy } from "lucide-react";
 import { Card } from "@/components/ui";
 import { achievements, dailyPhrases, initialState, metricValue, minutesFromStudyTime, prioritySubject, profileFromAnswers, todayKey } from "@/lib/study-data";
 import { loadLocalState, saveLocalState } from "@/lib/local-store";
