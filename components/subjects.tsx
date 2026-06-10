@@ -24,10 +24,10 @@ export function Subjects({ state, onStatusChange }: SubjectsProps) {
   return (
     <div className="grid gap-4 animate-float-in lg:grid-cols-2 lg:gap-5">
       <Card className="lg:col-span-2">
-        <p className="text-xs font-black uppercase tracking-[0.16em] text-cyan">mapa de progresso</p>
-        <h2 className="mt-1 text-2xl font-black text-white lg:text-3xl">Territórios da aprovação</h2>
+        <p className="text-xs font-black uppercase tracking-[0.16em] text-cyan">mapa estelar</p>
+        <h2 className="mt-1 text-2xl font-black text-white lg:text-3xl">Setores da aprovação</h2>
         <p className="mt-2 max-w-2xl text-sm font-bold text-slate-400">
-          Use esta visão para decidir onde investir energia. Forte, em disputa ou crítico: cada matéria precisa de uma ação clara.
+          Cada matéria é um setor da rota. O objetivo é saber onde acelerar, onde estabilizar e onde recalcular.
         </p>
       </Card>
 
@@ -37,7 +37,7 @@ export function Subjects({ state, onStatusChange }: SubjectsProps) {
             <div>
               <h2 className="text-lg font-black text-white">{territory.subject}</h2>
               <p className="text-xs font-bold uppercase tracking-[0.12em] text-slate-500">
-                território {territory.progress >= 60 ? "forte" : territory.progress >= 35 ? "em disputa" : "crítico"}
+                setor {territory.progress >= 60 ? "em órbita" : territory.progress >= 35 ? "em ajuste" : "crítico"}
               </p>
             </div>
             <span className="rounded-lg border border-cyan/20 bg-cyan/10 px-3 py-2 text-lg font-black text-cyan">
@@ -47,7 +47,7 @@ export function Subjects({ state, onStatusChange }: SubjectsProps) {
           <ProgressBar value={territory.progress} className="mt-4" />
           <div className="mt-4 grid gap-3 xl:grid-cols-2">
             {territory.topics.map((topic) => (
-              <div key={topic.id} className="rounded-lg border border-white/10 bg-white/[0.04] p-3">
+              <div key={topic.id} className="rounded-lg border border-white/10 bg-slate-950/35 p-3">
                 <p className="font-bold text-white">{topic.title}</p>
                 <select
                   value={topic.status}
