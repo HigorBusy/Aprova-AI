@@ -24,7 +24,7 @@ export function Button({
     <button
       className={clsx(
         "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition duration-300 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50",
-        "border border-accent/35 bg-accent text-white shadow-[0_0_34px_rgba(124,58,237,0.30)] hover:bg-violet hover:shadow-[0_0_44px_rgba(168,85,247,0.34)]",
+        "border border-accent/30 bg-accent text-white shadow-[0_0_34px_rgba(124,58,237,0.30)] hover:bg-violet hover:shadow-[0_0_44px_rgba(168,85,247,0.34)]",
         className
       )}
       {...props}
@@ -42,7 +42,7 @@ export function GhostButton({
   return (
     <button
       className={clsx(
-        "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/[0.045] px-4 py-2 text-sm font-semibold text-slate-200 transition duration-300 hover:border-accent/35 hover:bg-white/[0.07] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50",
+        "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/[0.045] px-4 py-2 text-sm font-semibold text-slate-200 transition duration-300 hover:border-accent/40 hover:bg-white/[0.07] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50",
         className
       )}
       {...props}
