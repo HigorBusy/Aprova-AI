@@ -84,8 +84,8 @@ export function Quiz({ answers, daysToEnem, step, onAnswer, onNext, onBack }: Qu
               onClick={() => screen.select(option.id)}
               className={`rounded-lg border p-4 text-left font-medium transition duration-300 active:scale-[0.98] ${
                 screen.selected === option.id
-                  ? "border-accent/70 bg-accent/15 text-white shadow-[0_0_30px_rgba(124,58,237,0.22)]"
-                  : "border-white/10 bg-white/[0.045] text-slate-200 hover:border-accent/45 hover:bg-white/[0.06]"
+                  ? "border-accent/70 bg-accent/20 text-white shadow-[0_0_30px_rgba(124,58,237,0.22)]"
+                  : "border-white/10 bg-white/[0.045] text-slate-200 hover:border-accent/50 hover:bg-white/[0.06]"
               }`}
             >
               {option.label}
