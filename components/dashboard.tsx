@@ -37,26 +37,26 @@ export function Dashboard({
 
   return (
     <div className="grid gap-4 animate-float-in lg:grid-cols-12 lg:gap-5">
-      <CountdownPanel daysToEnem={daysToEnem} className="lg:col-span-7" />
+      <CountdownPanel daysToEnem={daysToEnem} className="lg:col-span-12" />
+
+      <WritingCenterCard className="lg:col-span-8 lg:row-span-2" />
       <TelemetryPanel
         state={state}
         progressPercent={progressPercent}
         nextRank={nextRank}
         habits={habits}
-        className="lg:col-span-5"
+        className="lg:col-span-4"
       />
 
-      <WritingCenterCard className="lg:col-span-7 lg:row-span-2" />
-
-      <Card className="lg:col-span-5">
+      <Card className="lg:col-span-4">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <p className="text-xs font-medium uppercase tracking-[0.18em] text-sky-300">missão do dia</p>
-            <h2 className="mt-2 text-2xl font-light leading-tight text-white">{nextTask?.title ?? "Revisar rota"}</h2>
+            <p className="text-xs font-medium uppercase tracking-[0.18em] text-aura">missão do dia</p>
+            <h2 className="mt-2 text-2xl font-medium leading-tight text-white">{nextTask?.title ?? "Revisar rota"}</h2>
           </div>
-          <Target className="h-5 w-5 text-sky-300" />
+          <Target className="h-5 w-5 text-aura" />
         </div>
-        <p className="mt-3 text-sm leading-6 text-slate-400">
+        <p className="mt-3 text-sm leading-6 text-muted">
           O tempo vai passar de qualquer jeito. Use este bloco para executar a próxima ação, não para planejar de novo.
         </p>
         <div className="mt-5 grid grid-cols-2 gap-2">
@@ -71,39 +71,29 @@ export function Dashboard({
         </div>
       </Card>
 
-      <Card className="lg:col-span-3">
+      <Card className="premium-glow lg:col-span-3">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <p className="text-xs font-medium uppercase tracking-[0.18em] text-slate-500">créditos</p>
-            <h2 className="mt-2 text-5xl font-light text-white">1</h2>
+            <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted">créditos</p>
+            <h2 className="energy-text mt-2 text-6xl font-medium text-white">1</h2>
           </div>
-          <CreditCard className="h-5 w-5 text-sky-300" />
+          <CreditCard className="h-5 w-5 text-aura" />
         </div>
-        <p className="mt-3 text-sm leading-6 text-slate-400">correção disponível hoje</p>
+        <p className="mt-3 text-sm leading-6 text-muted">correção disponível hoje</p>
       </Card>
 
-      <Card className="lg:col-span-3">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <p className="text-xs font-medium uppercase tracking-[0.18em] text-slate-500">ritmo observado</p>
-            <h2 className="mt-2 text-5xl font-light text-white">{habits.consistency}%</h2>
-          </div>
-          <Radar className="h-5 w-5 text-sky-300" />
-        </div>
-        <p className="mt-3 text-sm leading-6 text-slate-400">presença na semana atual</p>
-      </Card>
-
-      <Card className="lg:col-span-6">
+      <Card className="lg:col-span-5">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="text-xs font-medium uppercase tracking-[0.18em] text-slate-500">registro de bordo</p>
-            <h2 className="mt-2 text-xl font-light text-white">Seu padrão está sendo observado.</h2>
+            <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted">registro de bordo</p>
+            <h2 className="mt-2 text-xl font-medium text-white">Seu padrão está sendo observado.</h2>
           </div>
-          <Gauge className="h-5 w-5 text-sky-300" />
+          <Gauge className="h-5 w-5 text-aura" />
         </div>
-        <div className="mt-5 grid grid-cols-2 gap-3">
+        <div className="mt-5 grid grid-cols-3 gap-3">
           <Stat label="hoje" value={studiedHours} tone="green" />
           <Stat label="jornada" value={totalHours} tone="blue" />
+          <Stat label="ritmo" value={`${habits.consistency}%`} tone="purple" />
         </div>
       </Card>
 
@@ -125,34 +115,37 @@ function CountdownPanel({ daysToEnem, className }: { daysToEnem: number; classNa
   const countdown = useMemo(() => getCountdown(now), [now]);
 
   return (
-    <Card className={`command-surface p-5 sm:p-6 ${className ?? ""}`}>
-      <div className="flex items-start justify-between gap-4">
+    <Card className={`command-surface premium-glow p-5 sm:p-7 lg:p-8 ${className ?? ""}`}>
+      <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0">
-          <p className="text-xs font-medium uppercase tracking-[0.20em] text-sky-200">aproximação ENEM</p>
-          <h2 className="mt-4 max-w-xl text-2xl font-light leading-tight text-white sm:text-4xl">
-            Quanto tempo resta para chegar ao destino?
+          <p className="text-xs font-medium uppercase tracking-[0.22em] text-aura">contagem regressiva ENEM</p>
+          <h2 className="mt-4 max-w-3xl text-3xl font-semibold leading-tight text-white sm:text-5xl lg:text-6xl">
+            A prova está se aproximando.
           </h2>
+          <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-300">
+            O cronômetro é o painel principal da missão. Cada bloco executado reduz a distância entre hoje e a aprovação.
+          </p>
         </div>
-        <div className="rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-right">
-          <p className="text-3xl font-light text-white">{daysToEnem}</p>
-          <p className="text-[0.65rem] uppercase tracking-[0.16em] text-slate-400">dias</p>
+        <div className="rounded-lg border border-accent/25 bg-black/25 px-4 py-3 text-right shadow-[0_0_34px_rgba(124,58,237,0.20)]">
+          <p className="energy-text text-5xl font-semibold text-white sm:text-6xl">{daysToEnem}</p>
+          <p className="text-[0.68rem] uppercase tracking-[0.18em] text-muted">dias totais</p>
         </div>
       </div>
 
-      <div className="mt-6 grid grid-cols-5 gap-2 rounded-lg border border-white/10 bg-black/20 p-2">
+      <div className="mt-7 grid grid-cols-5 gap-2 rounded-lg border border-white/10 bg-black/25 p-2 sm:gap-3 sm:p-3">
         <CountdownUnit label="meses" value={countdown.months} />
         <CountdownUnit label="dias" value={countdown.days} />
         <CountdownUnit label="horas" value={countdown.hours} />
         <CountdownUnit label="min" value={countdown.minutes} />
-        <CountdownUnit label="seg" value={countdown.seconds} />
+        <CountdownUnit label="seg" value={countdown.seconds} pulse />
       </div>
 
-      <div className="mt-5 h-24 overflow-hidden rounded-lg border border-white/10 bg-black/20 px-3 pt-4">
+      <div className="mt-6 h-24 overflow-hidden rounded-lg border border-white/10 bg-black/25 px-3 pt-4 sm:h-28">
         <div className="flex h-full items-end gap-1 scanline">
           {flightBars.map((height, index) => (
             <span
               key={`${height}-${index}`}
-              className="block flex-1 rounded-t bg-gradient-to-t from-blue-600 via-sky-400 to-sky-200 opacity-80 shadow-[0_0_18px_rgba(56,189,248,0.22)]"
+              className="block flex-1 rounded-t bg-gradient-to-t from-cosmic via-violet to-aura opacity-80 shadow-[0_0_18px_rgba(168,85,247,0.24)]"
               style={{ height: `${height}%` }}
             />
           ))}
@@ -162,11 +155,13 @@ function CountdownPanel({ daysToEnem, className }: { daysToEnem: number; classNa
   );
 }
 
-function CountdownUnit({ label, value }: { label: string; value: number }) {
+function CountdownUnit({ label, value, pulse }: { label: string; value: number; pulse?: boolean }) {
   return (
-    <div className="text-center">
-      <p className="text-2xl font-light text-white sm:text-4xl">{String(value).padStart(2, "0")}</p>
-      <p className="mt-1 text-[0.62rem] font-medium uppercase tracking-[0.10em] text-slate-500">{label}</p>
+    <div className="rounded-lg border border-white/10 bg-white/[0.035] px-2 py-3 text-center">
+      <p className={`energy-text text-3xl font-semibold text-white sm:text-5xl lg:text-6xl ${pulse ? "signal-pulse" : ""}`}>
+        {String(value).padStart(2, "0")}
+      </p>
+      <p className="mt-1 text-[0.62rem] font-medium uppercase tracking-[0.10em] text-muted">{label}</p>
     </div>
   );
 }
@@ -188,13 +183,13 @@ function TelemetryPanel({
     <Card className={`p-5 sm:p-6 ${className ?? ""}`}>
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-medium uppercase tracking-[0.20em] text-sky-300">relatório do comandante</p>
-          <h2 className="mt-2 text-2xl font-light text-white">{habits.status}</h2>
+          <p className="text-xs font-medium uppercase tracking-[0.20em] text-aura">relatório do comandante</p>
+          <h2 className="mt-2 text-2xl font-medium text-white">{habits.status}</h2>
         </div>
-        <Gauge className="h-5 w-5 text-sky-300" />
+        <Gauge className="h-5 w-5 text-aura" />
       </div>
 
-      <p className="mt-4 text-sm leading-6 text-slate-400">{habits.summary}</p>
+      <p className="mt-4 text-sm leading-6 text-muted">{habits.summary}</p>
 
       <div className="mt-6 grid gap-4">
         <MetricRow label="Meta de hoje" value={`${progressPercent}%`} progress={progressPercent} />
@@ -202,8 +197,8 @@ function TelemetryPanel({
         <MetricRow label="Próxima patente" value={nextRank.label} progress={nextRank.progress} />
       </div>
 
-      <div className="mt-5 rounded-lg border border-white/10 bg-black/20 p-3">
-        <p className="text-[0.68rem] font-medium uppercase tracking-[0.16em] text-slate-500">leitura de hábito</p>
+      <div className="mt-5 rounded-lg border border-accent/20 bg-black/25 p-3">
+        <p className="text-[0.68rem] font-medium uppercase tracking-[0.16em] text-muted">leitura de hábito</p>
         <p className="mt-2 text-sm leading-6 text-slate-300">{habits.insight}</p>
       </div>
 
@@ -220,7 +215,7 @@ function MetricRow({ label, value, progress }: { label: string; value: string; p
   return (
     <div>
       <div className="mb-2 flex items-center justify-between gap-3 text-sm">
-        <span className="text-slate-400">{label}</span>
+        <span className="text-muted">{label}</span>
         <span className="font-medium text-slate-100">{value}</span>
       </div>
       <ProgressBar value={progress} />
@@ -248,19 +243,21 @@ function WritingCenterCard({ className }: { className?: string }) {
   }
 
   return (
-    <Card className={`p-5 sm:p-6 ${className ?? ""}`}>
+    <Card className={`premium-glow p-5 sm:p-6 lg:p-7 ${className ?? ""}`}>
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-medium uppercase tracking-[0.20em] text-sky-300">centro de redação</p>
-          <h2 className="mt-2 text-3xl font-light text-white">Corrigir minha redação</h2>
+          <p className="text-xs font-medium uppercase tracking-[0.20em] text-aura">centro de redação</p>
+          <h2 className="mt-2 text-3xl font-semibold text-white sm:text-4xl">Corrigir minha redação</h2>
         </div>
-        <FileText className="h-5 w-5 text-sky-300" />
+        <div className="grid h-11 w-11 place-items-center rounded-lg border border-accent/25 bg-accent/10 text-aura">
+          <FileText className="h-5 w-5" />
+        </div>
       </div>
-      <p className="mt-3 max-w-xl text-sm leading-6 text-slate-400">
-        Cole sua redação ou envie uma imagem para receber uma análise detalhada. A nave só melhora quando os erros aparecem no painel.
+      <p className="mt-3 max-w-2xl text-sm leading-6 text-muted">
+        Cole sua redação ou envie uma imagem para receber uma análise detalhada. A aprovação fica mais próxima quando os erros aparecem com clareza.
       </p>
 
-      <div className="mt-5 grid grid-cols-2 gap-2 rounded-lg border border-white/10 bg-black/20 p-1 text-sm text-slate-300">
+      <div className="mt-6 grid grid-cols-2 gap-2 rounded-lg border border-white/10 bg-black/25 p-1 text-sm text-muted">
         <span className="rounded-md bg-white/10 px-3 py-2 text-center text-white">Texto</span>
         <span className="px-3 py-2 text-center">Imagem</span>
       </div>
@@ -269,11 +266,11 @@ function WritingCenterCard({ className }: { className?: string }) {
         value={essayText}
         onChange={(event) => setEssayText(event.target.value)}
         placeholder="Cole sua redação aqui..."
-        className="mt-4 min-h-48 w-full resize-none rounded-lg border border-white/10 bg-black/30 px-3 py-3 text-sm text-slate-100 outline-none placeholder:text-slate-600 focus:border-sky-300/50"
+        className="mt-4 min-h-56 w-full resize-none rounded-lg border border-white/10 bg-black/35 px-3 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-accent/50 focus:shadow-[0_0_28px_rgba(124,58,237,0.16)]"
       />
 
       <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-        <label className="inline-flex min-h-11 flex-1 cursor-pointer items-center justify-center rounded-lg border border-white/10 bg-white/[0.045] px-3 text-sm font-semibold text-slate-200 transition hover:border-sky-300/30">
+        <label className="inline-flex min-h-11 flex-1 cursor-pointer items-center justify-center rounded-lg border border-white/10 bg-white/[0.045] px-3 text-sm font-semibold text-slate-200 transition hover:border-accent/35 hover:bg-white/[0.07]">
           {fileName ?? "Enviar imagem"}
           <input
             type="file"
@@ -283,7 +280,7 @@ function WritingCenterCard({ className }: { className?: string }) {
           />
         </label>
         <Button onClick={handleCorrection} className="flex-1">
-          Acionar análise
+          Iniciar Correção
         </Button>
       </div>
 
@@ -291,7 +288,7 @@ function WritingCenterCard({ className }: { className?: string }) {
         <Stat label="palavras" value={`${wordCount}`} tone="blue" />
         <Stat label="parágrafos" value={`${paragraphCount}`} tone="green" />
       </div>
-      {result && <p className="mt-3 rounded-lg border border-sky-300/20 bg-black/30 p-3 text-sm leading-6 text-slate-300">{result}</p>}
+      {result && <p className="mt-3 rounded-lg border border-accent/20 bg-black/30 p-3 text-sm leading-6 text-slate-300">{result}</p>}
     </Card>
   );
 }
