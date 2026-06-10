@@ -20,45 +20,45 @@ export function Progress({ state }: ProgressProps) {
 
   return (
     <div className="grid gap-4 animate-float-in lg:grid-cols-12 lg:gap-5">
-      <Card className="lg:col-span-5">
-        <p className="text-xs font-black uppercase tracking-[0.16em] text-cyan">registro de jornada</p>
-        <h2 className="mt-1 text-2xl font-black text-white lg:text-3xl">Sua rota está deixando rastro.</h2>
-        <p className="mt-2 text-sm font-bold text-slate-400">
-          Progresso real é telemetria: horas, setores concluídos, sequência e evolução.
+      <Card className="command-surface p-5 lg:col-span-5 lg:p-6">
+        <p className="text-xs font-medium uppercase tracking-[0.20em] text-sky-200">registro de jornada</p>
+        <h2 className="mt-3 text-3xl font-light leading-tight text-white">Sua rota está deixando rastro.</h2>
+        <p className="mt-3 text-sm leading-6 text-slate-300">
+          Progresso real é telemetria: horas, setores concluídos, sequência e evolução semanal.
         </p>
-        <div className="mt-4 grid grid-cols-2 gap-3">
+        <div className="mt-5 grid grid-cols-2 gap-3">
           <Stat label="horas de voo" value={formatHours(state.totalMinutes)} tone="blue" />
-          <Stat label="setores concluídos" value={`${concluded}/${totalTopics}`} tone="green" />
-          <Stat label="ganho semanal" value={`+${growth}%`} tone="purple" />
+          <Stat label="setores" value={`${concluded}/${totalTopics}`} tone="green" />
+          <Stat label="semana" value={`+${growth}%`} tone="purple" />
           <Stat label="sequência" value={`${state.currentStreak}d`} tone="orange" />
         </div>
       </Card>
 
-      <Card className="lg:col-span-7">
+      <Card className="p-5 lg:col-span-7 lg:p-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-black text-white">Telemetria semanal</h2>
-          <Activity className="h-5 w-5 text-mint" />
+          <h2 className="text-xl font-light text-white">Telemetria semanal</h2>
+          <Activity className="h-5 w-5 text-sky-300" />
         </div>
-        <div className="mt-4 flex h-44 items-end gap-2">
+        <div className="mt-5 flex h-44 items-end gap-2 rounded-lg border border-white/10 bg-black/20 px-3 pt-4">
           {state.weeklyMinutes.map((minutes, index) => (
             <div key={`${index}-${minutes}`} className="flex flex-1 flex-col items-center gap-2">
               <div
-                className="w-full rounded-t-lg bg-gradient-to-t from-ocean via-cyan to-mint shadow-[0_0_18px_rgba(34,211,238,0.18)] transition-all duration-700"
+                className="w-full rounded-t bg-gradient-to-t from-blue-700 via-sky-500 to-sky-200 opacity-85 shadow-[0_0_18px_rgba(56,189,248,0.18)] transition-all duration-700"
                 style={{ height: `${Math.max(8, (minutes / max) * 100)}%` }}
               />
-              <span className="text-xs font-bold text-slate-500">{dayLabels[index]}</span>
+              <span className="text-xs text-slate-500">{dayLabels[index]}</span>
             </div>
           ))}
         </div>
       </Card>
 
-      <Card className="lg:col-span-12">
+      <Card className="p-5 lg:col-span-12 lg:p-6">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <h2 className="text-lg font-black text-white">Constelação de estudos</h2>
-            <p className="mt-1 text-sm font-bold text-slate-400">Cada ponto aceso é um dia em que a nave não ficou parada.</p>
+            <h2 className="text-xl font-light text-white">Constelação de estudos</h2>
+            <p className="mt-1 text-sm leading-6 text-slate-400">Cada ponto aceso é um dia em que a nave não ficou parada.</p>
           </div>
-          <CalendarDays className="h-5 w-5 text-cyan" />
+          <CalendarDays className="h-5 w-5 text-sky-300" />
         </div>
         <Heatmap streak={state.currentStreak} weeklyMinutes={state.weeklyMinutes} />
       </Card>
@@ -73,15 +73,15 @@ function Heatmap({ streak, weeklyMinutes }: { streak: number; weeklyMinutes: num
     return active ? Math.min(4, Math.max(1, Math.ceil((weeklyMinutes[index % weeklyMinutes.length] || 20) / 30))) : 0;
   });
 
-  const classes = ["bg-white/[0.055]", "bg-mint/20", "bg-mint/30", "bg-cyan/50", "bg-ocean"];
+  const classes = ["bg-white/[0.045]", "bg-sky-950", "bg-blue-800", "bg-sky-500", "bg-sky-200"];
 
   return (
-    <div className="mt-4 grid grid-cols-7 gap-2 sm:grid-cols-10 lg:grid-cols-10">
+    <div className="mt-5 grid grid-cols-7 gap-2 sm:grid-cols-10 lg:grid-cols-10">
       {cells.map((intensity, index) => (
         <div
           key={`${index}-${intensity}`}
           className={`aspect-square rounded-md border border-white/5 ${classes[intensity]} ${
-            intensity > 2 ? "shadow-[0_0_16px_rgba(34,211,238,0.25)]" : ""
+            intensity > 2 ? "shadow-[0_0_14px_rgba(56,189,248,0.22)]" : ""
           }`}
           aria-label={`dia ${index + 1} intensidade ${intensity}`}
         />
