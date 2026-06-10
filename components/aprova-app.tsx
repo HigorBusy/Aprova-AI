@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
-import { BarChart3, Home, Map, Sparkles, Trophy } from "lucide-react";
+import { BarChart3, Home, Map, Orbit, Sparkles, Trophy } from "lucide-react";
 import { Card } from "@/components/ui";
 import { achievements, dailyPhrases, initialState, metricValue, minutesFromStudyTime, prioritySubject, profileFromAnswers, todayKey } from "@/lib/study-data";
 import { loadLocalState, saveLocalState } from "@/lib/local-store";
@@ -18,9 +18,9 @@ import type { QuizAnswers, StudyState } from "@/lib/types";
 const enemFirstDay = new Date("2026-11-08T13:30:00-03:00");
 
 const tabs = [
-  { id: "home", label: "Missão", icon: Home },
-  { id: "subjects", label: "Mapa", icon: Map },
-  { id: "progress", label: "Evidência", icon: BarChart3 }
+  { id: "home", label: "Controle", icon: Home },
+  { id: "subjects", label: "Mapa Estelar", icon: Map },
+  { id: "progress", label: "Jornada", icon: BarChart3 }
 ] as const;
 
 type TabId = (typeof tabs)[number]["id"];
@@ -113,7 +113,7 @@ export function AprovaApp() {
       profileKind,
       dailyGoalMinutes,
       notifications: [
-        `${priority} virou seu primeiro território de ataque. O avanço começa hoje.`,
+        `${priority} virou seu primeiro setor de navegação. A rota começa hoje.`,
         ...current.notifications.slice(0, 2)
       ],
       topics: current.topics.map((topic) =>
@@ -128,8 +128,8 @@ export function AprovaApp() {
     return (
       <main className="mission-grid flex min-h-screen items-center justify-center px-5">
         <Card className="w-full max-w-sm text-center">
-          <Sparkles className="mx-auto h-8 w-8 animate-pulse text-cyan" />
-          <p className="mt-3 font-black text-white">Carregando sistema de evolução...</p>
+          <Orbit className="mx-auto h-8 w-8 animate-pulse text-cyan" />
+          <p className="mt-3 font-black text-white">Inicializando nave AprovaAI...</p>
         </Card>
       </main>
     );
@@ -151,12 +151,15 @@ export function AprovaApp() {
   }
 
   return (
-    <main className="mission-grid min-h-screen bg-canvas text-white lg:grid lg:grid-cols-[280px_1fr]">
-      <aside className="sticky top-0 hidden h-screen flex-col border-r border-white/10 bg-white/[0.035] px-5 py-6 backdrop-blur-xl lg:flex">
+    <main className="mission-grid min-h-screen bg-canvas text-white lg:grid lg:grid-cols-[292px_1fr]">
+      <aside className="sticky top-0 hidden h-screen flex-col border-r border-cyan/10 bg-slate-950/45 px-5 py-6 backdrop-blur-2xl lg:flex">
         <div>
-          <p className="text-xs font-black uppercase tracking-[0.18em] text-cyan">Aprova.AI</p>
-          <h1 className="mt-2 text-2xl font-black leading-tight">Central de Missão</h1>
-          <p className="mt-3 text-sm font-bold text-slate-400">{phrase}</p>
+          <p className="text-xs font-black uppercase tracking-[0.22em] text-cyan">Nave AprovaAI</p>
+          <h1 className="mt-2 text-2xl font-black leading-tight">Central de Controle</h1>
+          <div className="mt-4 rounded-lg border border-cyan/15 bg-cyan/10 p-3">
+            <p className="text-[0.68rem] font-black uppercase tracking-[0.16em] text-cyan">Comandante IA</p>
+            <p className="mt-1 text-sm font-bold text-slate-200">{phrase}</p>
+          </div>
         </div>
 
         <nav className="mt-8 grid gap-2">
@@ -169,7 +172,7 @@ export function AprovaApp() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex min-h-12 items-center gap-3 rounded-lg px-3 text-left text-sm font-black transition ${
                   active
-                    ? "border border-cyan/20 bg-ocean/20 text-cyan shadow-[0_0_22px_rgba(37,99,235,0.22)]"
+                    ? "border border-cyan/25 bg-cyan/12 text-cyan shadow-glow"
                     : "text-slate-400 hover:bg-white/[0.06] hover:text-white"
                 }`}
               >
@@ -181,9 +184,9 @@ export function AprovaApp() {
         </nav>
 
         <div className="mt-auto rounded-lg border border-white/10 bg-white/[0.04] p-4">
-          <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-500">próxima conquista</p>
-          <p className="mt-2 text-sm font-black text-white">{nextAchievement?.title ?? "Tudo liberado"}</p>
-          <Link href="/achievements" className="mt-4 inline-flex items-center gap-2 text-sm font-black text-amber-300">
+          <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-500">próximo marco orbital</p>
+          <p className="mt-2 text-sm font-black text-white">{nextAchievement?.title ?? "Rota completa"}</p>
+          <Link href="/achievements" className="mt-4 inline-flex items-center gap-2 text-sm font-black text-amber">
             <Trophy className="h-4 w-4" />
             Ver arsenal
           </Link>
@@ -194,19 +197,19 @@ export function AprovaApp() {
         <header className="mx-auto w-full max-w-7xl animate-float-in lg:hidden">
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0">
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-cyan">Aprova.AI</p>
-              <h1 className="mt-1 text-2xl font-black text-white">CENTRAL DE MISSÃO</h1>
+              <p className="text-xs font-black uppercase tracking-[0.22em] text-cyan">Nave AprovaAI</p>
+              <h1 className="mt-1 text-2xl font-black text-white">CENTRAL DE CONTROLE</h1>
             </div>
             <Link
               href="/achievements"
-              className="grid h-11 w-11 place-items-center rounded-lg border border-amber-300/20 bg-amber-300/10 text-amber-300 shadow-glow transition active:scale-95"
-              aria-label="Conquistas"
+              className="grid h-11 w-11 place-items-center rounded-lg border border-amber/20 bg-amber/10 text-amber shadow-glow transition active:scale-95"
+              aria-label="Arsenal"
             >
               <Trophy className="h-5 w-5" />
             </Link>
           </div>
-          <div className="mt-4 rounded-lg border border-white/10 bg-white/[0.055] p-3">
-            <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-400">ordem do dia</p>
+          <div className="mt-4 rounded-lg border border-cyan/15 bg-cyan/10 p-3">
+            <p className="text-xs font-black uppercase tracking-[0.12em] text-cyan">transmissão do comandante</p>
             <p className="mt-1 text-sm font-bold text-white">&ldquo;{phrase}&rdquo;</p>
           </div>
         </header>
@@ -236,7 +239,7 @@ export function AprovaApp() {
         </div>
       </section>
 
-      <nav className="safe-bottom fixed inset-x-0 bottom-0 z-20 border-t border-white/10 bg-canvas/85 px-3 py-2 backdrop-blur-xl lg:hidden">
+      <nav className="safe-bottom fixed inset-x-0 bottom-0 z-20 border-t border-cyan/10 bg-canvas/88 px-3 py-2 backdrop-blur-xl lg:hidden">
         <div className="mx-auto grid max-w-md grid-cols-3 gap-2">
           {tabs.map((tab) => {
             const Icon = tab.icon;
@@ -247,7 +250,7 @@ export function AprovaApp() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`rounded-lg px-2 py-2 text-xs font-black transition ${
                   active
-                    ? "bg-ocean/20 text-cyan shadow-[0_0_22px_rgba(37,99,235,0.24)]"
+                    ? "bg-cyan/10 text-cyan shadow-glow"
                     : "text-slate-500 hover:text-white"
                 }`}
               >
