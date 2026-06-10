@@ -47,7 +47,7 @@ export function Subjects({ state, onStatusChange }: SubjectsProps) {
           <ProgressBar value={territory.progress} className="mt-4" />
           <div className="mt-4 grid gap-3 xl:grid-cols-2">
             {territory.topics.map((topic) => (
-              <div key={topic.id} className="rounded-lg border border-white/10 bg-slate-950/35 p-3">
+              <div key={topic.id} className="rounded-lg border border-white/10 bg-slate-950/30 p-3">
                 <p className="font-bold text-white">{topic.title}</p>
                 <select
                   value={topic.status}
