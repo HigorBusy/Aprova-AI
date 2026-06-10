@@ -43,7 +43,6 @@ export function Dashboard({
       <CountdownCard daysToEnem={daysToEnem} className="lg:col-span-8" />
       <MissionStatusCard
         state={state}
-        progressPercent={progressPercent}
         completedAchievements={completedAchievements}
         nextRank={nextRank}
         className="lg:col-span-4"
@@ -83,11 +82,11 @@ export function Dashboard({
         </div>
         <p className="mt-3 text-sm font-bold text-slate-400">1 correção por dia para manter a nave em movimento.</p>
         <div className="mt-4 grid gap-2 text-sm font-bold text-slate-300">
-          <div className="flex items-center justify-between rounded-lg bg-slate-950/35 px-3 py-2">
+          <div className="flex items-center justify-between rounded-lg bg-slate-950/30 px-3 py-2">
             <span>Mensal</span>
             <span className="text-cyan">R$19,90</span>
           </div>
-          <div className="flex items-center justify-between rounded-lg bg-slate-950/35 px-3 py-2">
+          <div className="flex items-center justify-between rounded-lg bg-slate-950/30 px-3 py-2">
             <span>Trimestral</span>
             <span className="text-mint">R$39,90</span>
           </div>
@@ -124,7 +123,7 @@ export function Dashboard({
           </div>
           <Trophy className="h-6 w-6 text-amber" />
         </div>
-        <div className="mt-4 rounded-lg border border-white/10 bg-slate-950/35 p-3">
+        <div className="mt-4 rounded-lg border border-white/10 bg-slate-950/30 p-3">
           <div className="flex items-center justify-between text-sm font-bold">
             <span className="text-slate-300">Próxima patente</span>
             <span className="text-cyan">{nextRank.label}</span>
@@ -192,7 +191,7 @@ function CountdownCard({ daysToEnem, className }: { daysToEnem: number; classNam
 
 function CountdownUnit({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-lg border border-cyan/15 bg-slate-950/50 p-2 text-center sm:p-3">
+    <div className="rounded-lg border border-cyan/20 bg-slate-950/50 p-2 text-center sm:p-3">
       <p className="text-2xl font-black text-white sm:text-4xl">{String(value).padStart(2, "0")}</p>
       <p className="mt-1 text-[0.62rem] font-black uppercase tracking-[0.08em] text-slate-500">{label}</p>
     </div>
@@ -234,10 +233,10 @@ function WritingCenterCard({ className }: { className?: string }) {
         value={essayText}
         onChange={(event) => setEssayText(event.target.value)}
         placeholder="Cole sua redação aqui..."
-        className="mt-4 min-h-44 w-full resize-none rounded-lg border border-cyan/15 bg-slate-950/70 px-3 py-3 text-sm font-semibold text-white outline-none placeholder:text-slate-600 focus:border-cyan"
+        className="mt-4 min-h-44 w-full resize-none rounded-lg border border-cyan/20 bg-slate-950/70 px-3 py-3 text-sm font-semibold text-white outline-none placeholder:text-slate-600 focus:border-cyan"
       />
       <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-        <label className="inline-flex min-h-11 flex-1 cursor-pointer items-center justify-center rounded-lg border border-cyan/15 bg-white/[0.06] px-3 text-sm font-black text-white transition hover:border-cyan/50">
+        <label className="inline-flex min-h-11 flex-1 cursor-pointer items-center justify-center rounded-lg border border-cyan/20 bg-white/[0.06] px-3 text-sm font-black text-white transition hover:border-cyan/50">
           {fileName ?? "Enviar imagem"}
           <input
             type="file"
@@ -254,20 +253,18 @@ function WritingCenterCard({ className }: { className?: string }) {
         <span>{wordCount} palavras</span>
         <span>{paragraphCount} parágrafos</span>
       </div>
-      {result && <p className="mt-3 rounded-lg border border-cyan/15 bg-slate-950/45 p-3 text-sm font-bold text-slate-200">{result}</p>}
+      {result && <p className="mt-3 rounded-lg border border-cyan/20 bg-slate-950/50 p-3 text-sm font-bold text-slate-200">{result}</p>}
     </Card>
   );
 }
 
 function MissionStatusCard({
   state,
-  progressPercent,
   completedAchievements,
   nextRank,
   className
 }: {
   state: StudyState;
-  progressPercent: number;
   completedAchievements: number;
   nextRank: { label: string; remaining: number; progress: number };
   className?: string;
@@ -286,7 +283,7 @@ function MissionStatusCard({
         <Stat label="sequência" value={`${state.currentStreak}d`} tone="orange" />
         <Stat label="conquistas" value={`${completedAchievements}`} tone="green" />
       </div>
-      <div className="mt-4 rounded-lg border border-white/10 bg-slate-950/35 p-3">
+      <div className="mt-4 rounded-lg border border-white/10 bg-slate-950/30 p-3">
         <div className="flex items-center justify-between text-sm font-bold">
           <span className="text-slate-300">Próxima patente</span>
           <span className="text-cyan">{nextRank.label}</span>
