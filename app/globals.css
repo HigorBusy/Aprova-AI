@@ -4,8 +4,8 @@
 
 :root {
   color-scheme: dark;
-  --background: 1 3 10;
-  --foreground: 241 245 249;
+  --background: 2 6 23;
+  --foreground: 248 250 252;
 }
 
 * {
@@ -14,30 +14,33 @@
 
 html {
   scroll-behavior: smooth;
+  background: #020617;
 }
 
 body {
   min-height: 100vh;
   margin: 0;
-  background:
-    linear-gradient(180deg, rgba(22, 78, 255, 0.32) 0%, rgba(19, 34, 121, 0.20) 18%, transparent 42%),
-    linear-gradient(145deg, rgba(14, 165, 233, 0.12), transparent 30%),
-    linear-gradient(180deg, #00030a 0%, #020511 46%, #000000 100%);
+  overflow-x: hidden;
+  background: #020617;
   color: rgb(var(--foreground));
+  font-family: var(--font-space-grotesk), "Space Grotesk", "Geist", "Inter", ui-sans-serif, system-ui, sans-serif;
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  text-rendering: geometricPrecision;
 }
 
 body::before {
   pointer-events: none;
   content: "";
   position: fixed;
-  inset: 0;
-  z-index: -1;
+  inset: -18%;
+  z-index: -2;
   background:
-    linear-gradient(90deg, rgba(148, 163, 184, 0.045) 1px, transparent 1px),
-    linear-gradient(180deg, rgba(148, 163, 184, 0.035) 1px, transparent 1px);
-  background-size: 88px 88px;
-  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.52), transparent 68%);
+    radial-gradient(circle at 18% 20%, rgba(124, 58, 237, 0.20), transparent 28%),
+    radial-gradient(circle at 78% 8%, rgba(139, 92, 246, 0.14), transparent 30%),
+    radial-gradient(circle at 52% 88%, rgba(30, 41, 59, 0.46), transparent 38%),
+    linear-gradient(180deg, #020617 0%, #050816 45%, #020617 100%);
+  animation: cosmicDrift 70s ease-in-out infinite alternate;
+  will-change: transform;
 }
 
 body::after {
@@ -46,11 +49,21 @@ body::after {
   position: fixed;
   inset: 0;
   z-index: -1;
-  background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.32) 48%, rgba(0, 0, 0, 0.82) 100%);
+  background:
+    radial-gradient(circle at 12% 18%, rgba(248, 250, 252, 0.42) 0 1px, transparent 1.4px),
+    radial-gradient(circle at 72% 24%, rgba(196, 181, 253, 0.34) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 44% 68%, rgba(148, 163, 184, 0.30) 0 1px, transparent 1.4px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.026) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.020) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(2, 6, 23, 0.08), rgba(2, 6, 23, 0.72));
+  background-size: 220px 220px, 310px 310px, 260px 260px, 96px 96px, 96px 96px, auto;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.88), rgba(0, 0, 0, 0.72) 58%, rgba(0, 0, 0, 0.44));
+  animation: starParallax 120s linear infinite;
+  will-change: background-position;
 }
 
 ::selection {
-  background: rgba(56, 189, 248, 0.32);
+  background: rgba(168, 85, 247, 0.34);
 }
 
 button,
@@ -74,11 +87,11 @@ select {
   position: relative;
   overflow: hidden;
   background:
-    linear-gradient(180deg, rgba(18, 26, 52, 0.78), rgba(3, 7, 18, 0.74)),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.075), transparent 44%);
-  border: 1px solid rgba(148, 163, 184, 0.14);
-  box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.055), 0 28px 90px rgba(0, 0, 0, 0.54);
-  backdrop-filter: blur(28px);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.058), rgba(255, 255, 255, 0.032)),
+    rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.025), 0 28px 96px rgba(0, 0, 0, 0.54);
+  backdrop-filter: blur(22px);
 }
 
 .glass::before {
@@ -87,8 +100,10 @@ select {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: linear-gradient(180deg, rgba(125, 211, 252, 0.10), transparent 36%, rgba(255, 255, 255, 0.03));
-  opacity: 0.82;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.11), transparent 34%),
+    linear-gradient(180deg, rgba(168, 85, 247, 0.055), transparent 48%);
+  opacity: 0.84;
 }
 
 .glass > * {
@@ -97,18 +112,27 @@ select {
 }
 
 .mission-grid {
-  background-image: linear-gradient(180deg, rgba(15, 23, 42, 0.34), transparent 22%);
+  background-image: linear-gradient(180deg, rgba(2, 6, 23, 0.16), transparent 24%);
 }
 
 .command-surface {
   background:
-    linear-gradient(180deg, rgba(25, 46, 155, 0.72) 0%, rgba(14, 23, 64, 0.78) 36%, rgba(3, 7, 18, 0.92) 100%),
-    linear-gradient(120deg, rgba(56, 189, 248, 0.18), transparent 42%);
-  border-color: rgba(125, 211, 252, 0.22);
+    linear-gradient(180deg, rgba(30, 18, 78, 0.72) 0%, rgba(15, 23, 42, 0.72) 44%, rgba(2, 6, 23, 0.90) 100%),
+    linear-gradient(120deg, rgba(124, 58, 237, 0.22), transparent 42%);
+  border-color: rgba(168, 85, 247, 0.22);
+  box-shadow: 0 0 0 1px rgba(168, 85, 247, 0.18), 0 0 58px rgba(124, 58, 237, 0.18), 0 34px 120px rgba(0, 0, 0, 0.58);
 }
 
 .scanline {
-  background-image: repeating-linear-gradient(90deg, rgba(56, 189, 248, 0.22) 0 1px, transparent 1px 9px);
+  background-image: repeating-linear-gradient(90deg, rgba(168, 85, 247, 0.30) 0 1px, transparent 1px 10px);
+}
+
+.premium-glow {
+  box-shadow: 0 0 0 1px rgba(168, 85, 247, 0.22), 0 0 44px rgba(124, 58, 237, 0.24), 0 28px 90px rgba(0, 0, 0, 0.56);
+}
+
+.energy-text {
+  text-shadow: 0 0 28px rgba(168, 85, 247, 0.34);
 }
 
 .ai-orb {
@@ -119,11 +143,11 @@ select {
   place-items: center;
   border-radius: 9999px;
   background:
-    radial-gradient(circle at 32% 24%, rgba(255, 255, 255, 0.92), transparent 10%),
+    radial-gradient(circle at 32% 24%, rgba(255, 255, 255, 0.86), transparent 10%),
     radial-gradient(circle at 62% 42%, rgba(168, 85, 247, 0.78), transparent 32%),
-    radial-gradient(circle at 38% 66%, rgba(56, 189, 248, 0.78), transparent 36%),
+    radial-gradient(circle at 38% 66%, rgba(124, 58, 237, 0.74), transparent 36%),
     radial-gradient(circle, rgba(15, 23, 42, 0.96), rgba(2, 6, 23, 0.98));
-  box-shadow: 0 0 42px rgba(99, 102, 241, 0.44), inset 0 0 38px rgba(255, 255, 255, 0.12);
+  box-shadow: 0 0 42px rgba(124, 58, 237, 0.44), inset 0 0 38px rgba(255, 255, 255, 0.12);
   animation: orbFloat 5200ms ease-in-out infinite;
 }
 
@@ -133,13 +157,13 @@ select {
   position: absolute;
   inset: -14px;
   border-radius: inherit;
-  border: 1px solid rgba(125, 211, 252, 0.22);
+  border: 1px solid rgba(168, 85, 247, 0.25);
   animation: orbRing 3600ms ease-in-out infinite;
 }
 
 .ai-orb::after {
   inset: -28px;
-  border-color: rgba(168, 85, 247, 0.16);
+  border-color: rgba(196, 181, 253, 0.16);
   animation-delay: 900ms;
 }
 
@@ -149,7 +173,7 @@ select {
   border-radius: inherit;
   background:
     linear-gradient(135deg, transparent 32%, rgba(255, 255, 255, 0.82) 48%, transparent 55%),
-    radial-gradient(circle, rgba(56, 189, 248, 0.14), rgba(15, 23, 42, 0.42));
+    radial-gradient(circle, rgba(168, 85, 247, 0.18), rgba(15, 23, 42, 0.42));
   filter: blur(0.2px);
   opacity: 0.9;
   animation: orbSpin 9000ms linear infinite;
@@ -157,6 +181,24 @@ select {
 
 .safe-bottom {
   padding-bottom: env(safe-area-inset-bottom);
+}
+
+@keyframes cosmicDrift {
+  from {
+    transform: translate3d(-1.2%, -0.8%, 0) scale(1);
+  }
+  to {
+    transform: translate3d(1.4%, 1%, 0) scale(1.04);
+  }
+}
+
+@keyframes starParallax {
+  from {
+    background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 0 0;
+  }
+  to {
+    background-position: 160px 80px, -120px 140px, 90px -160px, 0 96px, 96px 0, 0 0;
+  }
 }
 
 @keyframes floatIn {
@@ -172,10 +214,10 @@ select {
 
 @keyframes pulseSignal {
   0%, 100% {
-    opacity: 0.48;
+    opacity: 0.54;
   }
   50% {
-    opacity: 0.9;
+    opacity: 0.92;
   }
 }
 
@@ -205,10 +247,20 @@ select {
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 .animate-float-in {
-  animation: floatIn 280ms ease-out both;
+  animation: floatIn 320ms ease-out both;
 }
 
 .signal-pulse {
-  animation: pulseSignal 2400ms ease-in-out infinite;
+  animation: pulseSignal 2600ms ease-in-out infinite;
 }
