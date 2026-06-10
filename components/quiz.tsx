@@ -54,15 +54,15 @@ export function Quiz({ answers, daysToEnem, step, onAnswer, onNext, onBack }: Qu
   return (
     <main className="mission-grid mx-auto flex min-h-screen w-full max-w-md flex-col px-5 py-6">
       <div className="flex items-center justify-between">
-        <p className="text-xs font-black uppercase tracking-[0.18em] text-cyan">Aprova.AI</p>
-        <p className="text-sm font-black text-slate-400">{step + 1}/4</p>
+        <p className="text-xs font-medium uppercase tracking-[0.20em] text-aura">Aprova.AI</p>
+        <p className="text-sm font-medium text-muted">{step + 1}/4</p>
       </div>
 
-      <section className="mt-7 rounded-lg border border-ocean/30 bg-ocean/10 p-4 shadow-glow">
-        <p className="text-sm font-black text-white">Sua aprovação começa hoje.</p>
+      <section className="command-surface premium-glow mt-7 rounded-lg border border-accent/25 p-4">
+        <p className="text-sm font-medium text-white">Sua aprovação começa hoje.</p>
         <div className="mt-3 flex items-end gap-3">
-          <span className="text-6xl font-black leading-none text-white">{daysToEnem}</span>
-          <span className="pb-2 text-sm font-black uppercase tracking-[0.12em] text-cyan">
+          <span className="energy-text text-6xl font-semibold leading-none text-white">{daysToEnem}</span>
+          <span className="pb-2 text-sm font-medium uppercase tracking-[0.12em] text-aura">
             dias até o ENEM
           </span>
         </div>
@@ -70,10 +70,10 @@ export function Quiz({ answers, daysToEnem, step, onAnswer, onNext, onBack }: Qu
       </section>
 
       <section className="mt-8 flex flex-1 flex-col">
-        <p className="text-xs font-black uppercase tracking-[0.16em] text-amber-300">
-          diagnóstico de combate
+        <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted">
+          diagnóstico de rota
         </p>
-        <h1 className="mt-3 text-3xl font-black leading-tight text-white">
+        <h1 className="mt-3 text-3xl font-semibold leading-tight text-white">
           {screen.title}
         </h1>
 
@@ -82,15 +82,15 @@ export function Quiz({ answers, daysToEnem, step, onAnswer, onNext, onBack }: Qu
             <button
               key={option.id}
               onClick={() => screen.select(option.id)}
-              className={`rounded-lg border p-4 text-left font-bold transition duration-200 active:scale-[0.98] ${
+              className={`rounded-lg border p-4 text-left font-medium transition duration-300 active:scale-[0.98] ${
                 screen.selected === option.id
-                  ? "border-cyan/70 bg-cyan/20 text-white shadow-[0_0_26px_rgba(34,211,238,0.18)]"
-                  : "border-white/10 bg-white/[0.055] text-slate-200 hover:border-ocean/60"
+                  ? "border-accent/70 bg-accent/15 text-white shadow-[0_0_30px_rgba(124,58,237,0.22)]"
+                  : "border-white/10 bg-white/[0.045] text-slate-200 hover:border-accent/45 hover:bg-white/[0.06]"
               }`}
             >
               {option.label}
               {option.detail && (
-                <span className="mt-1 block text-sm font-semibold text-slate-400">
+                <span className="mt-1 block text-sm font-normal text-muted">
                   {option.detail}
                 </span>
               )}
