@@ -9,7 +9,7 @@ export function Card({
   className?: string;
 }) {
   return (
-    <section className={clsx("glass rounded-lg p-4 shadow-command transition duration-300 hover:border-white/12 hover:bg-white/[0.052]", className)}>
+    <section className={clsx("glass rounded-lg p-4 shadow-command transition duration-300 hover:border-white/[0.12] hover:bg-white/[0.052]", className)}>
       {children}
     </section>
   );
