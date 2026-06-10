@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
-import { Bot, Home, Orbit, UserCircle } from "lucide-react";
+import { Home, MessageCircle, Orbit } from "lucide-react";
 import { Card } from "@/components/ui";
 import { dailyPhrases, initialState, minutesFromStudyTime, prioritySubject, profileFromAnswers, todayKey } from "@/lib/study-data";
 import { loadLocalState, saveLocalState } from "@/lib/local-store";
@@ -17,7 +17,7 @@ const enemFirstDay = new Date("2026-11-08T13:30:00-03:00");
 
 const tabs = [
   { id: "home", label: "Central de controle", icon: Home },
-  { id: "copilot", label: "Copiloto IA", icon: Bot }
+  { id: "copilot", label: "Copiloto IA", icon: MessageCircle }
 ] as const;
 
 type TabId = (typeof tabs)[number]["id"];
@@ -187,13 +187,8 @@ export function AprovaApp() {
         </nav>
 
         <div className="mt-auto rounded-lg border border-white/10 bg-white/[0.04] p-4">
-          <div className="flex items-center gap-3">
-            <UserCircle className="h-5 w-5 text-sky-300" />
-            <div>
-              <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-500">perfil</p>
-              <p className="mt-1 text-sm text-slate-200">{state.profileKind}</p>
-            </div>
-          </div>
+          <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-500">perfil</p>
+          <p className="mt-2 text-sm text-slate-200">{state.profileKind}</p>
           <div className="mt-4 rounded-lg border border-white/10 bg-black/20 px-3 py-2">
             <p className="text-[0.68rem] uppercase tracking-[0.16em] text-slate-500">plano atual</p>
             <p className="mt-1 text-sm text-sky-100">Gratuito</p>
@@ -227,8 +222,6 @@ export function AprovaApp() {
               progressPercent={progressPercent}
               onTaskToggle={(taskId) => updateState((current) => toggleTask(current, taskId))}
               onAddMinutes={(minutes) => updateState((current) => addMinutes(current, minutes))}
-              onGoalChange={(minutes) => updateState((current) => ({ ...current, dailyGoalMinutes: minutes }))}
-              onNameChange={(name) => updateState((current) => ({ ...current, name: name.trim() || "Candidato" }))}
             />
           )}
           {activeTab === "copilot" && <Copilot />}
