@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Check, Clock, CreditCard, FileText, Flame, Plus, Target, Trophy } from "lucide-react";
+import { Check, Clock, CreditCard, FileText, Flame, Gauge, Plus, Radar, Rocket, Shield, Target, Trophy } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
 import { Card, Button, GhostButton, ProgressBar, Stat } from "@/components/ui";
 import { rankFromXp } from "@/lib/study-data";
@@ -40,71 +40,21 @@ export function Dashboard({
 
   return (
     <div className="grid gap-4 animate-float-in lg:grid-cols-12 lg:gap-5">
-      <CountdownCard daysToEnem={daysToEnem} className="lg:col-span-7" />
-      <EssayCorrectionCard className="lg:col-span-5 lg:row-span-2" />
-
-      <Card className="lg:col-span-4">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <p className="text-xs font-black uppercase tracking-[0.16em] text-cyan">plano atual</p>
-            <h2 className="mt-1 text-xl font-black text-white">Gratuito</h2>
-          </div>
-          <div className="rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-right">
-            <p className="text-[0.65rem] font-black uppercase text-slate-400">meta</p>
-            <p className="text-sm font-black text-white">{formatHours(state.dailyGoalMinutes)}/dia</p>
-          </div>
-        </div>
-        <p className="mt-3 text-sm font-bold text-slate-400">
-          Você tem 1 correção gratuita por dia. O tempo vai passar de qualquer jeito.
-        </p>
-        <div className="mt-4 grid gap-2 text-sm font-bold text-slate-300">
-          <div className="flex items-center justify-between rounded-lg bg-white/[0.04] px-3 py-2">
-            <span>Mensal</span>
-            <span className="text-cyan">R$19,90</span>
-          </div>
-          <div className="flex items-center justify-between rounded-lg bg-white/[0.04] px-3 py-2">
-            <span>Trimestral</span>
-            <span className="text-mint">R$39,90</span>
-          </div>
-        </div>
-      </Card>
-
-      <Card className="lg:col-span-3">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">créditos</p>
-            <h2 className="mt-1 text-3xl font-black text-white">1</h2>
-          </div>
-          <CreditCard className="h-6 w-6 text-cyan" />
-        </div>
-        <p className="mt-2 text-sm font-bold text-slate-400">correção disponível hoje</p>
-        <div className="mt-4 rounded-lg border border-cyan/20 bg-cyan/10 p-3 text-sm font-black text-cyan">
-          Gratuito: 1 correção/dia
-        </div>
-      </Card>
+      <CountdownCard daysToEnem={daysToEnem} className="lg:col-span-8" />
+      <MissionStatusCard
+        state={state}
+        progressPercent={progressPercent}
+        completedAchievements={completedAchievements}
+        nextRank={nextRank}
+        className="lg:col-span-4"
+      />
+      <WritingCenterCard className="lg:col-span-7 lg:row-span-2" />
 
       <Card className="lg:col-span-5">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.16em] text-cyan">progresso real</p>
-            <h2 className="mt-1 text-xl font-black text-white">{progressPercent}% da missão diária</h2>
-          </div>
-          <Flame className="h-6 w-6 text-reward" />
-        </div>
-        <ProgressBar value={progressPercent} className="mt-4" />
-        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
-          <Stat label="hoje" value={studiedHours} tone="green" />
-          <Stat label="total" value={totalHours} tone="blue" />
-          <Stat label="rank" value={rankFromXp(state.xp)} tone="purple" />
-          <Stat label="streak" value={`${state.currentStreak}d`} tone="orange" />
-        </div>
-      </Card>
-
-      <Card className="lg:col-span-4">
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">próxima ação recomendada</p>
-            <h2 className="mt-1 text-xl font-black text-white">{nextTask?.title ?? "Revisar evolução"}</h2>
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-cyan">missão do dia</p>
+            <h2 className="mt-1 text-2xl font-black text-white">{nextTask?.title ?? "Revisar rota"}</h2>
           </div>
           <Target className="h-6 w-6 text-mint" />
         </div>
@@ -114,31 +64,88 @@ export function Dashboard({
         <div className="mt-4 grid grid-cols-2 gap-2">
           <Button onClick={() => (nextTask ? onTaskToggle(nextTask.id) : onAddMinutes(30))} className="px-3">
             {nextTask ? <Check className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-            Executar
+            Acionar
           </Button>
           <GhostButton onClick={() => onAddMinutes(30)} className="px-3">
             <Clock className="h-4 w-4" />
-            +30m
+            +30m de rota
           </GhostButton>
         </div>
       </Card>
 
       <Card className="lg:col-span-3">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">plano de voo</p>
+            <h2 className="mt-1 text-xl font-black text-white">Gratuito</h2>
+          </div>
+          <Shield className="h-6 w-6 text-cyan" />
+        </div>
+        <p className="mt-3 text-sm font-bold text-slate-400">1 correção por dia para manter a nave em movimento.</p>
+        <div className="mt-4 grid gap-2 text-sm font-bold text-slate-300">
+          <div className="flex items-center justify-between rounded-lg bg-slate-950/35 px-3 py-2">
+            <span>Mensal</span>
+            <span className="text-cyan">R$19,90</span>
+          </div>
+          <div className="flex items-center justify-between rounded-lg bg-slate-950/35 px-3 py-2">
+            <span>Trimestral</span>
+            <span className="text-mint">R$39,90</span>
+          </div>
+        </div>
+      </Card>
+
+      <Card className="lg:col-span-2">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">créditos</p>
+            <h2 className="mt-1 text-4xl font-black text-white">1</h2>
+          </div>
+          <CreditCard className="h-6 w-6 text-cyan" />
+        </div>
+        <p className="mt-2 text-sm font-bold text-slate-400">correção disponível hoje</p>
+      </Card>
+
+      <Card className="lg:col-span-2">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">sequência</p>
+            <h2 className="mt-1 text-4xl font-black text-white">{state.currentStreak}</h2>
+          </div>
+          <Flame className="h-6 w-6 text-amber" />
+        </div>
+        <p className="mt-2 text-sm font-bold text-slate-400">dias de navegação</p>
+      </Card>
+
+      <Card className="lg:col-span-5">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">conquista</p>
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">próximo marco</p>
             <h2 className="mt-1 text-lg font-black text-white">{nextAchievementTitle}</h2>
           </div>
-          <Trophy className="h-6 w-6 text-amber-300" />
+          <Trophy className="h-6 w-6 text-amber" />
         </div>
-        <div className="mt-4 rounded-lg border border-white/10 bg-white/[0.04] p-3">
+        <div className="mt-4 rounded-lg border border-white/10 bg-slate-950/35 p-3">
           <div className="flex items-center justify-between text-sm font-bold">
-            <span className="text-slate-300">Próximo rank</span>
+            <span className="text-slate-300">Próxima patente</span>
             <span className="text-cyan">{nextRank.label}</span>
           </div>
           <ProgressBar value={nextRank.progress} className="mt-3" />
           <p className="mt-2 text-xs font-bold text-slate-500">{nextRank.remaining} XP restantes</p>
-          <p className="mt-2 text-xs font-bold text-slate-500">{completedAchievements} conquistas liberadas</p>
+        </div>
+      </Card>
+
+      <Card className="lg:col-span-4">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-cyan">mapa estelar</p>
+            <h2 className="mt-1 text-xl font-black text-white">{progressPercent}% da missão diária</h2>
+          </div>
+          <Radar className="h-6 w-6 text-cyan" />
+        </div>
+        <ProgressBar value={progressPercent} className="mt-4" />
+        <div className="mt-4 grid grid-cols-2 gap-3">
+          <Stat label="hoje" value={studiedHours} tone="green" />
+          <Stat label="jornada" value={totalHours} tone="blue" />
         </div>
       </Card>
 
@@ -160,12 +167,19 @@ function CountdownCard({ daysToEnem, className }: { daysToEnem: number; classNam
   const countdown = useMemo(() => getCountdown(now), [now]);
 
   return (
-    <Card className={`relative overflow-hidden ${className ?? ""}`}>
+    <Card className={`command-surface relative overflow-hidden p-5 sm:p-6 ${className ?? ""}`}>
       <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-ocean via-cyan to-mint" />
-      <p className="text-xs font-black uppercase tracking-[0.16em] text-cyan">Contagem regressiva para o ENEM</p>
-      <h2 className="mt-2 text-3xl font-black text-white sm:text-4xl">O tempo vai passar de qualquer jeito.</h2>
-      <p className="mt-3 text-sm font-bold text-slate-400">{daysToEnem} dias corridos até a primeira prova.</p>
-      <div className="mt-5 grid grid-cols-5 gap-2">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-cyan">Contagem regressiva para o ENEM</p>
+          <h2 className="mt-2 max-w-2xl text-3xl font-black leading-tight text-white sm:text-5xl">
+            Janela de lançamento da aprovação.
+          </h2>
+          <p className="mt-3 text-sm font-bold text-slate-400">{daysToEnem} dias corridos até o destino.</p>
+        </div>
+        <Rocket className="hidden h-9 w-9 text-cyan signal-pulse sm:block" />
+      </div>
+      <div className="mt-6 grid grid-cols-5 gap-2">
         <CountdownUnit label="meses" value={countdown.months} />
         <CountdownUnit label="dias" value={countdown.days} />
         <CountdownUnit label="horas" value={countdown.hours} />
@@ -178,14 +192,14 @@ function CountdownCard({ daysToEnem, className }: { daysToEnem: number; classNam
 
 function CountdownUnit({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-lg border border-white/10 bg-white/[0.055] p-2 text-center sm:p-3">
-      <p className="text-2xl font-black text-white sm:text-3xl">{String(value).padStart(2, "0")}</p>
-      <p className="mt-1 text-[0.65rem] font-black uppercase tracking-[0.08em] text-slate-500">{label}</p>
+    <div className="rounded-lg border border-cyan/15 bg-slate-950/50 p-2 text-center sm:p-3">
+      <p className="text-2xl font-black text-white sm:text-4xl">{String(value).padStart(2, "0")}</p>
+      <p className="mt-1 text-[0.62rem] font-black uppercase tracking-[0.08em] text-slate-500">{label}</p>
     </div>
   );
 }
 
-function EssayCorrectionCard({ className }: { className?: string }) {
+function WritingCenterCard({ className }: { className?: string }) {
   const [essayText, setEssayText] = useState("");
   const [fileName, setFileName] = useState<string | undefined>();
   const [result, setResult] = useState("");
@@ -199,19 +213,19 @@ function EssayCorrectionCard({ className }: { className?: string }) {
       return;
     }
 
-    const density = wordCount >= 240 ? "boa extensão" : "texto ainda curto";
-    const structure = paragraphCount >= 4 ? "estrutura próxima do esperado" : "estrutura precisa de mais blocos";
-    setResult(`Pré-análise: ${density}, ${structure}. Cada redação corrigida é um erro a menos no dia da prova.`);
+    const density = wordCount >= 240 ? "extensão de voo adequada" : "texto ainda curto para altitude de prova";
+    const structure = paragraphCount >= 4 ? "módulos estruturais detectados" : "estrutura precisa de mais blocos";
+    setResult(`Pré-análise do Centro de Redação: ${density}, ${structure}. Cada redação corrigida é um erro a menos no dia da prova.`);
   }
 
   return (
-    <Card className={`border-cyan/20 bg-cyan/10 ${className ?? ""}`}>
+    <Card className={`border-cyan/25 bg-cyan/10 p-5 ${className ?? ""}`}>
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-black uppercase tracking-[0.16em] text-cyan">ferramenta principal</p>
-          <h2 className="mt-1 text-2xl font-black text-white">Corrigir minha redação</h2>
+          <p className="text-xs font-black uppercase tracking-[0.16em] text-cyan">centro de redação</p>
+          <h2 className="mt-1 text-3xl font-black text-white">Corrigir minha redação</h2>
         </div>
-        <FileText className="h-7 w-7 text-cyan" />
+        <FileText className="h-8 w-8 text-cyan" />
       </div>
       <p className="mt-3 text-sm font-bold text-slate-300">
         Cole sua redação ou envie uma imagem para receber uma análise detalhada.
@@ -220,10 +234,10 @@ function EssayCorrectionCard({ className }: { className?: string }) {
         value={essayText}
         onChange={(event) => setEssayText(event.target.value)}
         placeholder="Cole sua redação aqui..."
-        className="mt-4 min-h-36 w-full resize-none rounded-lg border border-white/10 bg-slate-950/70 px-3 py-3 text-sm font-semibold text-white outline-none placeholder:text-slate-600 focus:border-cyan"
+        className="mt-4 min-h-44 w-full resize-none rounded-lg border border-cyan/15 bg-slate-950/70 px-3 py-3 text-sm font-semibold text-white outline-none placeholder:text-slate-600 focus:border-cyan"
       />
       <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-        <label className="inline-flex min-h-11 flex-1 cursor-pointer items-center justify-center rounded-lg border border-white/10 bg-white/[0.06] px-3 text-sm font-black text-white transition hover:border-cyan/50">
+        <label className="inline-flex min-h-11 flex-1 cursor-pointer items-center justify-center rounded-lg border border-cyan/15 bg-white/[0.06] px-3 text-sm font-black text-white transition hover:border-cyan/50">
           {fileName ?? "Enviar imagem"}
           <input
             type="file"
@@ -233,14 +247,52 @@ function EssayCorrectionCard({ className }: { className?: string }) {
           />
         </label>
         <Button onClick={handleCorrection} className="flex-1">
-          Corrigir redação
+          Acionar correção
         </Button>
       </div>
       <div className="mt-3 grid grid-cols-2 gap-2 text-xs font-black uppercase tracking-[0.1em] text-slate-500">
         <span>{wordCount} palavras</span>
         <span>{paragraphCount} parágrafos</span>
       </div>
-      {result && <p className="mt-3 rounded-lg border border-white/10 bg-white/[0.06] p-3 text-sm font-bold text-slate-200">{result}</p>}
+      {result && <p className="mt-3 rounded-lg border border-cyan/15 bg-slate-950/45 p-3 text-sm font-bold text-slate-200">{result}</p>}
+    </Card>
+  );
+}
+
+function MissionStatusCard({
+  state,
+  progressPercent,
+  completedAchievements,
+  nextRank,
+  className
+}: {
+  state: StudyState;
+  progressPercent: number;
+  completedAchievements: number;
+  nextRank: { label: string; remaining: number; progress: number };
+  className?: string;
+}) {
+  return (
+    <Card className={`p-5 ${className ?? ""}`}>
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <p className="text-xs font-black uppercase tracking-[0.16em] text-cyan">status da nave</p>
+          <h2 className="mt-1 text-2xl font-black text-white">Patente {rankFromXp(state.xp)}</h2>
+        </div>
+        <Gauge className="h-7 w-7 text-cyan" />
+      </div>
+      <div className="mt-5 grid gap-3">
+        <Stat label="experiência de bordo" value={`${state.xp}`} tone="purple" />
+        <Stat label="sequência" value={`${state.currentStreak}d`} tone="orange" />
+        <Stat label="conquistas" value={`${completedAchievements}`} tone="green" />
+      </div>
+      <div className="mt-4 rounded-lg border border-white/10 bg-slate-950/35 p-3">
+        <div className="flex items-center justify-between text-sm font-bold">
+          <span className="text-slate-300">Próxima patente</span>
+          <span className="text-cyan">{nextRank.label}</span>
+        </div>
+        <ProgressBar value={nextRank.progress} className="mt-3" />
+      </div>
     </Card>
   );
 }
