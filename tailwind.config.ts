@@ -9,22 +9,26 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        canvas: "#030712",
+        canvas: "#020617",
         ink: "#f8fafc",
-        void: "#070b18",
-        panel: "#0b1120",
-        ocean: "#2563eb",
-        cyan: "#22d3ee",
-        ion: "#38bdf8",
-        mint: "#22c55e",
-        amber: "#fbbf24",
-        reward: "#f97316",
-        grape: "#7c3aed"
+        muted: "#94a3b8",
+        void: "#030712",
+        panel: "rgba(255,255,255,0.04)",
+        cosmic: "#7c3aed",
+        violet: "#8b5cf6",
+        accent: "#a855f7",
+        aura: "#c4b5fd",
+        mint: "#34d399",
+        amber: "#f59e0b"
+      },
+      fontFamily: {
+        sans: ["var(--font-space-grotesk)", "Space Grotesk", "Geist", "Inter", "ui-sans-serif", "system-ui", "sans-serif"]
       },
       boxShadow: {
-        soft: "0 24px 90px rgba(0, 0, 0, 0.46)",
-        glow: "0 0 32px rgba(34, 211, 238, 0.34)",
-        command: "0 0 0 1px rgba(34, 211, 238, 0.12), 0 28px 90px rgba(2, 8, 23, 0.72)"
+        soft: "0 24px 90px rgba(0, 0, 0, 0.50)",
+        glow: "0 0 34px rgba(124, 58, 237, 0.32)",
+        command: "0 0 0 1px rgba(255,255,255,0.08), 0 28px 90px rgba(0,0,0,0.58)",
+        energy: "0 0 0 1px rgba(168,85,247,0.22), 0 0 48px rgba(124,58,237,0.26), 0 28px 90px rgba(0,0,0,0.62)"
       }
     }
   },
