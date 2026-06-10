@@ -266,11 +266,11 @@ function WritingCenterCard({ className }: { className?: string }) {
         value={essayText}
         onChange={(event) => setEssayText(event.target.value)}
         placeholder="Cole sua redação aqui..."
-        className="mt-4 min-h-56 w-full resize-none rounded-lg border border-white/10 bg-black/35 px-3 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-accent/50 focus:shadow-[0_0_28px_rgba(124,58,237,0.16)]"
+        className="mt-4 min-h-56 w-full resize-none rounded-lg border border-white/10 bg-black/40 px-3 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-accent/50 focus:shadow-[0_0_28px_rgba(124,58,237,0.16)]"
       />
 
       <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-        <label className="inline-flex min-h-11 flex-1 cursor-pointer items-center justify-center rounded-lg border border-white/10 bg-white/[0.045] px-3 text-sm font-semibold text-slate-200 transition hover:border-accent/35 hover:bg-white/[0.07]">
+        <label className="inline-flex min-h-11 flex-1 cursor-pointer items-center justify-center rounded-lg border border-white/10 bg-white/[0.045] px-3 text-sm font-semibold text-slate-200 transition hover:border-accent/40 hover:bg-white/[0.07]">
           {fileName ?? "Enviar imagem"}
           <input
             type="file"
