@@ -111,6 +111,50 @@ select {
   background-image: repeating-linear-gradient(90deg, rgba(56, 189, 248, 0.22) 0 1px, transparent 1px 9px);
 }
 
+.ai-orb {
+  position: relative;
+  display: grid;
+  height: 148px;
+  width: 148px;
+  place-items: center;
+  border-radius: 9999px;
+  background:
+    radial-gradient(circle at 32% 24%, rgba(255, 255, 255, 0.92), transparent 10%),
+    radial-gradient(circle at 62% 42%, rgba(168, 85, 247, 0.78), transparent 32%),
+    radial-gradient(circle at 38% 66%, rgba(56, 189, 248, 0.78), transparent 36%),
+    radial-gradient(circle, rgba(15, 23, 42, 0.96), rgba(2, 6, 23, 0.98));
+  box-shadow: 0 0 42px rgba(99, 102, 241, 0.44), inset 0 0 38px rgba(255, 255, 255, 0.12);
+  animation: orbFloat 5200ms ease-in-out infinite;
+}
+
+.ai-orb::before,
+.ai-orb::after {
+  content: "";
+  position: absolute;
+  inset: -14px;
+  border-radius: inherit;
+  border: 1px solid rgba(125, 211, 252, 0.22);
+  animation: orbRing 3600ms ease-in-out infinite;
+}
+
+.ai-orb::after {
+  inset: -28px;
+  border-color: rgba(168, 85, 247, 0.16);
+  animation-delay: 900ms;
+}
+
+.ai-orb-core {
+  height: 62%;
+  width: 62%;
+  border-radius: inherit;
+  background:
+    linear-gradient(135deg, transparent 32%, rgba(255, 255, 255, 0.82) 48%, transparent 55%),
+    radial-gradient(circle, rgba(56, 189, 248, 0.14), rgba(15, 23, 42, 0.42));
+  filter: blur(0.2px);
+  opacity: 0.9;
+  animation: orbSpin 9000ms linear infinite;
+}
+
 .safe-bottom {
   padding-bottom: env(safe-area-inset-bottom);
 }
@@ -132,6 +176,32 @@ select {
   }
   50% {
     opacity: 0.9;
+  }
+}
+
+@keyframes orbFloat {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-8px) scale(1.03);
+  }
+}
+
+@keyframes orbRing {
+  0%, 100% {
+    opacity: 0.34;
+    transform: scale(0.94) rotate(0deg);
+  }
+  50% {
+    opacity: 0.82;
+    transform: scale(1.06) rotate(8deg);
+  }
+}
+
+@keyframes orbSpin {
+  to {
+    transform: rotate(360deg);
   }
 }
 
