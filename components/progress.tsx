@@ -21,22 +21,22 @@ export function Progress({ state }: ProgressProps) {
   return (
     <div className="grid gap-4 animate-float-in lg:grid-cols-12 lg:gap-5">
       <Card className="lg:col-span-5">
-        <p className="text-xs font-black uppercase tracking-[0.16em] text-cyan">evidência de evolução</p>
-        <h2 className="mt-1 text-2xl font-black text-white lg:text-3xl">Você está acumulando prova real.</h2>
+        <p className="text-xs font-black uppercase tracking-[0.16em] text-cyan">registro de jornada</p>
+        <h2 className="mt-1 text-2xl font-black text-white lg:text-3xl">Sua rota está deixando rastro.</h2>
         <p className="mt-2 text-sm font-bold text-slate-400">
-          Menos sensação de esforço solto. Mais sinais concretos de avanço.
+          Progresso real é telemetria: horas, setores concluídos, sequência e evolução.
         </p>
         <div className="mt-4 grid grid-cols-2 gap-3">
-          <Stat label="horas acumuladas" value={formatHours(state.totalMinutes)} tone="blue" />
-          <Stat label="temas concluídos" value={`${concluded}/${totalTopics}`} tone="green" />
-          <Stat label="evolução" value={`+${growth}%`} tone="purple" />
-          <Stat label="sequência atual" value={`${state.currentStreak}d`} tone="orange" />
+          <Stat label="horas de voo" value={formatHours(state.totalMinutes)} tone="blue" />
+          <Stat label="setores concluídos" value={`${concluded}/${totalTopics}`} tone="green" />
+          <Stat label="ganho semanal" value={`+${growth}%`} tone="purple" />
+          <Stat label="sequência" value={`${state.currentStreak}d`} tone="orange" />
         </div>
       </Card>
 
       <Card className="lg:col-span-7">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-black text-white">Evolução semanal</h2>
+          <h2 className="text-lg font-black text-white">Telemetria semanal</h2>
           <Activity className="h-5 w-5 text-mint" />
         </div>
         <div className="mt-4 flex h-44 items-end gap-2">
@@ -55,8 +55,8 @@ export function Progress({ state }: ProgressProps) {
       <Card className="lg:col-span-12">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <h2 className="text-lg font-black text-white">Calendário de Guerra</h2>
-            <p className="mt-1 text-sm font-bold text-slate-400">Consistência visível, sem calendário poluído.</p>
+            <h2 className="text-lg font-black text-white">Constelação de estudos</h2>
+            <p className="mt-1 text-sm font-bold text-slate-400">Cada ponto aceso é um dia em que a nave não ficou parada.</p>
           </div>
           <CalendarDays className="h-5 w-5 text-cyan" />
         </div>
