@@ -1,26 +1,23 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
-import { BarChart3, Home, Map, Orbit, Trophy } from "lucide-react";
+import { Bot, Home, Orbit, UserCircle } from "lucide-react";
 import { Card } from "@/components/ui";
-import { achievements, dailyPhrases, initialState, metricValue, minutesFromStudyTime, prioritySubject, profileFromAnswers, todayKey } from "@/lib/study-data";
+import { dailyPhrases, initialState, minutesFromStudyTime, prioritySubject, profileFromAnswers, todayKey } from "@/lib/study-data";
 import { loadLocalState, saveLocalState } from "@/lib/local-store";
 import { getSupabaseClient } from "@/lib/supabase/client";
-import { addMinutes, changeTopicStatus, normalizeDailyReset, toggleTask } from "@/lib/state-helpers";
+import { addMinutes, normalizeDailyReset, toggleTask } from "@/lib/state-helpers";
 import { Quiz } from "@/components/quiz";
 import { Dashboard } from "@/components/dashboard";
-import { Subjects } from "@/components/subjects";
-import { Progress } from "@/components/progress";
+import { Copilot } from "@/components/copilot";
 import type { QuizAnswers, StudyState } from "@/lib/types";
 
 const enemFirstDay = new Date("2026-11-08T13:30:00-03:00");
 
 const tabs = [
-  { id: "home", label: "Controle", icon: Home },
-  { id: "subjects", label: "Mapa Estelar", icon: Map },
-  { id: "progress", label: "Jornada", icon: BarChart3 }
+  { id: "home", label: "Central de controle", icon: Home },
+  { id: "copilot", label: "Copiloto IA", icon: Bot }
 ] as const;
 
 type TabId = (typeof tabs)[number]["id"];
@@ -94,11 +91,9 @@ export function AprovaApp() {
     ]);
   }, [user, state]);
 
-  const phrase = dailyPhrases[new Date().getDate() % dailyPhrases.length];
+  const phrase = dailyPhrases[0];
   const daysToEnem = getDaysToEnem();
   const progressPercent = Math.round((state.studiedMinutesToday / state.dailyGoalMinutes) * 100);
-  const completedAchievements = achievements.filter((item) => metricValue(item, state) >= item.target);
-  const nextAchievement = achievements.find((item) => metricValue(item, state) < item.target);
 
   function updateState(updater: (current: StudyState) => StudyState) {
     setState((current) => updater(current));
@@ -157,7 +152,7 @@ export function AprovaApp() {
           <div className="flex items-center justify-between gap-3">
             <div>
               <p className="text-xs font-medium uppercase tracking-[0.22em] text-sky-300">AprovaAI</p>
-              <h1 className="mt-2 text-2xl font-light leading-tight text-white">Central de Controle</h1>
+              <h1 className="mt-2 text-2xl font-light leading-tight text-white">Central de controle</h1>
             </div>
             <div className="grid h-10 w-10 place-items-center rounded-lg border border-white/10 bg-white/[0.045] text-sm text-slate-300">
               {state.name.slice(0, 1).toUpperCase()}
@@ -165,7 +160,7 @@ export function AprovaApp() {
           </div>
 
           <div className="mt-5 rounded-lg border border-white/10 bg-white/[0.045] p-3">
-            <p className="text-[0.68rem] font-medium uppercase tracking-[0.18em] text-slate-500">Comandante IA</p>
+            <p className="text-[0.68rem] font-medium uppercase tracking-[0.18em] text-slate-500">comando do dia</p>
             <p className="mt-2 text-sm leading-6 text-slate-200">{phrase}</p>
           </div>
         </div>
@@ -192,12 +187,17 @@ export function AprovaApp() {
         </nav>
 
         <div className="mt-auto rounded-lg border border-white/10 bg-white/[0.04] p-4">
-          <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-500">próximo marco</p>
-          <p className="mt-2 text-sm leading-6 text-slate-200">{nextAchievement?.title ?? "Rota completa"}</p>
-          <Link href="/achievements" className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-sky-200">
-            <Trophy className="h-4 w-4" />
-            Ver marcos
-          </Link>
+          <div className="flex items-center gap-3">
+            <UserCircle className="h-5 w-5 text-sky-300" />
+            <div>
+              <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-500">perfil</p>
+              <p className="mt-1 text-sm text-slate-200">{state.profileKind}</p>
+            </div>
+          </div>
+          <div className="mt-4 rounded-lg border border-white/10 bg-black/20 px-3 py-2">
+            <p className="text-[0.68rem] uppercase tracking-[0.16em] text-slate-500">plano atual</p>
+            <p className="mt-1 text-sm text-sky-100">Gratuito</p>
+          </div>
         </div>
       </aside>
 
@@ -206,18 +206,14 @@ export function AprovaApp() {
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0">
               <p className="text-xs font-medium uppercase tracking-[0.22em] text-sky-300">AprovaAI</p>
-              <h1 className="mt-1 text-2xl font-light text-white">Central de Controle</h1>
+              <h1 className="mt-1 text-2xl font-light text-white">{activeTab === "home" ? "Central de controle" : "Copiloto IA"}</h1>
             </div>
-            <Link
-              href="/achievements"
-              className="grid h-11 w-11 place-items-center rounded-lg border border-white/10 bg-white/[0.045] text-sky-200 transition active:scale-95"
-              aria-label="Marcos"
-            >
-              <Trophy className="h-5 w-5" />
-            </Link>
+            <div className="grid h-11 w-11 place-items-center rounded-lg border border-white/10 bg-white/[0.045] text-slate-300">
+              {state.name.slice(0, 1).toUpperCase()}
+            </div>
           </div>
           <div className="mt-4 rounded-lg border border-white/10 bg-white/[0.045] p-3">
-            <p className="text-xs font-medium uppercase tracking-[0.14em] text-slate-500">transmissão do comandante</p>
+            <p className="text-xs font-medium uppercase tracking-[0.14em] text-slate-500">comando do dia</p>
             <p className="mt-2 text-sm leading-6 text-slate-200">{phrase}</p>
           </div>
         </header>
@@ -229,26 +225,18 @@ export function AprovaApp() {
               user={user}
               daysToEnem={daysToEnem}
               progressPercent={progressPercent}
-              completedAchievements={completedAchievements.length}
-              nextAchievementTitle={nextAchievement?.title ?? "Todas as conquistas liberadas"}
               onTaskToggle={(taskId) => updateState((current) => toggleTask(current, taskId))}
               onAddMinutes={(minutes) => updateState((current) => addMinutes(current, minutes))}
               onGoalChange={(minutes) => updateState((current) => ({ ...current, dailyGoalMinutes: minutes }))}
               onNameChange={(name) => updateState((current) => ({ ...current, name: name.trim() || "Candidato" }))}
             />
           )}
-          {activeTab === "subjects" && (
-            <Subjects
-              state={state}
-              onStatusChange={(topicId, status) => updateState((current) => changeTopicStatus(current, topicId, status))}
-            />
-          )}
-          {activeTab === "progress" && <Progress state={state} />}
+          {activeTab === "copilot" && <Copilot />}
         </div>
       </section>
 
       <nav className="safe-bottom fixed inset-x-0 bottom-0 z-20 border-t border-white/10 bg-black/80 px-3 py-2 backdrop-blur-xl lg:hidden">
-        <div className="mx-auto grid max-w-md grid-cols-3 gap-2">
+        <div className="mx-auto grid max-w-md grid-cols-2 gap-2">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const active = activeTab === tab.id;
