@@ -9,7 +9,7 @@ export function Card({
   className?: string;
 }) {
   return (
-    <section className={clsx("glass rounded-lg p-4 shadow-command", className)}>
+    <section className={clsx("glass rounded-lg p-4 shadow-command transition duration-300 hover:border-white/12 hover:bg-white/[0.052]", className)}>
       {children}
     </section>
   );
@@ -23,8 +23,8 @@ export function Button({
   return (
     <button
       className={clsx(
-        "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition duration-200 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50",
-        "border border-sky-300/25 bg-sky-400 text-slate-950 shadow-[0_0_34px_rgba(56,189,248,0.22)] hover:bg-sky-300",
+        "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition duration-300 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50",
+        "border border-accent/35 bg-accent text-white shadow-[0_0_34px_rgba(124,58,237,0.30)] hover:bg-violet hover:shadow-[0_0_44px_rgba(168,85,247,0.34)]",
         className
       )}
       {...props}
@@ -42,7 +42,7 @@ export function GhostButton({
   return (
     <button
       className={clsx(
-        "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/[0.045] px-4 py-2 text-sm font-semibold text-slate-200 transition duration-200 hover:border-sky-300/30 hover:bg-white/[0.07] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50",
+        "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/[0.045] px-4 py-2 text-sm font-semibold text-slate-200 transition duration-300 hover:border-accent/35 hover:bg-white/[0.07] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50",
         className
       )}
       {...props}
@@ -62,18 +62,18 @@ export function Stat({
   tone?: "blue" | "green" | "orange" | "purple";
 }) {
   const toneClass = {
-    blue: "text-sky-200",
+    blue: "text-aura",
     green: "text-emerald-200",
     orange: "text-amber-200",
-    purple: "text-indigo-200"
+    purple: "text-violet-200"
   }[tone];
 
   return (
-    <div className="rounded-lg border border-white/10 bg-black/20 p-3">
-      <p className="text-[0.68rem] font-medium uppercase tracking-[0.14em] text-slate-500">
+    <div className="rounded-lg border border-white/10 bg-white/[0.035] p-3 transition duration-300 hover:border-accent/25 hover:bg-white/[0.052]">
+      <p className="text-[0.68rem] font-medium uppercase tracking-[0.14em] text-muted">
         {label}
       </p>
-      <p className={clsx("mt-2 break-words text-xl font-light leading-tight sm:text-2xl", toneClass)}>
+      <p className={clsx("mt-2 break-words text-xl font-medium leading-tight sm:text-2xl", toneClass)}>
         {value}
       </p>
     </div>
@@ -92,7 +92,7 @@ export function ProgressBar({
   return (
     <div className={clsx("h-2 overflow-hidden rounded-full border border-white/10 bg-black/40", className)}>
       <div
-        className="h-full rounded-full bg-gradient-to-r from-emerald-300 via-sky-300 to-blue-500 shadow-[0_0_24px_rgba(56,189,248,0.34)] transition-all duration-700 ease-out"
+        className="h-full rounded-full bg-gradient-to-r from-cosmic via-violet to-accent shadow-[0_0_24px_rgba(168,85,247,0.36)] transition-all duration-700 ease-out"
         style={{ width: `${safeValue}%` }}
       />
     </div>
