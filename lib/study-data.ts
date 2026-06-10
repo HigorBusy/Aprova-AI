@@ -40,14 +40,7 @@ export const levels: Array<{ id: Level; label: string }> = [
   { id: "improve", label: "Quero pilotar em outro nível" }
 ];
 
-export const dailyPhrases = [
-  "Estou pilotando minha aprovação.",
-  "O ENEM é o destino. A rota é hoje.",
-  "A nave não chega por intenção. Chega por comando.",
-  "Cada correção ajusta a trajetória da prova.",
-  "Você não precisa de motivação. Precisa manter a rota.",
-  "O futuro não espera. Ajuste os motores."
-];
+export const dailyPhrases = ["Ninguém está vindo te salvar"];
 
 export const subjects = ["Matemática", "Redação", "Linguagens", "Humanas", "Natureza"];
 
