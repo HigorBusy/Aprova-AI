@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { User } from "@supabase/supabase-js";
-import { Card, Button, GhostButton } from "@/components/ui";
+import { Button, Card, GhostButton } from "@/components/ui";
 import { getSupabaseClient } from "@/lib/supabase/client";
 
 export function AuthCard({ user }: { user: User | null }) {
@@ -15,9 +15,9 @@ export function AuthCard({ user }: { user: User | null }) {
   if (!supabase) {
     return (
       <Card>
-        <p className="text-xs font-black uppercase tracking-[0.16em] text-cyan">nuvem</p>
-        <h2 className="mt-1 text-lg font-black text-white">Modo local ativo</h2>
-        <p className="mt-2 text-sm font-semibold text-slate-400">
+        <p className="text-xs font-medium uppercase tracking-[0.18em] text-sky-300">nuvem</p>
+        <h2 className="mt-2 text-xl font-light text-white">Modo local ativo</h2>
+        <p className="mt-2 text-sm leading-6 text-slate-400">
           O sistema funciona neste dispositivo. Com Supabase ativo, a evolução acompanha sua conta.
         </p>
       </Card>
@@ -28,8 +28,8 @@ export function AuthCard({ user }: { user: User | null }) {
     return (
       <Card className="flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-sm font-black text-mint">Evolução sincronizada</p>
-          <p className="truncate text-sm font-semibold text-slate-400">{user.email}</p>
+          <p className="text-sm font-medium text-emerald-200">Evolução sincronizada</p>
+          <p className="truncate text-sm text-slate-400">{user.email}</p>
         </div>
         <GhostButton onClick={() => void supabase.auth.signOut()} className="shrink-0">
           Sair
@@ -60,25 +60,25 @@ export function AuthCard({ user }: { user: User | null }) {
 
   return (
     <Card>
-      <p className="text-xs font-black uppercase tracking-[0.16em] text-cyan">conta</p>
-      <h2 className="mt-1 text-lg font-black text-white">Salvar evolução na nuvem</h2>
-      <div className="mt-3 grid gap-2">
+      <p className="text-xs font-medium uppercase tracking-[0.18em] text-sky-300">conta</p>
+      <h2 className="mt-2 text-xl font-light text-white">Sincronizar evolução</h2>
+      <div className="mt-4 grid gap-2 sm:grid-cols-2">
         <input
           value={email}
           onChange={(event) => setEmail(event.target.value)}
           type="email"
           placeholder="email@exemplo.com"
-          className="h-11 rounded-lg border border-white/10 bg-white/[0.06] px-3 font-semibold text-white outline-none placeholder:text-slate-500 focus:border-cyan"
+          className="h-11 rounded-lg border border-white/10 bg-black/25 px-3 text-sm text-slate-100 outline-none placeholder:text-slate-600 focus:border-sky-300/50"
         />
         <input
           value={password}
           onChange={(event) => setPassword(event.target.value)}
           type="password"
           placeholder="Senha"
-          className="h-11 rounded-lg border border-white/10 bg-white/[0.06] px-3 font-semibold text-white outline-none placeholder:text-slate-500 focus:border-cyan"
+          className="h-11 rounded-lg border border-white/10 bg-black/25 px-3 text-sm text-slate-100 outline-none placeholder:text-slate-600 focus:border-sky-300/50"
         />
       </div>
-      <div className="mt-3 grid grid-cols-2 gap-2">
+      <div className="mt-3 grid grid-cols-2 gap-2 sm:max-w-sm">
         <Button disabled={submitting} onClick={() => void submit("login")}>
           Entrar
         </Button>
@@ -86,7 +86,7 @@ export function AuthCard({ user }: { user: User | null }) {
           Criar conta
         </GhostButton>
       </div>
-      {message && <p className="mt-3 text-sm font-semibold text-slate-400">{message}</p>}
+      {message && <p className="mt-3 text-sm leading-6 text-slate-400">{message}</p>}
     </Card>
   );
 }
