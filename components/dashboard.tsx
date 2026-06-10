@@ -40,7 +40,7 @@ export function Dashboard({
 
   return (
     <div className="grid gap-4 animate-float-in lg:grid-cols-12 lg:gap-5">
-      <CountdownCard className="lg:col-span-7" />
+      <CountdownCard daysToEnem={daysToEnem} className="lg:col-span-7" />
       <EssayCorrectionCard className="lg:col-span-5 lg:row-span-2" />
 
       <Card className="lg:col-span-4">
@@ -112,10 +112,7 @@ export function Dashboard({
           Você não precisa estudar mais. Precisa estudar com direção.
         </p>
         <div className="mt-4 grid grid-cols-2 gap-2">
-          <Button
-            onClick={() => (nextTask ? onTaskToggle(nextTask.id) : onAddMinutes(30))}
-            className="px-3"
-          >
+          <Button onClick={() => (nextTask ? onTaskToggle(nextTask.id) : onAddMinutes(30))} className="px-3">
             {nextTask ? <Check className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
             Executar
           </Button>
@@ -141,26 +138,18 @@ export function Dashboard({
           </div>
           <ProgressBar value={nextRank.progress} className="mt-3" />
           <p className="mt-2 text-xs font-bold text-slate-500">{nextRank.remaining} XP restantes</p>
+          <p className="mt-2 text-xs font-bold text-slate-500">{completedAchievements} conquistas liberadas</p>
         </div>
       </Card>
 
-      <Card className="lg:col-span-12">
-        <div className="grid gap-4 lg:grid-cols-[1fr_320px] lg:items-center">
-          <div>
-            <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">conta</p>
-            <h2 className="mt-1 text-xl font-black text-white">Sincronização e acesso</h2>
-            <p className="mt-2 text-sm font-bold text-slate-400">
-              Mantido no fim do portal para não competir com redação, cronômetro e direção diária.
-            </p>
-          </div>
-          <AuthCard user={user} />
-        </div>
-      </Card>
+      <div className="lg:col-span-12">
+        <AuthCard user={user} />
+      </div>
     </div>
   );
 }
 
-function CountdownCard({ className }: { className?: string }) {
+function CountdownCard({ daysToEnem, className }: { daysToEnem: number; className?: string }) {
   const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
@@ -175,6 +164,7 @@ function CountdownCard({ className }: { className?: string }) {
       <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-ocean via-cyan to-mint" />
       <p className="text-xs font-black uppercase tracking-[0.16em] text-cyan">Contagem regressiva para o ENEM</p>
       <h2 className="mt-2 text-3xl font-black text-white sm:text-4xl">O tempo vai passar de qualquer jeito.</h2>
+      <p className="mt-3 text-sm font-bold text-slate-400">{daysToEnem} dias corridos até a primeira prova.</p>
       <div className="mt-5 grid grid-cols-5 gap-2">
         <CountdownUnit label="meses" value={countdown.months} />
         <CountdownUnit label="dias" value={countdown.days} />
