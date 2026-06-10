@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
-import { BarChart3, BrainCircuit, Home, Map, Sparkles, Trophy } from "lucide-react";
+import { BarChart3, Home, Map, Sparkles, Trophy } from "lucide-react";
 import { Card } from "@/components/ui";
 import { achievements, dailyPhrases, initialState, metricValue, minutesFromStudyTime, prioritySubject, profileFromAnswers, todayKey } from "@/lib/study-data";
 import { loadLocalState, saveLocalState } from "@/lib/local-store";
@@ -21,11 +21,10 @@ const enemFirstDay = new Date("2026-11-08T13:30:00-03:00");
 const tabs = [
   { id: "home", label: "Missão", icon: Home },
   { id: "subjects", label: "Mapa", icon: Map },
-  { id: "progress", label: "Evidência", icon: BarChart3 },
-  { id: "mentor", label: "IA", icon: BrainCircuit }
+  { id: "progress", label: "Evidência", icon: BarChart3 }
 ] as const;
 
-type TabId = (typeof tabs)[number]["id"];
+type TabId = (typeof tabs)[number]["id"] | "mentor";
 
 export function AprovaApp() {
   const [state, setState] = useState<StudyState>(() => initialState());
@@ -153,64 +152,104 @@ export function AprovaApp() {
   }
 
   return (
-    <main className="mission-grid mx-auto flex min-h-screen w-full max-w-md flex-col px-4 pb-28 pt-5">
-      <header className="animate-float-in">
-        <div className="flex items-center justify-between gap-3">
-          <div className="min-w-0">
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-cyan">Aprova.AI</p>
-            <h1 className="mt-1 text-2xl font-black text-white">CENTRAL DE MISSÃO</h1>
-          </div>
-          <Link
-            href="/achievements"
-            className="grid h-11 w-11 place-items-center rounded-lg border border-amber-300/20 bg-amber-300/10 text-amber-300 shadow-glow transition active:scale-95"
-            aria-label="Conquistas"
-          >
-            <Trophy className="h-5 w-5" />
+    <main className="mission-grid min-h-screen bg-canvas text-white lg:grid lg:grid-cols-[280px_1fr]">
+      <aside className="sticky top-0 hidden h-screen flex-col border-r border-white/10 bg-white/[0.035] px-5 py-6 backdrop-blur-xl lg:flex">
+        <div>
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-cyan">Aprova.AI</p>
+          <h1 className="mt-2 text-2xl font-black leading-tight">Central de Missão</h1>
+          <p className="mt-3 text-sm font-bold text-slate-400">{phrase}</p>
+        </div>
+
+        <nav className="mt-8 grid gap-2">
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            const active = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex min-h-12 items-center gap-3 rounded-lg px-3 text-left text-sm font-black transition ${
+                  active
+                    ? "border border-cyan/20 bg-ocean/20 text-cyan shadow-[0_0_22px_rgba(37,99,235,0.22)]"
+                    : "text-slate-400 hover:bg-white/[0.06] hover:text-white"
+                }`}
+              >
+                <Icon className="h-5 w-5" />
+                {tab.label}
+              </button>
+            );
+          })}
+        </nav>
+
+        <div className="mt-auto rounded-lg border border-white/10 bg-white/[0.04] p-4">
+          <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-500">próxima conquista</p>
+          <p className="mt-2 text-sm font-black text-white">{nextAchievement?.title ?? "Tudo liberado"}</p>
+          <Link href="/achievements" className="mt-4 inline-flex items-center gap-2 text-sm font-black text-amber-300">
+            <Trophy className="h-4 w-4" />
+            Ver arsenal
           </Link>
         </div>
-        <div className="mt-4 rounded-lg border border-white/10 bg-white/[0.055] p-3">
-          <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-400">ordem do dia</p>
-          <p className="mt-1 text-sm font-bold text-white">&ldquo;{phrase}&rdquo;</p>
+      </aside>
+
+      <section className="flex min-h-screen flex-col px-4 pb-28 pt-5 sm:px-6 lg:px-8 lg:pb-10 lg:pt-8">
+        <header className="mx-auto w-full max-w-7xl animate-float-in lg:hidden">
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-cyan">Aprova.AI</p>
+              <h1 className="mt-1 text-2xl font-black text-white">CENTRAL DE MISSÃO</h1>
+            </div>
+            <Link
+              href="/achievements"
+              className="grid h-11 w-11 place-items-center rounded-lg border border-amber-300/20 bg-amber-300/10 text-amber-300 shadow-glow transition active:scale-95"
+              aria-label="Conquistas"
+            >
+              <Trophy className="h-5 w-5" />
+            </Link>
+          </div>
+          <div className="mt-4 rounded-lg border border-white/10 bg-white/[0.055] p-3">
+            <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-400">ordem do dia</p>
+            <p className="mt-1 text-sm font-bold text-white">&ldquo;{phrase}&rdquo;</p>
+          </div>
+        </header>
+
+        <div className="mx-auto mt-5 w-full max-w-7xl lg:mt-0">
+          {activeTab === "home" && (
+            <Dashboard
+              state={state}
+              user={user}
+              daysToEnem={daysToEnem}
+              progressPercent={progressPercent}
+              completedAchievements={completedAchievements.length}
+              nextAchievementTitle={nextAchievement?.title ?? "Todas as conquistas liberadas"}
+              onTaskToggle={(taskId) => updateState((current) => toggleTask(current, taskId))}
+              onAddMinutes={(minutes) => updateState((current) => addMinutes(current, minutes))}
+              onGoalChange={(minutes) => updateState((current) => ({ ...current, dailyGoalMinutes: minutes }))}
+              onNameChange={(name) => updateState((current) => ({ ...current, name: name.trim() || "Candidato" }))}
+            />
+          )}
+          {activeTab === "subjects" && (
+            <Subjects
+              state={state}
+              onStatusChange={(topicId, status) => updateState((current) => changeTopicStatus(current, topicId, status))}
+            />
+          )}
+          {activeTab === "progress" && <Progress state={state} />}
+          {activeTab === "mentor" && (
+            <Mentor
+              messages={state.mentorMessages}
+              onSend={(message) =>
+                updateState((current) => ({
+                  ...current,
+                  mentorMessages: [...current.mentorMessages, message, mentorReply()]
+                }))
+              }
+            />
+          )}
         </div>
-      </header>
+      </section>
 
-      <div className="mt-5">
-        {activeTab === "home" && (
-          <Dashboard
-            state={state}
-            user={user}
-            daysToEnem={daysToEnem}
-            progressPercent={progressPercent}
-            completedAchievements={completedAchievements.length}
-            nextAchievementTitle={nextAchievement?.title ?? "Todas as conquistas liberadas"}
-            onTaskToggle={(taskId) => updateState((current) => toggleTask(current, taskId))}
-            onAddMinutes={(minutes) => updateState((current) => addMinutes(current, minutes))}
-            onGoalChange={(minutes) => updateState((current) => ({ ...current, dailyGoalMinutes: minutes }))}
-            onNameChange={(name) => updateState((current) => ({ ...current, name: name.trim() || "Candidato" }))}
-          />
-        )}
-        {activeTab === "subjects" && (
-          <Subjects
-            state={state}
-            onStatusChange={(topicId, status) => updateState((current) => changeTopicStatus(current, topicId, status))}
-          />
-        )}
-        {activeTab === "progress" && <Progress state={state} />}
-        {activeTab === "mentor" && (
-          <Mentor
-            messages={state.mentorMessages}
-            onSend={(message) =>
-              updateState((current) => ({
-                ...current,
-                mentorMessages: [...current.mentorMessages, message, mentorReply()]
-              }))
-            }
-          />
-        )}
-      </div>
-
-      <nav className="safe-bottom fixed inset-x-0 bottom-0 z-20 border-t border-white/10 bg-canvas/85 px-3 py-2 backdrop-blur-xl">
-        <div className="mx-auto grid max-w-md grid-cols-4 gap-2">
+      <nav className="safe-bottom fixed inset-x-0 bottom-0 z-20 border-t border-white/10 bg-canvas/85 px-3 py-2 backdrop-blur-xl lg:hidden">
+        <div className="mx-auto grid max-w-md grid-cols-3 gap-2">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const active = activeTab === tab.id;
