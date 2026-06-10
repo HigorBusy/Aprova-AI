@@ -123,7 +123,7 @@ export function AprovaApp() {
     return (
       <main className="mission-grid flex min-h-screen items-center justify-center px-5">
         <Card className="w-full max-w-sm text-center">
-          <Orbit className="mx-auto h-7 w-7 animate-pulse text-sky-300" />
+          <Orbit className="mx-auto h-7 w-7 animate-pulse text-aura" />
           <p className="mt-3 text-sm font-medium text-slate-200">Inicializando nave AprovaAI...</p>
         </Card>
       </main>
@@ -147,20 +147,20 @@ export function AprovaApp() {
 
   return (
     <main className="mission-grid min-h-screen bg-canvas text-white lg:grid lg:grid-cols-[284px_1fr]">
-      <aside className="sticky top-0 hidden h-screen flex-col border-r border-white/10 bg-black/40 px-5 py-6 backdrop-blur-2xl lg:flex">
+      <aside className="sticky top-0 hidden h-screen flex-col border-r border-white/10 bg-black/35 px-5 py-6 backdrop-blur-2xl lg:flex">
         <div>
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-xs font-medium uppercase tracking-[0.22em] text-sky-300">AprovaAI</p>
-              <h1 className="mt-2 text-2xl font-light leading-tight text-white">Central de controle</h1>
+              <p className="text-xs font-medium uppercase tracking-[0.22em] text-aura">AprovaAI</p>
+              <h1 className="mt-2 text-2xl font-semibold leading-tight text-white">Central de controle</h1>
             </div>
-            <div className="grid h-10 w-10 place-items-center rounded-lg border border-white/10 bg-white/[0.045] text-sm text-slate-300">
+            <div className="grid h-10 w-10 place-items-center rounded-lg border border-white/10 bg-white/[0.045] text-sm text-slate-300 shadow-[0_0_24px_rgba(124,58,237,0.12)]">
               {state.name.slice(0, 1).toUpperCase()}
             </div>
           </div>
 
           <div className="mt-5 rounded-lg border border-white/10 bg-white/[0.045] p-3">
-            <p className="text-[0.68rem] font-medium uppercase tracking-[0.18em] text-slate-500">comando do dia</p>
+            <p className="text-[0.68rem] font-medium uppercase tracking-[0.18em] text-muted">comando do dia</p>
             <p className="mt-2 text-sm leading-6 text-slate-200">{phrase}</p>
           </div>
         </div>
@@ -173,9 +173,9 @@ export function AprovaApp() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex min-h-12 items-center gap-3 rounded-lg px-3 text-left text-sm transition ${
+                className={`flex min-h-12 items-center gap-3 rounded-lg px-3 text-left text-sm transition duration-300 ${
                   active
-                    ? "border border-sky-300/20 bg-sky-300/10 text-sky-100"
+                    ? "border border-accent/25 bg-accent/10 text-violet-100 shadow-[0_0_28px_rgba(124,58,237,0.14)]"
                     : "text-slate-500 hover:bg-white/[0.05] hover:text-slate-200"
                 }`}
               >
@@ -187,11 +187,11 @@ export function AprovaApp() {
         </nav>
 
         <div className="mt-auto rounded-lg border border-white/10 bg-white/[0.04] p-4">
-          <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-500">perfil</p>
+          <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted">perfil</p>
           <p className="mt-2 text-sm text-slate-200">{state.profileKind}</p>
-          <div className="mt-4 rounded-lg border border-white/10 bg-black/20 px-3 py-2">
-            <p className="text-[0.68rem] uppercase tracking-[0.16em] text-slate-500">plano atual</p>
-            <p className="mt-1 text-sm text-sky-100">Gratuito</p>
+          <div className="mt-4 rounded-lg border border-white/10 bg-black/25 px-3 py-2">
+            <p className="text-[0.68rem] uppercase tracking-[0.16em] text-muted">plano atual</p>
+            <p className="mt-1 text-sm text-aura">Gratuito</p>
           </div>
         </div>
       </aside>
@@ -200,15 +200,15 @@ export function AprovaApp() {
         <header className="mx-auto w-full max-w-7xl animate-float-in lg:hidden">
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0">
-              <p className="text-xs font-medium uppercase tracking-[0.22em] text-sky-300">AprovaAI</p>
-              <h1 className="mt-1 text-2xl font-light text-white">{activeTab === "home" ? "Central de controle" : "Copiloto IA"}</h1>
+              <p className="text-xs font-medium uppercase tracking-[0.22em] text-aura">AprovaAI</p>
+              <h1 className="mt-1 text-2xl font-semibold text-white">{activeTab === "home" ? "Central de controle" : "Copiloto IA"}</h1>
             </div>
             <div className="grid h-11 w-11 place-items-center rounded-lg border border-white/10 bg-white/[0.045] text-slate-300">
               {state.name.slice(0, 1).toUpperCase()}
             </div>
           </div>
           <div className="mt-4 rounded-lg border border-white/10 bg-white/[0.045] p-3">
-            <p className="text-xs font-medium uppercase tracking-[0.14em] text-slate-500">comando do dia</p>
+            <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted">comando do dia</p>
             <p className="mt-2 text-sm leading-6 text-slate-200">{phrase}</p>
           </div>
         </header>
@@ -237,9 +237,9 @@ export function AprovaApp() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`rounded-lg px-2 py-2 text-xs transition ${
+                className={`rounded-lg px-2 py-2 text-xs transition duration-300 ${
                   active
-                    ? "bg-sky-300/10 text-sky-100"
+                    ? "bg-accent/10 text-violet-100"
                     : "text-slate-500 hover:text-slate-200"
                 }`}
               >
