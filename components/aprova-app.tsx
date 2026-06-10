@@ -128,8 +128,8 @@ export function AprovaApp() {
     return (
       <main className="mission-grid flex min-h-screen items-center justify-center px-5">
         <Card className="w-full max-w-sm text-center">
-          <Orbit className="mx-auto h-8 w-8 animate-pulse text-cyan" />
-          <p className="mt-3 font-black text-white">Inicializando nave AprovaAI...</p>
+          <Orbit className="mx-auto h-7 w-7 animate-pulse text-sky-300" />
+          <p className="mt-3 text-sm font-medium text-slate-200">Inicializando nave AprovaAI...</p>
         </Card>
       </main>
     );
@@ -151,14 +151,22 @@ export function AprovaApp() {
   }
 
   return (
-    <main className="mission-grid min-h-screen bg-canvas text-white lg:grid lg:grid-cols-[292px_1fr]">
-      <aside className="sticky top-0 hidden h-screen flex-col border-r border-cyan/10 bg-slate-950/50 px-5 py-6 backdrop-blur-2xl lg:flex">
+    <main className="mission-grid min-h-screen bg-canvas text-white lg:grid lg:grid-cols-[284px_1fr]">
+      <aside className="sticky top-0 hidden h-screen flex-col border-r border-white/10 bg-black/45 px-5 py-6 backdrop-blur-2xl lg:flex">
         <div>
-          <p className="text-xs font-black uppercase tracking-[0.22em] text-cyan">Nave AprovaAI</p>
-          <h1 className="mt-2 text-2xl font-black leading-tight">Central de Controle</h1>
-          <div className="mt-4 rounded-lg border border-cyan/20 bg-cyan/10 p-3">
-            <p className="text-[0.68rem] font-black uppercase tracking-[0.16em] text-cyan">Comandante IA</p>
-            <p className="mt-1 text-sm font-bold text-slate-200">{phrase}</p>
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-medium uppercase tracking-[0.22em] text-sky-300">AprovaAI</p>
+              <h1 className="mt-2 text-2xl font-light leading-tight text-white">Central de Controle</h1>
+            </div>
+            <div className="grid h-10 w-10 place-items-center rounded-lg border border-white/10 bg-white/[0.045] text-sm text-slate-300">
+              {state.name.slice(0, 1).toUpperCase()}
+            </div>
+          </div>
+
+          <div className="mt-5 rounded-lg border border-white/10 bg-white/[0.045] p-3">
+            <p className="text-[0.68rem] font-medium uppercase tracking-[0.18em] text-slate-500">Comandante IA</p>
+            <p className="mt-2 text-sm leading-6 text-slate-200">{phrase}</p>
           </div>
         </div>
 
@@ -170,13 +178,13 @@ export function AprovaApp() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex min-h-12 items-center gap-3 rounded-lg px-3 text-left text-sm font-black transition ${
+                className={`flex min-h-12 items-center gap-3 rounded-lg px-3 text-left text-sm transition ${
                   active
-                    ? "border border-cyan/25 bg-cyan/10 text-cyan shadow-glow"
-                    : "text-slate-400 hover:bg-white/[0.06] hover:text-white"
+                    ? "border border-sky-300/20 bg-sky-300/10 text-sky-100"
+                    : "text-slate-500 hover:bg-white/[0.05] hover:text-slate-200"
                 }`}
               >
-                <Icon className="h-5 w-5" />
+                <Icon className="h-4 w-4" />
                 {tab.label}
               </button>
             );
@@ -184,11 +192,11 @@ export function AprovaApp() {
         </nav>
 
         <div className="mt-auto rounded-lg border border-white/10 bg-white/[0.04] p-4">
-          <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-500">próximo marco orbital</p>
-          <p className="mt-2 text-sm font-black text-white">{nextAchievement?.title ?? "Rota completa"}</p>
-          <Link href="/achievements" className="mt-4 inline-flex items-center gap-2 text-sm font-black text-amber">
+          <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-500">próximo marco</p>
+          <p className="mt-2 text-sm leading-6 text-slate-200">{nextAchievement?.title ?? "Rota completa"}</p>
+          <Link href="/achievements" className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-sky-200">
             <Trophy className="h-4 w-4" />
-            Ver arsenal
+            Ver marcos
           </Link>
         </div>
       </aside>
@@ -197,20 +205,20 @@ export function AprovaApp() {
         <header className="mx-auto w-full max-w-7xl animate-float-in lg:hidden">
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0">
-              <p className="text-xs font-black uppercase tracking-[0.22em] text-cyan">Nave AprovaAI</p>
-              <h1 className="mt-1 text-2xl font-black text-white">CENTRAL DE CONTROLE</h1>
+              <p className="text-xs font-medium uppercase tracking-[0.22em] text-sky-300">AprovaAI</p>
+              <h1 className="mt-1 text-2xl font-light text-white">Central de Controle</h1>
             </div>
             <Link
               href="/achievements"
-              className="grid h-11 w-11 place-items-center rounded-lg border border-amber/20 bg-amber/10 text-amber shadow-glow transition active:scale-95"
-              aria-label="Arsenal"
+              className="grid h-11 w-11 place-items-center rounded-lg border border-white/10 bg-white/[0.045] text-sky-200 transition active:scale-95"
+              aria-label="Marcos"
             >
               <Trophy className="h-5 w-5" />
             </Link>
           </div>
-          <div className="mt-4 rounded-lg border border-cyan/20 bg-cyan/10 p-3">
-            <p className="text-xs font-black uppercase tracking-[0.12em] text-cyan">transmissão do comandante</p>
-            <p className="mt-1 text-sm font-bold text-white">&ldquo;{phrase}&rdquo;</p>
+          <div className="mt-4 rounded-lg border border-white/10 bg-white/[0.045] p-3">
+            <p className="text-xs font-medium uppercase tracking-[0.14em] text-slate-500">transmissão do comandante</p>
+            <p className="mt-2 text-sm leading-6 text-slate-200">{phrase}</p>
           </div>
         </header>
 
@@ -239,7 +247,7 @@ export function AprovaApp() {
         </div>
       </section>
 
-      <nav className="safe-bottom fixed inset-x-0 bottom-0 z-20 border-t border-cyan/10 bg-canvas/88 px-3 py-2 backdrop-blur-xl lg:hidden">
+      <nav className="safe-bottom fixed inset-x-0 bottom-0 z-20 border-t border-white/10 bg-black/80 px-3 py-2 backdrop-blur-xl lg:hidden">
         <div className="mx-auto grid max-w-md grid-cols-3 gap-2">
           {tabs.map((tab) => {
             const Icon = tab.icon;
@@ -248,10 +256,10 @@ export function AprovaApp() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`rounded-lg px-2 py-2 text-xs font-black transition ${
+                className={`rounded-lg px-2 py-2 text-xs transition ${
                   active
-                    ? "bg-cyan/10 text-cyan shadow-glow"
-                    : "text-slate-500 hover:text-white"
+                    ? "bg-sky-300/10 text-sky-100"
+                    : "text-slate-500 hover:text-slate-200"
                 }`}
               >
                 <Icon className="mx-auto h-5 w-5" />
