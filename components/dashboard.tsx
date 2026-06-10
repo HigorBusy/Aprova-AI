@@ -1,8 +1,9 @@
 "use client";
 
-import { Activity, Check, Flame, Plus, Target, Trophy } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Check, Clock, CreditCard, FileText, Flame, Plus, Target, Trophy } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
-import { Card, GhostButton, ProgressBar, Stat } from "@/components/ui";
+import { Card, Button, GhostButton, ProgressBar, Stat } from "@/components/ui";
 import { rankFromXp } from "@/lib/study-data";
 import { AuthCard } from "@/components/auth-card";
 import type { StudyState } from "@/lib/types";
@@ -20,6 +21,8 @@ type DashboardProps = {
   onNameChange: (name: string) => void;
 };
 
+const enemDate = new Date("2026-11-08T13:30:00-03:00");
+
 export function Dashboard({
   state,
   user,
@@ -28,55 +31,105 @@ export function Dashboard({
   completedAchievements,
   nextAchievementTitle,
   onTaskToggle,
-  onAddMinutes,
-  onGoalChange,
-  onNameChange
+  onAddMinutes
 }: DashboardProps) {
   const nextRank = nextRankTarget(state.xp);
+  const nextTask = state.tasks.find((task) => !task.done);
+  const studiedHours = formatHours(state.studiedMinutesToday);
+  const totalHours = formatHours(state.totalMinutes);
 
   return (
-    <div className="grid gap-4 animate-float-in">
-      <Card className="relative overflow-hidden">
-        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-ocean via-cyan to-mint" />
+    <div className="grid gap-4 animate-float-in lg:grid-cols-12 lg:gap-5">
+      <CountdownCard className="lg:col-span-7" />
+      <EssayCorrectionCard className="lg:col-span-5 lg:row-span-2" />
+
+      <Card className="lg:col-span-4">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.16em] text-cyan">meta do dia</p>
-            <h2 className="mt-1 text-2xl font-black text-white">{progressPercent}% conquistado</h2>
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-cyan">plano atual</p>
+            <h2 className="mt-1 text-xl font-black text-white">Gratuito</h2>
           </div>
-          <div className="rounded-lg border border-amber-300/20 bg-amber-300/10 px-3 py-2 text-right">
-            <p className="text-[0.65rem] font-black uppercase text-amber-300">ENEM</p>
-            <p className="text-lg font-black text-white">{daysToEnem}d</p>
+          <div className="rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-right">
+            <p className="text-[0.65rem] font-black uppercase text-slate-400">meta</p>
+            <p className="text-sm font-black text-white">{formatHours(state.dailyGoalMinutes)}/dia</p>
           </div>
         </div>
-
-        <ProgressBar value={progressPercent} className="mt-5" />
-
-        <div className="mt-4 grid grid-cols-2 gap-3">
-          <Stat label="hoje" value={formatHours(state.studiedMinutesToday)} tone="green" />
-          <Stat label="meta" value={formatHours(state.dailyGoalMinutes)} tone="blue" />
-        </div>
-
-        <div className="mt-4 grid grid-cols-3 gap-2">
-          {[15, 30, 60].map((minutes) => (
-            <GhostButton key={minutes} onClick={() => onAddMinutes(minutes)} className="px-2">
-              <Plus className="h-4 w-4" />
-              {minutes}m
-            </GhostButton>
-          ))}
+        <p className="mt-3 text-sm font-bold text-slate-400">
+          Você tem 1 correção gratuita por dia. O tempo vai passar de qualquer jeito.
+        </p>
+        <div className="mt-4 grid gap-2 text-sm font-bold text-slate-300">
+          <div className="flex items-center justify-between rounded-lg bg-white/[0.04] px-3 py-2">
+            <span>Mensal</span>
+            <span className="text-cyan">R$19,90</span>
+          </div>
+          <div className="flex items-center justify-between rounded-lg bg-white/[0.04] px-3 py-2">
+            <span>Trimestral</span>
+            <span className="text-mint">R$39,90</span>
+          </div>
         </div>
       </Card>
 
-      <section className="grid grid-cols-2 gap-3">
-        <Stat label="streak" value={`🔥 ${state.currentStreak} dias`} tone="orange" />
-        <Stat label="xp" value={`${state.xp}`} tone="purple" />
-        <Stat label="rank" value={rankFromXp(state.xp)} tone="blue" />
-        <Stat label="conquistas" value={`${completedAchievements}`} tone="green" />
-      </section>
+      <Card className="lg:col-span-3">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">créditos</p>
+            <h2 className="mt-1 text-3xl font-black text-white">1</h2>
+          </div>
+          <CreditCard className="h-6 w-6 text-cyan" />
+        </div>
+        <p className="mt-2 text-sm font-bold text-slate-400">correção disponível hoje</p>
+        <div className="mt-4 rounded-lg border border-cyan/20 bg-cyan/10 p-3 text-sm font-black text-cyan">
+          Gratuito: 1 correção/dia
+        </div>
+      </Card>
 
-      <Card>
+      <Card className="lg:col-span-5">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">próxima conquista</p>
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-cyan">progresso real</p>
+            <h2 className="mt-1 text-xl font-black text-white">{progressPercent}% da missão diária</h2>
+          </div>
+          <Flame className="h-6 w-6 text-reward" />
+        </div>
+        <ProgressBar value={progressPercent} className="mt-4" />
+        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
+          <Stat label="hoje" value={studiedHours} tone="green" />
+          <Stat label="total" value={totalHours} tone="blue" />
+          <Stat label="rank" value={rankFromXp(state.xp)} tone="purple" />
+          <Stat label="streak" value={`${state.currentStreak}d`} tone="orange" />
+        </div>
+      </Card>
+
+      <Card className="lg:col-span-4">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">próxima ação recomendada</p>
+            <h2 className="mt-1 text-xl font-black text-white">{nextTask?.title ?? "Revisar evolução"}</h2>
+          </div>
+          <Target className="h-6 w-6 text-mint" />
+        </div>
+        <p className="mt-3 text-sm font-bold text-slate-400">
+          Você não precisa estudar mais. Precisa estudar com direção.
+        </p>
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          <Button
+            onClick={() => (nextTask ? onTaskToggle(nextTask.id) : onAddMinutes(30))}
+            className="px-3"
+          >
+            {nextTask ? <Check className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+            Executar
+          </Button>
+          <GhostButton onClick={() => onAddMinutes(30)} className="px-3">
+            <Clock className="h-4 w-4" />
+            +30m
+          </GhostButton>
+        </div>
+      </Card>
+
+      <Card className="lg:col-span-3">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">conquista</p>
             <h2 className="mt-1 text-lg font-black text-white">{nextAchievementTitle}</h2>
           </div>
           <Trophy className="h-6 w-6 text-amber-300" />
@@ -91,95 +144,128 @@ export function Dashboard({
         </div>
       </Card>
 
-      {state.currentStreak === 0 && (
-        <Card className="border-reward/30 bg-reward/10">
-          <div className="flex gap-3">
-            <Flame className="mt-1 h-5 w-5 shrink-0 text-reward" />
-            <p className="text-sm font-bold text-amber-100">
-              Seu streak está vulnerável. Uma ação pequena hoje protege a identidade que você está construindo.
+      <Card className="lg:col-span-12">
+        <div className="grid gap-4 lg:grid-cols-[1fr_320px] lg:items-center">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">conta</p>
+            <h2 className="mt-1 text-xl font-black text-white">Sincronização e acesso</h2>
+            <p className="mt-2 text-sm font-bold text-slate-400">
+              Mantido no fim do portal para não competir com redação, cronômetro e direção diária.
             </p>
           </div>
-        </Card>
-      )}
-
-      <Card>
-        <div className="flex items-center justify-between gap-3">
-          <h2 className="text-lg font-black text-white">Ações de avanço</h2>
-          <Target className="h-5 w-5 text-cyan" />
+          <AuthCard user={user} />
         </div>
-        <div className="mt-3 grid gap-2">
-          {state.tasks.map((task) => (
-            <button
-              key={task.id}
-              onClick={() => onTaskToggle(task.id)}
-              className={`flex min-h-12 items-center justify-between rounded-lg border px-3 text-left transition duration-200 active:scale-[0.98] ${
-                task.done
-                  ? "border-mint/30 bg-mint/10 text-white"
-                  : "border-white/10 bg-white/[0.045] text-slate-200 hover:border-cyan/50"
-              }`}
-            >
-              <span className="font-bold">{task.title}</span>
-              <span className="grid h-8 w-8 place-items-center rounded-lg bg-white/10 text-sm font-black">
-                {task.done ? <Check className="h-4 w-4 text-mint" /> : `+${task.xp}`}
-              </span>
-            </button>
-          ))}
-        </div>
-      </Card>
-
-      <WeeklyEvolution weeklyMinutes={state.weeklyMinutes} />
-      <AuthCard user={user} />
-
-      <Card>
-        <label className="text-sm font-bold text-slate-300">
-          Nome operacional
-          <input
-            defaultValue={state.name}
-            onBlur={(event) => onNameChange(event.target.value)}
-            className="mt-2 h-11 w-full rounded-lg border border-white/10 bg-white/[0.06] px-3 font-bold text-white outline-none focus:border-cyan"
-          />
-        </label>
-        <label className="mt-4 block text-sm font-bold text-slate-300">
-          Meta diária em horas
-          <input
-            type="number"
-            min={0.5}
-            max={8}
-            step={0.5}
-            value={state.dailyGoalMinutes / 60}
-            onChange={(event) => onGoalChange(Number(event.target.value) * 60)}
-            className="mt-2 h-11 w-full rounded-lg border border-white/10 bg-white/[0.06] px-3 font-bold text-white outline-none focus:border-cyan"
-          />
-        </label>
       </Card>
     </div>
   );
 }
 
-function WeeklyEvolution({ weeklyMinutes }: { weeklyMinutes: number[] }) {
-  const max = Math.max(...weeklyMinutes, 60);
+function CountdownCard({ className }: { className?: string }) {
+  const [now, setNow] = useState(() => new Date());
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(new Date()), 1000);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  const countdown = useMemo(() => getCountdown(now), [now]);
 
   return (
-    <Card>
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-black text-white">Evolução semanal</h2>
-        <Activity className="h-5 w-5 text-mint" />
-      </div>
-      <div className="mt-4 flex h-36 items-end gap-2">
-        {weeklyMinutes.map((minutes, index) => (
-          <div key={`${index}-${minutes}`} className="flex flex-1 flex-col items-center gap-2">
-            <div
-              className="w-full rounded-t-lg bg-gradient-to-t from-ocean via-cyan to-mint shadow-[0_0_18px_rgba(34,211,238,0.18)] transition-all duration-700"
-              style={{ height: `${Math.max(8, (minutes / max) * 100)}%` }}
-            />
-            <span className="text-xs font-bold text-slate-500">
-              {["S", "T", "Q", "Q", "S", "S", "D"][index]}
-            </span>
-          </div>
-        ))}
+    <Card className={`relative overflow-hidden ${className ?? ""}`}>
+      <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-ocean via-cyan to-mint" />
+      <p className="text-xs font-black uppercase tracking-[0.16em] text-cyan">Contagem regressiva para o ENEM</p>
+      <h2 className="mt-2 text-3xl font-black text-white sm:text-4xl">O tempo vai passar de qualquer jeito.</h2>
+      <div className="mt-5 grid grid-cols-5 gap-2">
+        <CountdownUnit label="meses" value={countdown.months} />
+        <CountdownUnit label="dias" value={countdown.days} />
+        <CountdownUnit label="horas" value={countdown.hours} />
+        <CountdownUnit label="min" value={countdown.minutes} />
+        <CountdownUnit label="seg" value={countdown.seconds} />
       </div>
     </Card>
   );
+}
+
+function CountdownUnit({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="rounded-lg border border-white/10 bg-white/[0.055] p-2 text-center sm:p-3">
+      <p className="text-2xl font-black text-white sm:text-3xl">{String(value).padStart(2, "0")}</p>
+      <p className="mt-1 text-[0.65rem] font-black uppercase tracking-[0.08em] text-slate-500">{label}</p>
+    </div>
+  );
+}
+
+function EssayCorrectionCard({ className }: { className?: string }) {
+  const [essayText, setEssayText] = useState("");
+  const [fileName, setFileName] = useState<string | undefined>();
+  const [result, setResult] = useState("");
+
+  const wordCount = essayText.trim().split(/\s+/).filter(Boolean).length;
+  const paragraphCount = essayText.split(/\n+/).filter((part) => part.trim().length > 0).length;
+
+  function handleCorrection() {
+    if (!essayText.trim() && !fileName) {
+      setResult("Cole sua redação ou envie uma imagem antes de iniciar a correção.");
+      return;
+    }
+
+    const density = wordCount >= 240 ? "boa extensão" : "texto ainda curto";
+    const structure = paragraphCount >= 4 ? "estrutura próxima do esperado" : "estrutura precisa de mais blocos";
+    setResult(`Pré-análise: ${density}, ${structure}. Cada redação corrigida é um erro a menos no dia da prova.`);
+  }
+
+  return (
+    <Card className={`border-cyan/20 bg-cyan/10 ${className ?? ""}`}>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-xs font-black uppercase tracking-[0.16em] text-cyan">ferramenta principal</p>
+          <h2 className="mt-1 text-2xl font-black text-white">Corrigir minha redação</h2>
+        </div>
+        <FileText className="h-7 w-7 text-cyan" />
+      </div>
+      <p className="mt-3 text-sm font-bold text-slate-300">
+        Cole sua redação ou envie uma imagem para receber uma análise detalhada.
+      </p>
+      <textarea
+        value={essayText}
+        onChange={(event) => setEssayText(event.target.value)}
+        placeholder="Cole sua redação aqui..."
+        className="mt-4 min-h-36 w-full resize-none rounded-lg border border-white/10 bg-slate-950/70 px-3 py-3 text-sm font-semibold text-white outline-none placeholder:text-slate-600 focus:border-cyan"
+      />
+      <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+        <label className="inline-flex min-h-11 flex-1 cursor-pointer items-center justify-center rounded-lg border border-white/10 bg-white/[0.06] px-3 text-sm font-black text-white transition hover:border-cyan/50">
+          {fileName ?? "Enviar imagem"}
+          <input
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(event) => setFileName(event.target.files?.[0]?.name)}
+          />
+        </label>
+        <Button onClick={handleCorrection} className="flex-1">
+          Corrigir redação
+        </Button>
+      </div>
+      <div className="mt-3 grid grid-cols-2 gap-2 text-xs font-black uppercase tracking-[0.1em] text-slate-500">
+        <span>{wordCount} palavras</span>
+        <span>{paragraphCount} parágrafos</span>
+      </div>
+      {result && <p className="mt-3 rounded-lg border border-white/10 bg-white/[0.06] p-3 text-sm font-bold text-slate-200">{result}</p>}
+    </Card>
+  );
+}
+
+function getCountdown(now: Date) {
+  const diff = Math.max(0, enemDate.getTime() - now.getTime());
+  const totalSeconds = Math.floor(diff / 1000);
+  const totalDays = Math.floor(totalSeconds / 86400);
+  const months = Math.floor(totalDays / 30);
+  const days = totalDays % 30;
+  const hours = Math.floor((totalSeconds % 86400) / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  return { months, days, hours, minutes, seconds };
 }
 
 function formatHours(minutes: number) {
