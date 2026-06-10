@@ -152,11 +152,11 @@ export function AprovaApp() {
 
   return (
     <main className="mission-grid min-h-screen bg-canvas text-white lg:grid lg:grid-cols-[292px_1fr]">
-      <aside className="sticky top-0 hidden h-screen flex-col border-r border-cyan/10 bg-slate-950/45 px-5 py-6 backdrop-blur-2xl lg:flex">
+      <aside className="sticky top-0 hidden h-screen flex-col border-r border-cyan/10 bg-slate-950/50 px-5 py-6 backdrop-blur-2xl lg:flex">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.22em] text-cyan">Nave AprovaAI</p>
           <h1 className="mt-2 text-2xl font-black leading-tight">Central de Controle</h1>
-          <div className="mt-4 rounded-lg border border-cyan/15 bg-cyan/10 p-3">
+          <div className="mt-4 rounded-lg border border-cyan/20 bg-cyan/10 p-3">
             <p className="text-[0.68rem] font-black uppercase tracking-[0.16em] text-cyan">Comandante IA</p>
             <p className="mt-1 text-sm font-bold text-slate-200">{phrase}</p>
           </div>
@@ -208,7 +208,7 @@ export function AprovaApp() {
               <Trophy className="h-5 w-5" />
             </Link>
           </div>
-          <div className="mt-4 rounded-lg border border-cyan/15 bg-cyan/10 p-3">
+          <div className="mt-4 rounded-lg border border-cyan/20 bg-cyan/10 p-3">
             <p className="text-xs font-black uppercase tracking-[0.12em] text-cyan">transmissão do comandante</p>
             <p className="mt-1 text-sm font-bold text-white">&ldquo;{phrase}&rdquo;</p>
           </div>
