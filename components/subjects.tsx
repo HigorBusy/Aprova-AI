@@ -23,36 +23,36 @@ export function Subjects({ state, onStatusChange }: SubjectsProps) {
 
   return (
     <div className="grid gap-4 animate-float-in lg:grid-cols-2 lg:gap-5">
-      <Card className="lg:col-span-2">
-        <p className="text-xs font-black uppercase tracking-[0.16em] text-cyan">mapa estelar</p>
-        <h2 className="mt-1 text-2xl font-black text-white lg:text-3xl">Setores da aprovação</h2>
-        <p className="mt-2 max-w-2xl text-sm font-bold text-slate-400">
-          Cada matéria é um setor da rota. O objetivo é saber onde acelerar, onde estabilizar e onde recalcular.
+      <Card className="command-surface p-5 lg:col-span-2 lg:p-6">
+        <p className="text-xs font-medium uppercase tracking-[0.20em] text-sky-200">mapa estelar</p>
+        <h2 className="mt-3 text-3xl font-light text-white">Setores da aprovação</h2>
+        <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-300">
+          Cada matéria é tratada como um setor de rota. O objetivo é enxergar força, risco e prioridade sem transformar estudo em checklist.
         </p>
       </Card>
 
       {territories.map((territory) => (
-        <Card key={territory.subject} className="overflow-hidden">
+        <Card key={territory.subject} className="p-5">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <h2 className="text-lg font-black text-white">{territory.subject}</h2>
-              <p className="text-xs font-bold uppercase tracking-[0.12em] text-slate-500">
-                setor {territory.progress >= 60 ? "em órbita" : territory.progress >= 35 ? "em ajuste" : "crítico"}
+              <h2 className="text-xl font-light text-white">{territory.subject}</h2>
+              <p className="mt-1 text-xs font-medium uppercase tracking-[0.14em] text-slate-500">
+                setor {territory.progress >= 60 ? "estável" : territory.progress >= 35 ? "em ajuste" : "crítico"}
               </p>
             </div>
-            <span className="rounded-lg border border-cyan/20 bg-cyan/10 px-3 py-2 text-lg font-black text-cyan">
+            <span className="rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-xl font-light text-sky-200">
               {territory.progress}%
             </span>
           </div>
           <ProgressBar value={territory.progress} className="mt-4" />
-          <div className="mt-4 grid gap-3 xl:grid-cols-2">
+          <div className="mt-5 grid gap-3 xl:grid-cols-2">
             {territory.topics.map((topic) => (
-              <div key={topic.id} className="rounded-lg border border-white/10 bg-slate-950/30 p-3">
-                <p className="font-bold text-white">{topic.title}</p>
+              <div key={topic.id} className="rounded-lg border border-white/10 bg-black/20 p-3">
+                <p className="text-sm font-medium text-slate-100">{topic.title}</p>
                 <select
                   value={topic.status}
                   onChange={(event) => onStatusChange(topic.id, event.target.value as TopicStatus)}
-                  className="mt-2 h-10 w-full rounded-lg border border-white/10 bg-slate-950 px-3 text-sm font-bold text-white outline-none focus:border-cyan"
+                  className="mt-3 h-10 w-full rounded-lg border border-white/10 bg-black/40 px-3 text-sm text-slate-200 outline-none focus:border-sky-300/50"
                 >
                   <option>Não iniciado</option>
                   <option>Estudando</option>
