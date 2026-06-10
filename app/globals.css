@@ -4,7 +4,7 @@
 
 :root {
   color-scheme: dark;
-  --background: 6 9 19;
+  --background: 3 7 18;
   --foreground: 248 250 252;
 }
 
@@ -20,10 +20,25 @@ body {
   min-height: 100vh;
   margin: 0;
   background:
-    radial-gradient(circle at 20% 0%, rgba(37, 99, 235, 0.28), transparent 24rem),
-    radial-gradient(circle at 80% 12%, rgba(34, 197, 94, 0.16), transparent 18rem),
-    linear-gradient(180deg, #050816 0%, #070b18 44%, #0a0f1f 100%);
+    linear-gradient(125deg, rgba(37, 99, 235, 0.20), transparent 32%),
+    linear-gradient(215deg, rgba(20, 184, 166, 0.12), transparent 36%),
+    radial-gradient(circle at center, rgba(148, 163, 184, 0.055) 0 1px, transparent 1.6px),
+    linear-gradient(180deg, #020617 0%, #050816 42%, #07111f 100%);
+  background-size: auto, auto, 42px 42px, auto;
   color: rgb(var(--foreground));
+}
+
+body::before {
+  pointer-events: none;
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(90deg, rgba(34, 211, 238, 0.045) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(34, 211, 238, 0.035) 1px, transparent 1px);
+  background-size: 96px 96px;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.62), transparent 82%);
 }
 
 ::selection {
@@ -48,17 +63,42 @@ select {
 }
 
 .glass {
+  position: relative;
+  overflow: hidden;
   background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.105), rgba(255, 255, 255, 0.045));
-  border: 1px solid rgba(255, 255, 255, 0.11);
-  backdrop-filter: blur(22px);
+    linear-gradient(145deg, rgba(15, 23, 42, 0.78), rgba(2, 6, 23, 0.46));
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.055), 0 24px 80px rgba(0, 0, 0, 0.36);
+  backdrop-filter: blur(24px);
+}
+
+.glass::before {
+  pointer-events: none;
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), transparent 34%, rgba(34, 211, 238, 0.055));
+  opacity: 0.68;
+}
+
+.glass > * {
+  position: relative;
+  z-index: 1;
 }
 
 .mission-grid {
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
-  background-size: 34px 34px;
+    linear-gradient(rgba(34, 211, 238, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(34, 211, 238, 0.035) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+.command-surface {
+  background:
+    linear-gradient(180deg, rgba(15, 23, 42, 0.86), rgba(2, 6, 23, 0.78)),
+    radial-gradient(circle at center, rgba(34, 211, 238, 0.10) 0 1px, transparent 1.4px);
+  background-size: auto, 28px 28px;
 }
 
 .safe-bottom {
@@ -76,32 +116,12 @@ select {
   }
 }
 
-@keyframes rewardPop {
-  0% {
-    opacity: 0;
-    transform: translate(-50%, 14px) scale(0.92);
+@keyframes pulseSignal {
+  0%, 100% {
+    opacity: 0.52;
   }
-  18% {
+  50% {
     opacity: 1;
-    transform: translate(-50%, 0) scale(1);
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-50%, -36px) scale(0.98);
-  }
-}
-
-@keyframes sparkRise {
-  0% {
-    opacity: 0;
-    transform: translateY(10px) scale(0.8);
-  }
-  25% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(-46px) scale(1.08);
   }
 }
 
@@ -109,10 +129,6 @@ select {
   animation: floatIn 320ms ease-out both;
 }
 
-.reward-pop {
-  animation: rewardPop 1500ms ease-out both;
-}
-
-.spark-rise {
-  animation: sparkRise 1300ms ease-out both;
+.signal-pulse {
+  animation: pulseSignal 2200ms ease-in-out infinite;
 }
