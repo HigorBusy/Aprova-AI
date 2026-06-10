@@ -23,8 +23,8 @@ export function Button({
   return (
     <button
       className={clsx(
-        "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-black transition duration-200 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50",
-        "border border-cyan/30 bg-gradient-to-r from-ocean via-ion to-cyan text-white shadow-glow hover:brightness-110",
+        "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition duration-200 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50",
+        "border border-sky-300/25 bg-sky-400 text-slate-950 shadow-[0_0_34px_rgba(56,189,248,0.22)] hover:bg-sky-300",
         className
       )}
       {...props}
@@ -42,7 +42,7 @@ export function GhostButton({
   return (
     <button
       className={clsx(
-        "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-cyan/20 bg-white/[0.055] px-4 py-2 text-sm font-bold text-slate-100 transition duration-200 hover:border-cyan/50 hover:bg-cyan/10 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50",
+        "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/[0.045] px-4 py-2 text-sm font-semibold text-slate-200 transition duration-200 hover:border-sky-300/30 hover:bg-white/[0.07] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50",
         className
       )}
       {...props}
@@ -62,18 +62,18 @@ export function Stat({
   tone?: "blue" | "green" | "orange" | "purple";
 }) {
   const toneClass = {
-    blue: "from-ocean/30 to-cyan/10 text-cyan",
-    green: "from-mint/25 to-emerald-400/10 text-mint",
-    orange: "from-amber/25 to-reward/10 text-amber",
-    purple: "from-grape/25 to-fuchsia-400/10 text-violet-200"
+    blue: "text-sky-200",
+    green: "text-emerald-200",
+    orange: "text-amber-200",
+    purple: "text-indigo-200"
   }[tone];
 
   return (
-    <div className="rounded-lg border border-white/10 bg-slate-950/30 p-3">
-      <p className="text-[0.68rem] font-bold uppercase tracking-[0.12em] text-slate-500">
+    <div className="rounded-lg border border-white/10 bg-black/20 p-3">
+      <p className="text-[0.68rem] font-medium uppercase tracking-[0.14em] text-slate-500">
         {label}
       </p>
-      <p className={clsx("mt-2 rounded-md bg-gradient-to-br px-2 py-1 text-lg font-black", toneClass)}>
+      <p className={clsx("mt-2 text-2xl font-light leading-none", toneClass)}>
         {value}
       </p>
     </div>
@@ -90,9 +90,9 @@ export function ProgressBar({
   const safeValue = Math.min(100, Math.max(0, value));
 
   return (
-    <div className={clsx("h-3 overflow-hidden rounded-full border border-white/10 bg-slate-950/70", className)}>
+    <div className={clsx("h-2 overflow-hidden rounded-full border border-white/10 bg-black/40", className)}>
       <div
-        className="h-full rounded-full bg-gradient-to-r from-ocean via-cyan to-mint shadow-[0_0_26px_rgba(34,211,238,0.48)] transition-all duration-700 ease-out"
+        className="h-full rounded-full bg-gradient-to-r from-emerald-300 via-sky-300 to-blue-500 shadow-[0_0_24px_rgba(56,189,248,0.34)] transition-all duration-700 ease-out"
         style={{ width: `${safeValue}%` }}
       />
     </div>
