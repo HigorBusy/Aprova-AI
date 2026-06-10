@@ -76,7 +76,7 @@ function Heatmap({ streak, weeklyMinutes }: { streak: number; weeklyMinutes: num
   const classes = ["bg-white/[0.055]", "bg-mint/20", "bg-mint/30", "bg-cyan/50", "bg-ocean"];
 
   return (
-    <div className="mt-4 grid grid-cols-7 gap-2 sm:grid-cols-10 lg:grid-cols-14">
+    <div className="mt-4 grid grid-cols-7 gap-2 sm:grid-cols-10 lg:grid-cols-[repeat(14,minmax(0,1fr))]">
       {cells.map((intensity, index) => (
         <div
           key={`${index}-${intensity}`}
