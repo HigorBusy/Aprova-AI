@@ -8,12 +8,11 @@ import { Card } from "@/components/ui";
 import { achievements, dailyPhrases, initialState, metricValue, minutesFromStudyTime, prioritySubject, profileFromAnswers, todayKey } from "@/lib/study-data";
 import { loadLocalState, saveLocalState } from "@/lib/local-store";
 import { getSupabaseClient } from "@/lib/supabase/client";
-import { addMinutes, changeTopicStatus, mentorReply, normalizeDailyReset, toggleTask } from "@/lib/state-helpers";
+import { addMinutes, changeTopicStatus, normalizeDailyReset, toggleTask } from "@/lib/state-helpers";
 import { Quiz } from "@/components/quiz";
 import { Dashboard } from "@/components/dashboard";
 import { Subjects } from "@/components/subjects";
 import { Progress } from "@/components/progress";
-import { Mentor } from "@/components/mentor";
 import type { QuizAnswers, StudyState } from "@/lib/types";
 
 const enemFirstDay = new Date("2026-11-08T13:30:00-03:00");
@@ -24,7 +23,7 @@ const tabs = [
   { id: "progress", label: "Evidência", icon: BarChart3 }
 ] as const;
 
-type TabId = (typeof tabs)[number]["id"] | "mentor";
+type TabId = (typeof tabs)[number]["id"];
 
 export function AprovaApp() {
   const [state, setState] = useState<StudyState>(() => initialState());
@@ -234,17 +233,6 @@ export function AprovaApp() {
             />
           )}
           {activeTab === "progress" && <Progress state={state} />}
-          {activeTab === "mentor" && (
-            <Mentor
-              messages={state.mentorMessages}
-              onSend={(message) =>
-                updateState((current) => ({
-                  ...current,
-                  mentorMessages: [...current.mentorMessages, message, mentorReply()]
-                }))
-              }
-            />
-          )}
         </div>
       </section>
 
