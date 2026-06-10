@@ -22,12 +22,12 @@ export function Subjects({ state, onStatusChange }: SubjectsProps) {
   });
 
   return (
-    <div className="grid gap-4 animate-float-in">
-      <Card>
+    <div className="grid gap-4 animate-float-in lg:grid-cols-2 lg:gap-5">
+      <Card className="lg:col-span-2">
         <p className="text-xs font-black uppercase tracking-[0.16em] text-cyan">mapa de progresso</p>
-        <h2 className="mt-1 text-2xl font-black text-white">Territórios da aprovação</h2>
-        <p className="mt-2 text-sm font-bold text-slate-400">
-          O sistema mostra onde você domina, onde resiste e onde precisa atacar.
+        <h2 className="mt-1 text-2xl font-black text-white lg:text-3xl">Territórios da aprovação</h2>
+        <p className="mt-2 max-w-2xl text-sm font-bold text-slate-400">
+          Use esta visão para decidir onde investir energia. Forte, em disputa ou crítico: cada matéria precisa de uma ação clara.
         </p>
       </Card>
 
@@ -45,7 +45,7 @@ export function Subjects({ state, onStatusChange }: SubjectsProps) {
             </span>
           </div>
           <ProgressBar value={territory.progress} className="mt-4" />
-          <div className="mt-4 grid gap-3">
+          <div className="mt-4 grid gap-3 xl:grid-cols-2">
             {territory.topics.map((topic) => (
               <div key={topic.id} className="rounded-lg border border-white/10 bg-white/[0.04] p-3">
                 <p className="font-bold text-white">{topic.title}</p>
