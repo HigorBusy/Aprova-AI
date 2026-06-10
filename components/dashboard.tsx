@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Check, Clock, CreditCard, FileText, Gauge, Plus, Radar, Shield, Target } from "lucide-react";
+import { Check, Clock, CreditCard, FileText, Gauge, Plus, Radar, Target } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
 import { AuthCard } from "@/components/auth-card";
 import { Button, Card, GhostButton, ProgressBar, Stat } from "@/components/ui";
@@ -13,24 +13,19 @@ type DashboardProps = {
   user: User | null;
   daysToEnem: number;
   progressPercent: number;
-  completedAchievements: number;
-  nextAchievementTitle: string;
   onTaskToggle: (taskId: string) => void;
   onAddMinutes: (minutes: number) => void;
-  onGoalChange: (minutes: number) => void;
-  onNameChange: (name: string) => void;
 };
 
 const enemDate = new Date("2026-11-08T13:30:00-03:00");
 const flightBars = [18, 22, 28, 34, 42, 56, 68, 76, 72, 84, 66, 58, 49, 40, 31, 24];
+const dayNames = ["domingo", "segunda", "terça", "quarta", "quinta", "sexta", "sábado"];
 
 export function Dashboard({
   state,
   user,
   daysToEnem,
   progressPercent,
-  completedAchievements,
-  nextAchievementTitle,
   onTaskToggle,
   onAddMinutes
 }: DashboardProps) {
@@ -38,6 +33,7 @@ export function Dashboard({
   const nextTask = state.tasks.find((task) => !task.done);
   const studiedHours = formatHours(state.studiedMinutesToday);
   const totalHours = formatHours(state.totalMinutes);
+  const habits = analyzeHabits(state, progressPercent);
 
   return (
     <div className="grid gap-4 animate-float-in lg:grid-cols-12 lg:gap-5">
@@ -45,8 +41,8 @@ export function Dashboard({
       <TelemetryPanel
         state={state}
         progressPercent={progressPercent}
-        completedAchievements={completedAchievements}
         nextRank={nextRank}
+        habits={habits}
         className="lg:col-span-5"
       />
 
@@ -78,27 +74,6 @@ export function Dashboard({
       <Card className="lg:col-span-3">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <p className="text-xs font-medium uppercase tracking-[0.18em] text-slate-500">plano ativo</p>
-            <h2 className="mt-2 text-2xl font-light text-white">Gratuito</h2>
-          </div>
-          <Shield className="h-5 w-5 text-sky-300" />
-        </div>
-        <p className="mt-3 text-sm leading-6 text-slate-400">1 correção diária. Upgrade quando o volume de treino pedir mais cadência.</p>
-        <div className="mt-4 grid gap-2 text-sm text-slate-300">
-          <div className="flex items-center justify-between rounded-lg border border-white/10 bg-black/20 px-3 py-2">
-            <span>Mensal</span>
-            <span className="text-sky-200">R$19,90</span>
-          </div>
-          <div className="flex items-center justify-between rounded-lg border border-white/10 bg-black/20 px-3 py-2">
-            <span>Trimestral</span>
-            <span className="text-emerald-200">R$39,90</span>
-          </div>
-        </div>
-      </Card>
-
-      <Card className="lg:col-span-3">
-        <div className="flex items-start justify-between gap-3">
-          <div>
             <p className="text-xs font-medium uppercase tracking-[0.18em] text-slate-500">créditos</p>
             <h2 className="mt-2 text-5xl font-light text-white">1</h2>
           </div>
@@ -107,13 +82,24 @@ export function Dashboard({
         <p className="mt-3 text-sm leading-6 text-slate-400">correção disponível hoje</p>
       </Card>
 
+      <Card className="lg:col-span-3">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-[0.18em] text-slate-500">ritmo observado</p>
+            <h2 className="mt-2 text-5xl font-light text-white">{habits.consistency}%</h2>
+          </div>
+          <Radar className="h-5 w-5 text-sky-300" />
+        </div>
+        <p className="mt-3 text-sm leading-6 text-slate-400">presença na semana atual</p>
+      </Card>
+
       <Card className="lg:col-span-6">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="text-xs font-medium uppercase tracking-[0.18em] text-slate-500">próximo marco</p>
-            <h2 className="mt-2 text-xl font-light text-white">{nextAchievementTitle}</h2>
+            <p className="text-xs font-medium uppercase tracking-[0.18em] text-slate-500">registro de bordo</p>
+            <h2 className="mt-2 text-xl font-light text-white">Seu padrão está sendo observado.</h2>
           </div>
-          <Radar className="h-5 w-5 text-sky-300" />
+          <Gauge className="h-5 w-5 text-sky-300" />
         </div>
         <div className="mt-5 grid grid-cols-2 gap-3">
           <Stat label="hoje" value={studiedHours} tone="green" />
@@ -188,36 +174,43 @@ function CountdownUnit({ label, value }: { label: string; value: number }) {
 function TelemetryPanel({
   state,
   progressPercent,
-  completedAchievements,
   nextRank,
+  habits,
   className
 }: {
   state: StudyState;
   progressPercent: number;
-  completedAchievements: number;
   nextRank: { label: string; remaining: number; progress: number };
+  habits: HabitReport;
   className?: string;
 }) {
   return (
     <Card className={`p-5 sm:p-6 ${className ?? ""}`}>
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-medium uppercase tracking-[0.20em] text-sky-300">telemetria</p>
-          <h2 className="mt-2 text-2xl font-light text-white">Patente {rankFromXp(state.xp)}</h2>
+          <p className="text-xs font-medium uppercase tracking-[0.20em] text-sky-300">relatório do comandante</p>
+          <h2 className="mt-2 text-2xl font-light text-white">{habits.status}</h2>
         </div>
         <Gauge className="h-5 w-5 text-sky-300" />
       </div>
 
+      <p className="mt-4 text-sm leading-6 text-slate-400">{habits.summary}</p>
+
       <div className="mt-6 grid gap-4">
-        <MetricRow label="Missão diária" value={`${progressPercent}%`} progress={progressPercent} />
+        <MetricRow label="Meta de hoje" value={`${progressPercent}%`} progress={progressPercent} />
+        <MetricRow label="Consistência semanal" value={`${habits.consistency}%`} progress={habits.consistency} />
         <MetricRow label="Próxima patente" value={nextRank.label} progress={nextRank.progress} />
-        <MetricRow label="Sequência" value={`${state.currentStreak} dias`} progress={Math.min(100, state.currentStreak * 8)} />
+      </div>
+
+      <div className="mt-5 rounded-lg border border-white/10 bg-black/20 p-3">
+        <p className="text-[0.68rem] font-medium uppercase tracking-[0.16em] text-slate-500">leitura de hábito</p>
+        <p className="mt-2 text-sm leading-6 text-slate-300">{habits.insight}</p>
       </div>
 
       <div className="mt-5 grid grid-cols-3 gap-2">
-        <Stat label="XP" value={`${state.xp}`} tone="purple" />
-        <Stat label="marcos" value={`${completedAchievements}`} tone="green" />
-        <Stat label="faltam" value={`${nextRank.remaining}`} tone="blue" />
+        <Stat label="patente" value={rankFromXp(state.xp)} tone="purple" />
+        <Stat label="sequência" value={`${state.currentStreak}d`} tone="green" />
+        <Stat label="risco" value={habits.risk} tone="orange" />
       </div>
     </Card>
   );
@@ -301,6 +294,51 @@ function WritingCenterCard({ className }: { className?: string }) {
       {result && <p className="mt-3 rounded-lg border border-sky-300/20 bg-black/30 p-3 text-sm leading-6 text-slate-300">{result}</p>}
     </Card>
   );
+}
+
+type HabitReport = {
+  consistency: number;
+  status: string;
+  summary: string;
+  insight: string;
+  risk: string;
+};
+
+function analyzeHabits(state: StudyState, progressPercent: number): HabitReport {
+  const activeDays = state.weeklyMinutes.filter((minutes) => minutes > 0).length;
+  const consistency = Math.round((activeDays / 7) * 100);
+  const bestIndex = state.weeklyMinutes.reduce((best, minutes, index) => (minutes > state.weeklyMinutes[best] ? index : best), 0);
+  const bestDay = dayNames[bestIndex];
+  const average = Math.round(state.weeklyMinutes.reduce((sum, minutes) => sum + minutes, 0) / 7);
+  const todayGap = Math.max(0, state.dailyGoalMinutes - state.studiedMinutesToday);
+
+  if (progressPercent >= 100) {
+    return {
+      consistency,
+      status: "Ritmo sob controle",
+      summary: `Hoje você já cumpriu a meta. O sistema registrou ${activeDays} dias ativos nesta semana e média de ${average} minutos por dia.`,
+      insight: `Seu melhor ponto recente foi ${bestDay}. Repita esse padrão antes que a energia do dia caia.`,
+      risk: "baixo"
+    };
+  }
+
+  if (state.studiedMinutesToday > 0) {
+    return {
+      consistency,
+      status: "Você começou, mas ainda não fechou",
+      summary: `Faltam ${todayGap} minutos para fechar a meta de hoje. O painel está acompanhando sua consistência, não só seu esforço isolado.`,
+      insight: `Seu histórico mostra ${activeDays} dias ativos na semana. O próximo bloco precisa ser curto, claro e executado agora.`,
+      risk: todayGap > 45 ? "médio" : "baixo"
+    };
+  }
+
+  return {
+    consistency,
+    status: "Nenhum sinal de estudo hoje",
+    summary: `Até agora não há registro de estudo hoje. A semana tem ${activeDays} dias ativos, mas hoje ainda está vazio no radar.`,
+    insight: "O sistema não está julgando motivação. Ele está registrando comportamento. Sem registro, a rota fica invisível.",
+    risk: "alto"
+  };
 }
 
 function getCountdown(now: Date) {
