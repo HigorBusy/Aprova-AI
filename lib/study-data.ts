@@ -12,17 +12,17 @@ import type {
 } from "@/lib/types";
 
 export const difficulties: Array<{ id: Difficulty; label: string; detail: string }> = [
-  { id: "start", label: "Preciso de um ponto de partida", detail: "O primeiro avanço precisa ser óbvio." },
-  { id: "routine", label: "Eu perco consistência", detail: "Seu sistema precisa proteger a sequência." },
-  { id: "subjects", label: "Tenho territórios fracos", detail: "Vamos expor onde atacar primeiro." },
-  { id: "motivation", label: "Eu negocio com a procrastinação", detail: "O app vai transformar presença em identidade." }
+  { id: "start", label: "Preciso de uma rota inicial", detail: "O primeiro comando precisa ser claro." },
+  { id: "routine", label: "Eu perco consistência", detail: "A nave precisa de sequência para chegar." },
+  { id: "subjects", label: "Tenho setores fracos", detail: "Vamos revelar onde recalcular a rota." },
+  { id: "motivation", label: "Eu desligo fácil", detail: "O sistema vai transformar presença em pilotagem." }
 ];
 
 export const studyTimes: Array<{ id: StudyTime; label: string; minutes: number }> = [
-  { id: "30m", label: "30 minutos de presença real", minutes: 30 },
-  { id: "1h", label: "1 hora de avanço", minutes: 60 },
-  { id: "2h", label: "2 horas de campanha", minutes: 120 },
-  { id: "3h", label: "3 horas ou mais de domínio", minutes: 180 }
+  { id: "30m", label: "30 minutos de navegação real", minutes: 30 },
+  { id: "1h", label: "1 hora de rota", minutes: 60 },
+  { id: "2h", label: "2 horas de missão", minutes: 120 },
+  { id: "3h", label: "3 horas ou mais de comando", minutes: 180 }
 ];
 
 export const areas: Array<{ id: Area; label: string; subject: string }> = [
@@ -34,19 +34,19 @@ export const areas: Array<{ id: Area; label: string; subject: string }> = [
 ];
 
 export const levels: Array<{ id: Level; label: string }> = [
-  { id: "zero", label: "Ainda estou no começo" },
-  { id: "basic", label: "Tenho base, falta direção" },
-  { id: "messy", label: "Tenho esforço, falta sistema" },
-  { id: "improve", label: "Quero competir em outro nível" }
+  { id: "zero", label: "Ainda estou na base de lançamento" },
+  { id: "basic", label: "Tenho combustível, falta rota" },
+  { id: "messy", label: "Tenho esforço, falta painel" },
+  { id: "improve", label: "Quero pilotar em outro nível" }
 ];
 
 export const dailyPhrases = [
-  "A concorrência está estudando agora.",
-  "Seu futuro não liga para sua motivação.",
-  "Hoje é um dia que não volta.",
-  "Quem passa não negocia com a procrastinação.",
-  "A aprovação não premia intenção. Premia repetição.",
-  "Você não precisa se sentir pronto para agir como aprovado."
+  "Estou pilotando minha aprovação.",
+  "O ENEM é o destino. A rota é hoje.",
+  "A nave não chega por intenção. Chega por comando.",
+  "Cada correção ajusta a trajetória da prova.",
+  "Você não precisa de motivação. Precisa manter a rota.",
+  "O futuro não espera. Ajuste os motores."
 ];
 
 export const subjects = ["Matemática", "Redação", "Linguagens", "Humanas", "Natureza"];
@@ -62,19 +62,19 @@ export const defaultTopics: Topic[] = [
 ];
 
 export const defaultTasks: DailyTask[] = [
-  { id: "study-topic", title: "Avançar no território prioritário", xp: 15, done: false },
-  { id: "questions", title: "Vencer 10 questões", xp: 20, done: false },
-  { id: "review", title: "Corrigir os próprios erros", xp: 15, done: false },
-  { id: "log-hours", title: "Registrar presença real", xp: 10, done: false },
-  { id: "note", title: "Consolidar uma descoberta", xp: 10, done: false }
+  { id: "study-topic", title: "Avançar no setor prioritário", xp: 15, done: false },
+  { id: "questions", title: "Resolver 10 sinais de prova", xp: 20, done: false },
+  { id: "review", title: "Corrigir falhas de rota", xp: 15, done: false },
+  { id: "log-hours", title: "Registrar tempo de navegação", xp: 10, done: false },
+  { id: "note", title: "Salvar uma descoberta da missão", xp: 10, done: false }
 ];
 
 export const achievements: Achievement[] = [
-  { id: "first-task", title: "Primeiro avanço", description: "Execute sua primeira ação de missão.", target: 1, metric: "tasks", rewardXp: 20, icon: "✓" },
-  { id: "first-week", title: "Sequência protegida", description: "Mantenha 7 dias seguidos de presença.", target: 7, metric: "streak", rewardXp: 100, icon: "🔥" },
-  { id: "ten-hours", title: "Motor ligado", description: "Acumule 10 horas de avanço.", target: 10, metric: "hours", rewardXp: 80, icon: "⚡" },
-  { id: "thirty-hours", title: "Modo competição", description: "Acumule 30 horas de campanha.", target: 30, metric: "hours", rewardXp: 160, icon: "◆" },
-  { id: "hundred-questions", title: "Pressão aplicada", description: "Registre 100 questões vencidas.", target: 100, metric: "questions", rewardXp: 120, icon: "◎" }
+  { id: "first-task", title: "Primeiro comando", description: "Execute sua primeira ação de missão.", target: 1, metric: "tasks", rewardXp: 20, icon: "✓" },
+  { id: "first-week", title: "Órbita estável", description: "Mantenha 7 dias seguidos de navegação.", target: 7, metric: "streak", rewardXp: 100, icon: "◆" },
+  { id: "ten-hours", title: "Motores ativos", description: "Acumule 10 horas de voo.", target: 10, metric: "hours", rewardXp: 80, icon: "⚡" },
+  { id: "thirty-hours", title: "Rota profunda", description: "Acumule 30 horas de missão.", target: 30, metric: "hours", rewardXp: 160, icon: "◇" },
+  { id: "hundred-questions", title: "Radar calibrado", description: "Registre 100 questões vencidas.", target: 100, metric: "questions", rewardXp: 120, icon: "◎" }
 ];
 
 export function todayKey(date = new Date()) {
@@ -97,12 +97,12 @@ export function initialState(): StudyState {
     questionCount: 0,
     topics: defaultTopics,
     tasks: defaultTasks,
-    notifications: ["A missão de hoje ainda está aberta. Feche o dia antes que ele feche você."],
+    notifications: ["A nave está pronta. Falta o primeiro comando do dia."],
     mentorMessages: [
       {
         id: "welcome",
         role: "mentor",
-        text: "Relate seu bloqueio. Eu vou devolver uma estratégia de avanço, não uma resposta pronta.",
+        text: "Comandante IA em espera. Informe o bloqueio para recalcular a rota.",
         createdAt: new Date().toISOString()
       }
     ]
