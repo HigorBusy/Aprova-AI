@@ -33,12 +33,12 @@ export function AuthCard({ user, planTag, creditBalance, onSignOut }: AuthCardPr
           <div className="mt-2 min-h-7 text-xl font-semibold text-white">
             {creditBalance === null ? <Loader size="sm" /> : creditBalance}
           </div>
-          <p className="text-[0.65rem] uppercase tracking-[0.12em] text-muted">crÃ©ditos</p>
+          <p className="text-[0.65rem] uppercase tracking-[0.12em] text-muted">créditos</p>
         </div>
       </div>
       <GhostButton onClick={onSignOut} className="mt-4 w-full">
         <LogOut className="h-4 w-4" />
-        Encerrar sessÃ£o
+        Encerrar sessão
       </GhostButton>
     </Card>
   );

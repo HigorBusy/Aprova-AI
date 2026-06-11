@@ -33,7 +33,7 @@ export function Mentor({ messages, onSend }: MentorProps) {
         <div className="flex items-center justify-between gap-3">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.16em] text-cyan">estrategista IA</p>
-            <h2 className="text-xl font-black text-white">Comandante de avanÃ§o</h2>
+            <h2 className="text-xl font-black text-white">Comandante de avanço</h2>
           </div>
           <span className="grid h-10 w-10 place-items-center rounded-lg border border-accent/20 bg-accent/10 text-aura">
             <BrainCircuit className="h-5 w-5" />
@@ -63,7 +63,7 @@ export function Mentor({ messages, onSend }: MentorProps) {
         <textarea
           value={text}
           onChange={(event) => setText(event.target.value)}
-          placeholder="Descreva o bloqueio, a matÃ©ria ou o erro que precisa virar estratÃ©gia..."
+          placeholder="Descreva o bloqueio, a matéria ou o erro que precisa virar estratégia..."
           className="min-h-28 w-full resize-none rounded-lg border border-white/10 bg-white/[0.06] px-3 py-3 font-semibold text-white outline-none placeholder:text-slate-500 focus:border-cyan"
         />
         <div className="mt-3 flex items-center gap-2">
@@ -83,7 +83,7 @@ export function Mentor({ messages, onSend }: MentorProps) {
         </div>
         <p className="mt-3 flex items-center gap-2 text-xs font-bold text-slate-500">
           <Lock className="h-4 w-4 text-amber-300" />
-          A versÃ£o premium libera anÃ¡lises profundas e plano de ataque adaptativo.
+          A versão premium libera análises profundas e plano de ataque adaptativo.
         </p>
       </Card>
     </div>

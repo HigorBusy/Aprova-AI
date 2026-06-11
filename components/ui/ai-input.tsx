@@ -100,7 +100,7 @@ export function AiInput({ disabled = false, onSubmit }: AiInputProps) {
                     className="text-sm text-slate-500"
                   >
                     {disabled
-                      ? "Copiloto aguardando conexÃ£o..."
+                      ? "Copiloto aguardando conexão..."
                       : searchMode
                         ? "Pesquisar e recalcular a rota..."
                         : "Pergunte ao Copiloto IA..."}

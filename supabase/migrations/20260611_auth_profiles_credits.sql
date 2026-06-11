@@ -204,7 +204,7 @@ begin
       new.id,
       1,
       'initial_bonus',
-      'CrÃ©dito inicial da conta free'
+      'Crédito inicial da conta free'
     )
     on conflict do nothing;
   end if;
@@ -235,6 +235,6 @@ select
   inserted_credits.user_id,
   1,
   'initial_bonus',
-  'CrÃ©dito inicial da conta free'
+  'Crédito inicial da conta free'
 from inserted_credits
 on conflict do nothing;
