@@ -49,6 +49,8 @@ export function AprovaApp() {
   const [localReady, setLocalReady] = useState(false);
   const [authLoading, setAuthLoading] = useState(true);
   const [accountLoading, setAccountLoading] = useState(false);
+  const [accountError, setAccountError] = useState("");
+  const [accountReloadKey, setAccountReloadKey] = useState(0);
   const [transitionLabel, setTransitionLabel] = useState<string | null>(null);
   const [planTag, setPlanTag] = useState<PlanTag>("free");
   const [creditBalance, setCreditBalance] = useState<number | null>(null);
@@ -88,7 +90,7 @@ export function AprovaApp() {
     let mounted = true;
     void supabase.auth.getSession().then(({ data }) => {
       if (!mounted) return;
-      if (data.session?.user) beginSession(data.session.user, "Restaurando sua missÃ£o");
+      if (data.session?.user) beginSession(data.session.user, "Restaurando sua missão");
       else setAuthLoading(false);
     });
 
@@ -120,33 +122,45 @@ export function AprovaApp() {
 
     let mounted = true;
     setAccountLoading(true);
-    void Promise.all([
-      supabase
-        .from("profiles")
-        .select("full_name,name,quiz_profile,daily_goal_minutes,plan_tag")
-        .eq("id", user.id)
-        .maybeSingle<ProfileRow>(),
-      supabase.from("user_credits").select("balance").eq("user_id", user.id).maybeSingle()
-    ]).then(([profileResult, creditsResult]) => {
-      if (!mounted) return;
-      const profile = profileResult.data;
-      if (profile) {
-        setPlanTag(profile.plan_tag ?? "free");
-        setState((current) => ({
-          ...current,
-          name: profile.name || profile.full_name || current.name,
-          profileKind: profile.quiz_profile,
-          dailyGoalMinutes: profile.daily_goal_minutes || current.dailyGoalMinutes
-        }));
+    setAccountError("");
+    void (async () => {
+      try {
+        const [profileResult, creditsResult] = await Promise.all([
+          supabase
+            .from("profiles")
+            .select("full_name,name,quiz_profile,daily_goal_minutes,plan_tag")
+            .eq("id", user.id)
+            .maybeSingle<ProfileRow>(),
+          supabase.from("user_credits").select("balance").eq("user_id", user.id).maybeSingle()
+        ]);
+
+        if (profileResult.error || creditsResult.error) {
+          throw profileResult.error ?? creditsResult.error;
+        }
+        if (!mounted) return;
+
+        const profile = profileResult.data;
+        if (profile) {
+          setPlanTag(profile.plan_tag ?? "free");
+          setState((current) => ({
+            ...current,
+            name: profile.name || profile.full_name || current.name,
+            profileKind: profile.quiz_profile,
+            dailyGoalMinutes: profile.daily_goal_minutes || current.dailyGoalMinutes
+          }));
+        }
+        setCreditBalance(creditsResult.data?.balance ?? 0);
+      } catch {
+        if (mounted) setAccountError("Não foi possível carregar seu perfil e seus créditos.");
+      } finally {
+        if (mounted) setAccountLoading(false);
       }
-      setCreditBalance(creditsResult.data?.balance ?? 0);
-      setAccountLoading(false);
-    });
+    })();
 
     return () => {
       mounted = false;
     };
-  }, [user]);
+  }, [accountReloadKey, user]);
 
   useEffect(() => {
     const supabase = getSupabaseClient();
@@ -213,11 +227,11 @@ export function AprovaApp() {
       profileKind,
       dailyGoalMinutes,
       notifications: [
-        `${priority} virou seu primeiro setor de navegaÃ§Ã£o. A rota comeÃ§a hoje.`,
+        `${priority} virou seu primeiro setor de navegação. A rota começa hoje.`,
         ...current.notifications.slice(0, 2)
       ],
       topics: current.topics.map((topic) =>
-        topic.subject === priority && topic.status === "NÃ£o iniciado"
+        topic.subject === priority && topic.status === "Não iniciado"
           ? { ...topic, status: "Estudando" as const }
           : topic
       )
@@ -227,9 +241,10 @@ export function AprovaApp() {
   async function handleSignOut() {
     const supabase = getSupabaseClient();
     if (!supabase) return;
-    setTransitionLabel("Encerrando sua missÃ£o");
+    setTransitionLabel("Encerrando sua missão");
     await new Promise((resolve) => window.setTimeout(resolve, 1200));
-    await supabase.auth.signOut();
+    const { error } = await supabase.auth.signOut();
+    if (error) setTransitionLabel(null);
   }
 
   if (!localReady || authLoading) {
@@ -245,7 +260,20 @@ export function AprovaApp() {
   }
 
   if (accountLoading) {
-    return <LoadingScreen label="Carregando perfil e crÃ©ditos" />;
+    return <LoadingScreen label="Carregando perfil e créditos" />;
+  }
+
+  if (accountError) {
+    return (
+      <main className="mission-grid grid min-h-[100dvh] place-items-center bg-canvas px-5 text-white">
+        <div className="glass max-w-md rounded-lg p-6 text-center">
+          <p className="text-sm leading-6 text-slate-300">{accountError}</p>
+          <GhostButton className="mt-5 w-full" onClick={() => setAccountReloadKey((key) => key + 1)}>
+            Tentar novamente
+          </GhostButton>
+        </div>
+      </main>
+    );
   }
 
   if (!state.profileKind) {
@@ -311,7 +339,7 @@ export function AprovaApp() {
             </div>
             <div className="rounded-lg border border-white/10 bg-black/25 px-3 py-2">
               <p className="flex items-center gap-1 text-[0.62rem] uppercase tracking-[0.14em] text-muted">
-                <CreditCard className="h-3 w-3" /> crÃ©ditos
+                <CreditCard className="h-3 w-3" /> créditos
               </p>
               <p className="mt-1 text-sm text-aura">{creditBalance ?? 0}</p>
             </div>

@@ -5,7 +5,7 @@ import type { User } from "@supabase/supabase-js";
 import { ArrowDown, CreditCard, FileText, Radar, Route, Upload } from "lucide-react";
 
 import { AuthCard } from "@/components/auth-card";
-import { Button, Card, ProgressBar, Stat } from "@/components/ui";
+import { Button, Card, Stat } from "@/components/ui";
 import { Loader } from "@/components/ui/loader-15";
 import { getDaysToEnem, getEnemCountdown } from "@/lib/constants";
 import type { PlanTag, StudyState } from "@/lib/types";
@@ -36,7 +36,11 @@ export function Dashboard({
     <div className="grid gap-4 animate-float-in lg:grid-cols-12 lg:gap-5">
       <CountdownPanel className="lg:col-span-12" />
 
-      <WritingCenterCard className="lg:col-span-8 lg:row-span-2" />
+      <WritingCenterCard
+        className="lg:col-span-8 lg:row-span-2"
+        balance={creditBalance}
+        planTag={planTag}
+      />
 
       <div className="grid content-start gap-4 lg:col-span-4">
         <RecommendedAction />
@@ -53,16 +57,16 @@ export function Dashboard({
             <h2 className="mt-2 text-2xl font-semibold text-white">
               {state.studiedMinutesToday > 0
                 ? "Seu ritmo de hoje foi registrado."
-                : "Ainda nÃ£o hÃ¡ sinal de estudo hoje."}
+                : "Ainda não há sinal de estudo hoje."}
             </h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">
-              O painel acompanha apenas dados registrados. Sem atividade, nÃ£o inventamos progresso.
+              O painel acompanha apenas dados registrados. Sem atividade, não inventamos progresso.
             </p>
           </div>
           <div className="grid grid-cols-3 gap-2 sm:min-w-[390px]">
             <Stat label="hoje" value={studiedHours} tone="green" />
             <Stat label="acumulado" value={totalHours} tone="blue" />
-            <Stat label="consistÃªncia" value={`${consistency}%`} tone="purple" />
+            <Stat label="consistência" value={`${consistency}%`} tone="purple" />
           </div>
         </div>
       </Card>
@@ -101,7 +105,7 @@ function CountdownPanel({ className }: { className?: string }) {
             O tempo vai passar de qualquer jeito.
           </h2>
           <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-300">
-            Provas confirmadas para 8 e 15 de novembro de 2026. O painel conta atÃ© o primeiro dia.
+            Provas confirmadas para 8 e 15 de novembro de 2026. O painel conta até o primeiro dia.
           </p>
         </div>
         <div className="rounded-lg border border-accent/25 bg-black/25 px-4 py-3 text-right shadow-[0_0_34px_rgba(124,58,237,0.20)]">
@@ -149,20 +153,35 @@ function CountdownUnit({ label, value, pulse }: { label: string; value: number; 
   );
 }
 
-function WritingCenterCard({ className }: { className?: string }) {
+function WritingCenterCard({
+  className,
+  balance,
+  planTag
+}: {
+  className?: string;
+  balance: number | null;
+  planTag: PlanTag;
+}) {
   const [essayText, setEssayText] = useState("");
   const [fileName, setFileName] = useState<string>();
   const [message, setMessage] = useState("");
+  const hasCredits = planTag === "premium" || (balance ?? 0) > 0;
 
   const wordCount = essayText.trim().split(/\s+/).filter(Boolean).length;
 
   function handleCorrection() {
+    if (!hasCredits) {
+      setMessage(
+        "Seus créditos terminaram. Nenhuma correção foi iniciada e seu saldo permanece protegido."
+      );
+      return;
+    }
     if (!essayText.trim() && !fileName) {
-      setMessage("Cole sua redaÃ§Ã£o ou envie uma imagem antes de iniciar.");
+      setMessage("Cole sua redação ou envie uma imagem antes de iniciar.");
       return;
     }
     setMessage(
-      "ConteÃºdo preparado. O motor de correÃ§Ã£o por IA ainda nÃ£o estÃ¡ conectado e nenhum crÃ©dito foi consumido."
+      "Conteúdo preparado. O motor de correção por IA ainda não está conectado e nenhum crédito foi consumido."
     );
   }
 
@@ -170,21 +189,21 @@ function WritingCenterCard({ className }: { className?: string }) {
     <Card id="centro-redacao" className={`premium-glow p-5 sm:p-6 lg:p-7 ${className ?? ""}`}>
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-medium uppercase tracking-[0.20em] text-aura">Centro de RedaÃ§Ã£o</p>
-          <h2 className="mt-2 text-3xl font-semibold text-white sm:text-4xl">Corrigir minha redaÃ§Ã£o</h2>
+          <p className="text-xs font-medium uppercase tracking-[0.20em] text-aura">Centro de Redação</p>
+          <h2 className="mt-2 text-3xl font-semibold text-white sm:text-4xl">Corrigir minha redação</h2>
         </div>
         <div className="grid h-11 w-11 shrink-0 place-items-center rounded-lg border border-accent/25 bg-accent/10 text-aura">
           <FileText className="h-5 w-5" />
         </div>
       </div>
       <p className="mt-3 max-w-2xl text-sm leading-6 text-muted">
-        Cole sua redaÃ§Ã£o, envie uma imagem ou suba um arquivo para receber uma anÃ¡lise detalhada.
+        Cole sua redação, envie uma imagem ou suba um arquivo para receber uma análise detalhada.
       </p>
 
       <textarea
         value={essayText}
         onChange={(event) => setEssayText(event.target.value)}
-        placeholder="Cole sua redaÃ§Ã£o aqui..."
+        placeholder="Cole sua redação aqui..."
         className="mt-6 min-h-64 w-full resize-y rounded-lg border border-white/10 bg-black/40 px-4 py-4 text-sm leading-6 text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-accent/50 focus:shadow-[0_0_28px_rgba(124,58,237,0.16)]"
       />
 
@@ -199,18 +218,23 @@ function WritingCenterCard({ className }: { className?: string }) {
             onChange={(event) => setFileName(event.target.files?.[0]?.name)}
           />
         </label>
-        <Button onClick={handleCorrection} className="min-h-12 flex-1">
-          Iniciar correÃ§Ã£o
+        <Button disabled={!hasCredits} onClick={handleCorrection} className="min-h-12 flex-1">
+          {hasCredits ? "Iniciar correção" : "Sem créditos"}
         </Button>
       </div>
 
       <div className="mt-4 flex items-center justify-between gap-3 text-xs text-muted">
         <span>{wordCount} palavras</span>
-        <span>Cada redaÃ§Ã£o corrigida Ã© um erro a menos no dia da prova.</span>
+        <span>Cada redação corrigida é um erro a menos no dia da prova.</span>
       </div>
       {message && (
         <p className="mt-3 rounded-lg border border-accent/20 bg-black/30 p-3 text-sm leading-6 text-slate-300">
           {message}
+        </p>
+      )}
+      {!hasCredits && !message && (
+        <p className="mt-3 rounded-lg border border-white/10 bg-black/30 p-3 text-sm leading-6 text-slate-300">
+          Seu saldo chegou a zero. A ferramenta não inicia cobranças nem permite saldo negativo.
         </p>
       )}
     </Card>
@@ -223,22 +247,22 @@ function RecommendedAction() {
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-xs font-medium uppercase tracking-[0.18em] text-aura">
-            PrÃ³xima aÃ§Ã£o recomendada
+            Próxima ação recomendada
           </p>
           <h2 className="mt-2 text-2xl font-semibold leading-tight text-white">
-            Descubra onde sua redaÃ§Ã£o perde pontos.
+            Descubra onde sua redação perde pontos.
           </h2>
         </div>
         <Route className="h-5 w-5 shrink-0 text-aura" />
       </div>
       <p className="mt-3 text-sm leading-6 text-muted">
-        Envie uma redaÃ§Ã£o hoje e transforme erro invisÃ­vel em direÃ§Ã£o objetiva.
+        Envie uma redação hoje e transforme erro invisível em direção objetiva.
       </p>
       <Button
         className="mt-5 w-full"
         onClick={() => document.getElementById("centro-redacao")?.scrollIntoView({ behavior: "smooth" })}
       >
-        Corrigir minha redaÃ§Ã£o
+        Corrigir minha redação
         <ArrowDown className="h-4 w-4" />
       </Button>
     </Card>
@@ -246,12 +270,14 @@ function RecommendedAction() {
 }
 
 function CreditsCard({ balance, planTag }: { balance: number | null; planTag: PlanTag }) {
+  const isEmpty = planTag !== "premium" && balance === 0;
+
   return (
     <Card className="premium-glow">
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted">
-            CrÃ©ditos disponÃ­veis
+            Créditos disponíveis
           </p>
           <div className="energy-text mt-2 min-h-16 text-6xl font-semibold text-white">
             {balance === null ? <Loader size="sm" /> : balance}
@@ -260,7 +286,10 @@ function CreditsCard({ balance, planTag }: { balance: number | null; planTag: Pl
         <CreditCard className="h-5 w-5 text-aura" />
       </div>
       <p className="mt-3 text-sm leading-6 text-muted">
-        Use crÃ©ditos para acessar ferramentas avanÃ§adas. Plano atual: {planTag === "premium" ? "Premium" : "Free"}.
+        {isEmpty
+          ? "Saldo esgotado. Nenhuma operação poderá gerar saldo negativo."
+          : "Use créditos para acessar ferramentas avançadas."}{" "}
+        Plano atual: {planTag === "premium" ? "Premium" : "Free"}.
       </p>
     </Card>
   );

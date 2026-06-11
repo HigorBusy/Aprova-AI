@@ -26,60 +26,69 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
   }) {
     const supabase = getSupabaseClient();
     if (!supabase) {
-      setMessage("A conexÃ£o com o Supabase nÃ£o estÃ¡ configurada.");
+      setMessage("A conexão com o Supabase não está configurada.");
       return;
     }
     if (!email || password.length < 6) {
-      setMessage("Use um e-mail vÃ¡lido e uma senha com pelo menos 6 caracteres.");
+      setMessage("Use um e-mail válido e uma senha com pelo menos 6 caracteres.");
       return;
     }
 
     setSubmitting(true);
     setMessage("");
 
-    if (mode === "signup") {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: { full_name: name ?? "Candidato" }
+    try {
+      if (mode === "signup") {
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: { full_name: name ?? "Candidato" }
+          }
+        });
+        if (error) {
+          setMessage(error.message);
+          return;
         }
-      });
-      setSubmitting(false);
+        if (data.user && data.session) {
+          onAuthenticated(data.user);
+          return;
+        }
+        setMessage("Conta criada. Confirme o e-mail para entrar na Central de Controle.");
+        setMode("login");
+        return;
+      }
+
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
         setMessage(error.message);
         return;
       }
-      if (data.user && data.session) {
-        onAuthenticated(data.user);
-        return;
-      }
-      setMessage("Conta criada. Confirme o e-mail para entrar na Central de Controle.");
-      setMode("login");
-      return;
+      if (data.user) onAuthenticated(data.user);
+    } catch {
+      setMessage("Não foi possível concluir a conexão. Verifique sua internet e tente novamente.");
+    } finally {
+      setSubmitting(false);
     }
-
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    setSubmitting(false);
-    if (error) {
-      setMessage(error.message);
-      return;
-    }
-    if (data.user) onAuthenticated(data.user);
   }
 
   async function resetPassword(email: string) {
     const supabase = getSupabaseClient();
     if (!supabase || !email) {
-      setMessage("Digite seu e-mail antes de solicitar a redefiniÃ§Ã£o.");
+      setMessage("Digite seu e-mail antes de solicitar a redefinição.");
       return;
     }
     setSubmitting(true);
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.origin
-    });
-    setSubmitting(false);
-    setMessage(error ? error.message : "Enviamos as instruÃ§Ãµes de redefiniÃ§Ã£o para seu e-mail.");
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin
+      });
+      setMessage(error ? error.message : "Enviamos as instruções de redefinição para seu e-mail.");
+    } catch {
+      setMessage("Não foi possível solicitar a redefinição. Tente novamente.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
