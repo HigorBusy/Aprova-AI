@@ -264,3 +264,109 @@ select {
 .signal-pulse {
   animation: pulseSignal 2600ms ease-in-out infinite;
 }
+
+.countdown-value {
+  animation: countdownChange 260ms ease-out both;
+}
+
+.brand-transition {
+  overflow: hidden;
+  animation: vignetteFade 1800ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  will-change: opacity;
+}
+
+.brand-transition::after {
+  pointer-events: none;
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, transparent 20%, rgba(2, 6, 23, 0.92) 88%);
+  animation: vignetteClose 1800ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  will-change: opacity, transform;
+}
+
+.brand-transition-mark {
+  position: relative;
+  z-index: 1;
+  animation: brandReveal 1800ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  will-change: opacity, transform;
+}
+
+.brand-transition-label {
+  animation: labelReveal 1800ms ease both;
+}
+
+@keyframes countdownChange {
+  from {
+    opacity: 0.32;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes brandReveal {
+  0% {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  28%, 66% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.035);
+  }
+}
+
+@keyframes labelReveal {
+  0%, 18% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  34%, 66% {
+    opacity: 0.9;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes vignetteFade {
+  0%, 74% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes vignetteClose {
+  0% {
+    opacity: 0.78;
+    transform: scale(1.08);
+  }
+  48% {
+    opacity: 0.32;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0.94;
+    transform: scale(0.96);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .countdown-value,
+  .brand-transition,
+  .brand-transition::after,
+  .brand-transition-mark,
+  .brand-transition-label {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

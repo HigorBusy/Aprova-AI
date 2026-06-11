@@ -1,15 +1,18 @@
 import { clsx } from "clsx";
-import type { ButtonHTMLAttributes, ReactNode } from "react";
+import type { ButtonHTMLAttributes, HTMLAttributes, ReactNode } from "react";
 
 export function Card({
   children,
-  className
-}: {
+  className,
+  ...props
+}: HTMLAttributes<HTMLElement> & {
   children: ReactNode;
-  className?: string;
 }) {
   return (
-    <section className={clsx("glass rounded-lg p-4 shadow-command transition duration-300 hover:border-white/[0.12] hover:bg-white/[0.052]", className)}>
+    <section
+      className={clsx("glass rounded-lg p-4 shadow-command transition duration-300 hover:border-white/[0.12] hover:bg-white/[0.052]", className)}
+      {...props}
+    >
       {children}
     </section>
   );

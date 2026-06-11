@@ -1,19 +1,29 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import Image from "next/image";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { User } from "@supabase/supabase-js";
-import { Home, MessageCircle, Orbit } from "lucide-react";
-import { Card } from "@/components/ui";
-import { dailyPhrases, initialState, minutesFromStudyTime, prioritySubject, profileFromAnswers, todayKey } from "@/lib/study-data";
-import { loadLocalState, saveLocalState } from "@/lib/local-store";
-import { getSupabaseClient } from "@/lib/supabase/client";
-import { addMinutes, normalizeDailyReset, toggleTask } from "@/lib/state-helpers";
-import { Quiz } from "@/components/quiz";
-import { Dashboard } from "@/components/dashboard";
-import { Copilot } from "@/components/copilot";
-import type { QuizAnswers, StudyState } from "@/lib/types";
+import { CreditCard, Home, LogOut, MessageCircle, ShieldCheck } from "lucide-react";
 
-const enemFirstDay = new Date("2026-11-08T13:30:00-03:00");
+import { AuthScreen } from "@/components/auth-screen";
+import { BrandTransition } from "@/components/brand-transition";
+import { Copilot } from "@/components/copilot";
+import { Dashboard } from "@/components/dashboard";
+import { Quiz } from "@/components/quiz";
+import { GhostButton } from "@/components/ui";
+import { Loader } from "@/components/ui/loader-15";
+import { getDaysToEnem } from "@/lib/constants";
+import { loadLocalState, saveLocalState } from "@/lib/local-store";
+import {
+  dailyPhrases,
+  initialState,
+  minutesFromStudyTime,
+  prioritySubject,
+  profileFromAnswers,
+  todayKey
+} from "@/lib/study-data";
+import { getSupabaseClient } from "@/lib/supabase/client";
+import type { PlanTag, ProfileKind, QuizAnswers, StudyState } from "@/lib/types";
 
 const tabs = [
   { id: "home", label: "Central de controle", icon: Home },
@@ -22,78 +32,172 @@ const tabs = [
 
 type TabId = (typeof tabs)[number]["id"];
 
+type ProfileRow = {
+  full_name: string | null;
+  name: string | null;
+  quiz_profile: ProfileKind | null;
+  daily_goal_minutes: number;
+  plan_tag: PlanTag;
+};
+
 export function AprovaApp() {
   const [state, setState] = useState<StudyState>(() => initialState());
   const [answers, setAnswers] = useState<QuizAnswers>({});
   const [quizStep, setQuizStep] = useState(0);
   const [activeTab, setActiveTab] = useState<TabId>("home");
   const [user, setUser] = useState<User | null>(null);
-  const [ready, setReady] = useState(false);
+  const [localReady, setLocalReady] = useState(false);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [accountLoading, setAccountLoading] = useState(false);
+  const [transitionLabel, setTransitionLabel] = useState<string | null>(null);
+  const [planTag, setPlanTag] = useState<PlanTag>("free");
+  const [creditBalance, setCreditBalance] = useState<number | null>(null);
+  const transitionTimerRef = useRef<number | null>(null);
+  const transitioningUserRef = useRef<string | null>(null);
+
+  const beginSession = useCallback((nextUser: User, label = "Preparando sua Central") => {
+    if (transitioningUserRef.current === nextUser.id || user?.id === nextUser.id) return;
+    if (transitionTimerRef.current) window.clearTimeout(transitionTimerRef.current);
+
+    transitioningUserRef.current = nextUser.id;
+    setAuthLoading(false);
+    setTransitionLabel(label);
+    transitionTimerRef.current = window.setTimeout(() => {
+      setUser(nextUser);
+      setTransitionLabel(null);
+      transitioningUserRef.current = null;
+    }, 1800);
+  }, [user?.id]);
 
   useEffect(() => {
-    setState(normalizeDailyReset(loadLocalState()));
-    setReady(true);
+    setState(loadLocalState());
+    setLocalReady(true);
   }, []);
 
   useEffect(() => {
-    if (ready) saveLocalState(state);
-  }, [ready, state]);
+    if (localReady) saveLocalState(state);
+  }, [localReady, state]);
 
   useEffect(() => {
     const supabase = getSupabaseClient();
-    if (!supabase) return;
+    if (!supabase) {
+      setAuthLoading(false);
+      return;
+    }
+
     let mounted = true;
-    void supabase.auth
-      .getSession()
-      .then(({ data }) => mounted && setUser(data.session?.user ?? null));
-    const { data } = supabase.auth.onAuthStateChange((_event, session) =>
-      setUser(session?.user ?? null)
-    );
+    void supabase.auth.getSession().then(({ data }) => {
+      if (!mounted) return;
+      if (data.session?.user) beginSession(data.session.user, "Restaurando sua missÃ£o");
+      else setAuthLoading(false);
+    });
+
+    const { data } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_OUT") {
+        setUser(null);
+        setPlanTag("free");
+        setCreditBalance(null);
+        setAccountLoading(false);
+        setTransitionLabel(null);
+        transitioningUserRef.current = null;
+        return;
+      }
+      if (event === "SIGNED_IN" && session?.user) {
+        beginSession(session.user);
+      }
+    });
+
     return () => {
       mounted = false;
       data.subscription.unsubscribe();
+      if (transitionTimerRef.current) window.clearTimeout(transitionTimerRef.current);
     };
-  }, []);
+  }, [beginSession]);
 
   useEffect(() => {
     const supabase = getSupabaseClient();
-    if (!supabase || !user || !state.profileKind) return;
+    if (!supabase || !user) return;
+
+    let mounted = true;
+    setAccountLoading(true);
     void Promise.all([
-      supabase.from("profiles").upsert({
-        id: user.id,
-        full_name: state.name,
-        quiz_profile: state.profileKind,
-        daily_goal_minutes: state.dailyGoalMinutes
-      }),
       supabase
-        .from("daily_progress")
-        .upsert(
-          {
-            user_id: user.id,
-            progress_date: todayKey(),
-            studied_minutes: state.studiedMinutesToday,
-            tasks_completed: state.completedTasks,
-            questions_answered: state.questionCount
-          },
-          { onConflict: "user_id,progress_date" }
-        ),
-      supabase
-        .from("streaks")
-        .upsert(
-          {
-            user_id: user.id,
-            current_streak: state.currentStreak,
-            best_streak: state.bestStreak,
-            last_study_date: state.studiedMinutesToday > 0 ? todayKey() : null
-          },
-          { onConflict: "user_id" }
-        )
+        .from("profiles")
+        .select("full_name,name,quiz_profile,daily_goal_minutes,plan_tag")
+        .eq("id", user.id)
+        .maybeSingle<ProfileRow>(),
+      supabase.from("user_credits").select("balance").eq("user_id", user.id).maybeSingle()
+    ]).then(([profileResult, creditsResult]) => {
+      if (!mounted) return;
+      const profile = profileResult.data;
+      if (profile) {
+        setPlanTag(profile.plan_tag ?? "free");
+        setState((current) => ({
+          ...current,
+          name: profile.name || profile.full_name || current.name,
+          profileKind: profile.quiz_profile,
+          dailyGoalMinutes: profile.daily_goal_minutes || current.dailyGoalMinutes
+        }));
+      }
+      setCreditBalance(creditsResult.data?.balance ?? 0);
+      setAccountLoading(false);
+    });
+
+    return () => {
+      mounted = false;
+    };
+  }, [user]);
+
+  useEffect(() => {
+    const supabase = getSupabaseClient();
+    if (!supabase || !user || !state.profileKind || accountLoading) return;
+
+    void supabase.from("profiles").update({
+      name: state.name,
+      full_name: state.name,
+      quiz_profile: state.profileKind,
+      daily_goal_minutes: state.dailyGoalMinutes
+    }).eq("id", user.id);
+  }, [accountLoading, state.dailyGoalMinutes, state.name, state.profileKind, user]);
+
+  useEffect(() => {
+    const supabase = getSupabaseClient();
+    if (!supabase || !user || !state.profileKind || accountLoading) return;
+
+    void Promise.all([
+      supabase.from("daily_progress").upsert(
+        {
+          user_id: user.id,
+          progress_date: todayKey(),
+          studied_minutes: state.studiedMinutesToday,
+          tasks_completed: state.completedTasks,
+          questions_answered: state.questionCount
+        },
+        { onConflict: "user_id,progress_date" }
+      ),
+      supabase.from("streaks").upsert(
+        {
+          user_id: user.id,
+          current_streak: state.currentStreak,
+          best_streak: state.bestStreak,
+          last_study_date: state.studiedMinutesToday > 0 ? todayKey() : null
+        },
+        { onConflict: "user_id" }
+      )
     ]);
-  }, [user, state]);
+  }, [
+    accountLoading,
+    state.bestStreak,
+    state.completedTasks,
+    state.currentStreak,
+    state.profileKind,
+    state.questionCount,
+    state.studiedMinutesToday,
+    user
+  ]);
 
   const phrase = dailyPhrases[0];
   const daysToEnem = getDaysToEnem();
-  const progressPercent = Math.round((state.studiedMinutesToday / state.dailyGoalMinutes) * 100);
 
   function updateState(updater: (current: StudyState) => StudyState) {
     setState((current) => updater(current));
@@ -103,31 +207,45 @@ export function AprovaApp() {
     const profileKind = profileFromAnswers(answers);
     const dailyGoalMinutes = minutesFromStudyTime(answers.studyTime);
     const priority = prioritySubject(answers.area);
+
     updateState((current) => ({
       ...current,
       profileKind,
       dailyGoalMinutes,
       notifications: [
-        `${priority} virou seu primeiro setor de navegação. A rota começa hoje.`,
+        `${priority} virou seu primeiro setor de navegaÃ§Ã£o. A rota comeÃ§a hoje.`,
         ...current.notifications.slice(0, 2)
       ],
       topics: current.topics.map((topic) =>
-        topic.subject === priority && topic.status === "Não iniciado"
+        topic.subject === priority && topic.status === "NÃ£o iniciado"
           ? { ...topic, status: "Estudando" as const }
           : topic
       )
     }));
   }
 
-  if (!ready) {
-    return (
-      <main className="mission-grid flex min-h-screen items-center justify-center px-5">
-        <Card className="w-full max-w-sm text-center">
-          <Orbit className="mx-auto h-7 w-7 animate-pulse text-aura" />
-          <p className="mt-3 text-sm font-medium text-slate-200">Inicializando nave AprovaAI...</p>
-        </Card>
-      </main>
-    );
+  async function handleSignOut() {
+    const supabase = getSupabaseClient();
+    if (!supabase) return;
+    setTransitionLabel("Encerrando sua missÃ£o");
+    await new Promise((resolve) => window.setTimeout(resolve, 1200));
+    await supabase.auth.signOut();
+  }
+
+  if (!localReady || authLoading) {
+    return <LoadingScreen label="Inicializando AprovaAI" />;
+  }
+
+  if (transitionLabel) {
+    return <BrandTransition label={transitionLabel} />;
+  }
+
+  if (!user) {
+    return <AuthScreen onAuthenticated={(nextUser) => beginSession(nextUser)} />;
+  }
+
+  if (accountLoading) {
+    return <LoadingScreen label="Carregando perfil e crÃ©ditos" />;
   }
 
   if (!state.profileKind) {
@@ -137,9 +255,7 @@ export function AprovaApp() {
         daysToEnem={daysToEnem}
         step={quizStep}
         onAnswer={(next) => setAnswers((current) => ({ ...current, ...next }))}
-        onNext={() =>
-          quizStep >= 3 ? finishQuiz() : setQuizStep((step) => step + 1)
-        }
+        onNext={() => (quizStep >= 3 ? finishQuiz() : setQuizStep((step) => step + 1))}
         onBack={() => setQuizStep((step) => Math.max(0, step - 1))}
       />
     );
@@ -148,22 +264,18 @@ export function AprovaApp() {
   return (
     <main className="mission-grid min-h-screen bg-canvas text-white lg:grid lg:grid-cols-[284px_1fr]">
       <aside className="sticky top-0 hidden h-screen flex-col border-r border-white/10 bg-black/40 px-5 py-6 backdrop-blur-2xl lg:flex">
-        <div>
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className="text-xs font-medium uppercase tracking-[0.22em] text-aura">AprovaAI</p>
-              <h1 className="mt-2 text-2xl font-semibold leading-tight text-white">Central de controle</h1>
-            </div>
-            <div className="grid h-10 w-10 place-items-center rounded-lg border border-white/10 bg-white/[0.045] text-sm text-slate-300 shadow-[0_0_24px_rgba(124,58,237,0.12)]">
-              {state.name.slice(0, 1).toUpperCase()}
-            </div>
-          </div>
+        <Image
+          src="/aprova-ai-glow.png"
+          alt="AprovaAI"
+          width={220}
+          height={90}
+          priority
+          className="h-auto w-44 object-contain"
+        />
 
-          <div className="mt-5 rounded-lg border border-white/10 bg-white/[0.045] p-3">
-            <p className="text-[0.68rem] font-medium uppercase tracking-[0.18em] text-muted">comando do dia</p>
-            <p className="mt-2 text-sm leading-6 text-slate-200">{phrase}</p>
-          </div>
-        </div>
+        <p className="energy-text mt-5 rounded-lg border border-accent/20 bg-accent/[0.07] p-4 text-center text-sm font-medium leading-6 text-white">
+          {phrase}
+        </p>
 
         <nav className="mt-8 grid gap-2">
           {tabs.map((tab) => {
@@ -187,30 +299,48 @@ export function AprovaApp() {
         </nav>
 
         <div className="mt-auto rounded-lg border border-white/10 bg-white/[0.04] p-4">
-          <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted">perfil</p>
-          <p className="mt-2 text-sm text-slate-200">{state.profileKind}</p>
-          <div className="mt-4 rounded-lg border border-white/10 bg-black/25 px-3 py-2">
-            <p className="text-[0.68rem] uppercase tracking-[0.16em] text-muted">plano atual</p>
-            <p className="mt-1 text-sm text-aura">Gratuito</p>
+          <p className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.16em] text-muted">
+            <ShieldCheck className="h-4 w-4 text-aura" />
+            Perfil
+          </p>
+          <p className="mt-2 truncate text-sm text-slate-200">{user.email}</p>
+          <div className="mt-4 grid grid-cols-2 gap-2">
+            <div className="rounded-lg border border-white/10 bg-black/25 px-3 py-2">
+              <p className="text-[0.62rem] uppercase tracking-[0.14em] text-muted">plano</p>
+              <p className="mt-1 text-sm text-aura">{planTag === "premium" ? "Premium" : "Free"}</p>
+            </div>
+            <div className="rounded-lg border border-white/10 bg-black/25 px-3 py-2">
+              <p className="flex items-center gap-1 text-[0.62rem] uppercase tracking-[0.14em] text-muted">
+                <CreditCard className="h-3 w-3" /> crÃ©ditos
+              </p>
+              <p className="mt-1 text-sm text-aura">{creditBalance ?? 0}</p>
+            </div>
           </div>
+          <GhostButton onClick={() => void handleSignOut()} className="mt-3 w-full">
+            <LogOut className="h-4 w-4" />
+            Sair
+          </GhostButton>
         </div>
       </aside>
 
       <section className="flex min-h-screen flex-col px-4 pb-28 pt-5 sm:px-6 lg:px-8 lg:pb-10 lg:pt-8">
         <header className="mx-auto w-full max-w-7xl animate-float-in lg:hidden">
           <div className="flex items-center justify-between gap-3">
-            <div className="min-w-0">
-              <p className="text-xs font-medium uppercase tracking-[0.22em] text-aura">AprovaAI</p>
-              <h1 className="mt-1 text-2xl font-semibold text-white">{activeTab === "home" ? "Central de controle" : "Copiloto IA"}</h1>
-            </div>
+            <Image
+              src="/aprova-ai-glow.png"
+              alt="AprovaAI"
+              width={170}
+              height={70}
+              priority
+              className="h-auto w-36 object-contain"
+            />
             <div className="grid h-11 w-11 place-items-center rounded-lg border border-white/10 bg-white/[0.045] text-slate-300">
               {state.name.slice(0, 1).toUpperCase()}
             </div>
           </div>
-          <div className="mt-4 rounded-lg border border-white/10 bg-white/[0.045] p-3">
-            <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted">comando do dia</p>
-            <p className="mt-2 text-sm leading-6 text-slate-200">{phrase}</p>
-          </div>
+          <p className="energy-text mt-4 rounded-lg border border-accent/20 bg-accent/[0.07] p-3 text-center text-sm font-medium leading-6 text-white">
+            {phrase}
+          </p>
         </header>
 
         <div className="mx-auto mt-5 w-full max-w-7xl lg:mt-0">
@@ -218,10 +348,9 @@ export function AprovaApp() {
             <Dashboard
               state={state}
               user={user}
-              daysToEnem={daysToEnem}
-              progressPercent={progressPercent}
-              onTaskToggle={(taskId) => updateState((current) => toggleTask(current, taskId))}
-              onAddMinutes={(minutes) => updateState((current) => addMinutes(current, minutes))}
+              planTag={planTag}
+              creditBalance={creditBalance}
+              onSignOut={() => void handleSignOut()}
             />
           )}
           {activeTab === "copilot" && <Copilot />}
@@ -238,9 +367,7 @@ export function AprovaApp() {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`rounded-lg px-2 py-2 text-xs transition duration-300 ${
-                  active
-                    ? "bg-accent/10 text-aura"
-                    : "text-slate-500 hover:text-slate-200"
+                  active ? "bg-accent/10 text-aura" : "text-slate-500 hover:text-slate-200"
                 }`}
               >
                 <Icon className="mx-auto h-5 w-5" />
@@ -254,7 +381,10 @@ export function AprovaApp() {
   );
 }
 
-function getDaysToEnem() {
-  const diff = enemFirstDay.getTime() - new Date().getTime();
-  return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+function LoadingScreen({ label }: { label: string }) {
+  return (
+    <main className="mission-grid grid min-h-[100dvh] place-items-center bg-canvas px-5">
+      <Loader size="lg" label={label} />
+    </main>
+  );
 }

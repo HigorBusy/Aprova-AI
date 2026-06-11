@@ -1,110 +1,85 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Check, Clock, CreditCard, FileText, Gauge, Plus, Radar, Target } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
+import { ArrowDown, CreditCard, FileText, Radar, Route, Upload } from "lucide-react";
+
 import { AuthCard } from "@/components/auth-card";
-import { Button, Card, GhostButton, ProgressBar, Stat } from "@/components/ui";
-import { rankFromXp } from "@/lib/study-data";
-import type { StudyState } from "@/lib/types";
+import { Button, Card, ProgressBar, Stat } from "@/components/ui";
+import { Loader } from "@/components/ui/loader-15";
+import { getDaysToEnem, getEnemCountdown } from "@/lib/constants";
+import type { PlanTag, StudyState } from "@/lib/types";
 
 type DashboardProps = {
   state: StudyState;
-  user: User | null;
-  daysToEnem: number;
-  progressPercent: number;
-  onTaskToggle: (taskId: string) => void;
-  onAddMinutes: (minutes: number) => void;
+  user: User;
+  planTag: PlanTag;
+  creditBalance: number | null;
+  onSignOut: () => void;
 };
 
-const enemDate = new Date("2026-11-08T13:30:00-03:00");
 const flightBars = [18, 22, 28, 34, 42, 56, 68, 76, 72, 84, 66, 58, 49, 40, 31, 24];
-const dayNames = ["domingo", "segunda", "terça", "quarta", "quinta", "sexta", "sábado"];
 
 export function Dashboard({
   state,
   user,
-  daysToEnem,
-  progressPercent,
-  onTaskToggle,
-  onAddMinutes
+  planTag,
+  creditBalance,
+  onSignOut
 }: DashboardProps) {
-  const nextRank = nextRankTarget(state.xp);
-  const nextTask = state.tasks.find((task) => !task.done);
   const studiedHours = formatHours(state.studiedMinutesToday);
   const totalHours = formatHours(state.totalMinutes);
-  const habits = analyzeHabits(state, progressPercent);
+  const activeDays = state.weeklyMinutes.filter((minutes) => minutes > 0).length;
+  const consistency = Math.round((activeDays / 7) * 100);
 
   return (
     <div className="grid gap-4 animate-float-in lg:grid-cols-12 lg:gap-5">
-      <CountdownPanel daysToEnem={daysToEnem} className="lg:col-span-12" />
+      <CountdownPanel className="lg:col-span-12" />
 
       <WritingCenterCard className="lg:col-span-8 lg:row-span-2" />
-      <TelemetryPanel
-        state={state}
-        progressPercent={progressPercent}
-        nextRank={nextRank}
-        habits={habits}
-        className="lg:col-span-4"
-      />
 
-      <Card className="lg:col-span-4">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <p className="text-xs font-medium uppercase tracking-[0.18em] text-aura">missão do dia</p>
-            <h2 className="mt-2 text-2xl font-medium leading-tight text-white">{nextTask?.title ?? "Revisar rota"}</h2>
-          </div>
-          <Target className="h-5 w-5 text-aura" />
-        </div>
-        <p className="mt-3 text-sm leading-6 text-muted">
-          O tempo vai passar de qualquer jeito. Use este bloco para executar a próxima ação, não para planejar de novo.
-        </p>
-        <div className="mt-5 grid grid-cols-2 gap-2">
-          <Button onClick={() => (nextTask ? onTaskToggle(nextTask.id) : onAddMinutes(30))} className="px-3">
-            {nextTask ? <Check className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-            Executar
-          </Button>
-          <GhostButton onClick={() => onAddMinutes(30)} className="px-3">
-            <Clock className="h-4 w-4" />
-            +30 min
-          </GhostButton>
-        </div>
-      </Card>
+      <div className="grid content-start gap-4 lg:col-span-4">
+        <RecommendedAction />
+        <CreditsCard balance={creditBalance} planTag={planTag} />
+      </div>
 
-      <Card className="premium-glow lg:col-span-3">
-        <div className="flex items-start justify-between gap-3">
+      <Card className="lg:col-span-12">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted">créditos</p>
-            <h2 className="energy-text mt-2 text-6xl font-medium text-white">1</h2>
+            <p className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.18em] text-aura">
+              <Radar className="h-4 w-4" />
+              Telemetria real
+            </p>
+            <h2 className="mt-2 text-2xl font-semibold text-white">
+              {state.studiedMinutesToday > 0
+                ? "Seu ritmo de hoje foi registrado."
+                : "Ainda nÃ£o hÃ¡ sinal de estudo hoje."}
+            </h2>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">
+              O painel acompanha apenas dados registrados. Sem atividade, nÃ£o inventamos progresso.
+            </p>
           </div>
-          <CreditCard className="h-5 w-5 text-aura" />
-        </div>
-        <p className="mt-3 text-sm leading-6 text-muted">correção disponível hoje</p>
-      </Card>
-
-      <Card className="lg:col-span-5">
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted">registro de bordo</p>
-            <h2 className="mt-2 text-xl font-medium text-white">Seu padrão está sendo observado.</h2>
+          <div className="grid grid-cols-3 gap-2 sm:min-w-[390px]">
+            <Stat label="hoje" value={studiedHours} tone="green" />
+            <Stat label="acumulado" value={totalHours} tone="blue" />
+            <Stat label="consistÃªncia" value={`${consistency}%`} tone="purple" />
           </div>
-          <Gauge className="h-5 w-5 text-aura" />
-        </div>
-        <div className="mt-5 grid grid-cols-3 gap-3">
-          <Stat label="hoje" value={studiedHours} tone="green" />
-          <Stat label="jornada" value={totalHours} tone="blue" />
-          <Stat label="ritmo" value={`${habits.consistency}%`} tone="purple" />
         </div>
       </Card>
 
       <div className="lg:col-span-12">
-        <AuthCard user={user} />
+        <AuthCard
+          user={user}
+          planTag={planTag}
+          creditBalance={creditBalance}
+          onSignOut={onSignOut}
+        />
       </div>
     </div>
   );
 }
 
-function CountdownPanel({ daysToEnem, className }: { daysToEnem: number; className?: string }) {
+function CountdownPanel({ className }: { className?: string }) {
   const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
@@ -112,18 +87,21 @@ function CountdownPanel({ daysToEnem, className }: { daysToEnem: number; classNa
     return () => window.clearInterval(timer);
   }, []);
 
-  const countdown = useMemo(() => getCountdown(now), [now]);
+  const countdown = useMemo(() => getEnemCountdown(now), [now]);
+  const daysToEnem = getDaysToEnem(now);
 
   return (
     <Card className={`command-surface premium-glow p-5 sm:p-7 lg:p-8 ${className ?? ""}`}>
       <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0">
-          <p className="text-xs font-medium uppercase tracking-[0.22em] text-aura">contagem regressiva ENEM</p>
+          <p className="text-xs font-medium uppercase tracking-[0.22em] text-aura">
+            Contagem regressiva para o ENEM
+          </p>
           <h2 className="mt-4 max-w-3xl text-3xl font-semibold leading-tight text-white sm:text-5xl lg:text-6xl">
-            A prova está se aproximando.
+            O tempo vai passar de qualquer jeito.
           </h2>
           <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-300">
-            O cronômetro é o painel principal da missão. Cada bloco executado reduz a distância entre hoje e a aprovação.
+            Provas confirmadas para 8 e 15 de novembro de 2026. O painel conta atÃ© o primeiro dia.
           </p>
         </div>
         <div className="rounded-lg border border-accent/25 bg-black/25 px-4 py-3 text-right shadow-[0_0_34px_rgba(124,58,237,0.20)]">
@@ -140,7 +118,7 @@ function CountdownPanel({ daysToEnem, className }: { daysToEnem: number; classNa
         <CountdownUnit label="seg" value={countdown.seconds} pulse />
       </div>
 
-      <div className="mt-6 h-24 overflow-hidden rounded-lg border border-white/10 bg-black/25 px-3 pt-4 sm:h-28">
+      <div className="mt-6 h-20 overflow-hidden rounded-lg border border-white/10 bg-black/25 px-3 pt-4 sm:h-24">
         <div className="flex h-full items-end gap-1 scanline">
           {flightBars.map((height, index) => (
             <span
@@ -157,222 +135,138 @@ function CountdownPanel({ daysToEnem, className }: { daysToEnem: number; classNa
 
 function CountdownUnit({ label, value, pulse }: { label: string; value: number; pulse?: boolean }) {
   return (
-    <div className="rounded-lg border border-white/10 bg-white/[0.035] px-2 py-3 text-center">
-      <p className={`energy-text text-3xl font-semibold text-white sm:text-5xl lg:text-6xl ${pulse ? "signal-pulse" : ""}`}>
+    <div className="rounded-lg border border-white/10 bg-white/[0.035] px-1 py-3 text-center sm:px-2">
+      <p
+        key={value}
+        className={`countdown-value energy-text text-2xl font-semibold text-white sm:text-5xl lg:text-6xl ${pulse ? "signal-pulse" : ""}`}
+      >
         {String(value).padStart(2, "0")}
       </p>
-      <p className="mt-1 text-[0.62rem] font-medium uppercase tracking-[0.10em] text-muted">{label}</p>
-    </div>
-  );
-}
-
-function TelemetryPanel({
-  state,
-  progressPercent,
-  nextRank,
-  habits,
-  className
-}: {
-  state: StudyState;
-  progressPercent: number;
-  nextRank: { label: string; remaining: number; progress: number };
-  habits: HabitReport;
-  className?: string;
-}) {
-  return (
-    <Card className={`p-5 sm:p-6 ${className ?? ""}`}>
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-xs font-medium uppercase tracking-[0.20em] text-aura">relatório do comandante</p>
-          <h2 className="mt-2 text-2xl font-medium text-white">{habits.status}</h2>
-        </div>
-        <Gauge className="h-5 w-5 text-aura" />
-      </div>
-
-      <p className="mt-4 text-sm leading-6 text-muted">{habits.summary}</p>
-
-      <div className="mt-6 grid gap-4">
-        <MetricRow label="Meta de hoje" value={`${progressPercent}%`} progress={progressPercent} />
-        <MetricRow label="Consistência semanal" value={`${habits.consistency}%`} progress={habits.consistency} />
-        <MetricRow label="Próxima patente" value={nextRank.label} progress={nextRank.progress} />
-      </div>
-
-      <div className="mt-5 rounded-lg border border-accent/20 bg-black/25 p-3">
-        <p className="text-[0.68rem] font-medium uppercase tracking-[0.16em] text-muted">leitura de hábito</p>
-        <p className="mt-2 text-sm leading-6 text-slate-300">{habits.insight}</p>
-      </div>
-
-      <div className="mt-5 grid grid-cols-3 gap-2">
-        <Stat label="patente" value={rankFromXp(state.xp)} tone="purple" />
-        <Stat label="sequência" value={`${state.currentStreak}d`} tone="green" />
-        <Stat label="risco" value={habits.risk} tone="orange" />
-      </div>
-    </Card>
-  );
-}
-
-function MetricRow({ label, value, progress }: { label: string; value: string; progress: number }) {
-  return (
-    <div>
-      <div className="mb-2 flex items-center justify-between gap-3 text-sm">
-        <span className="text-muted">{label}</span>
-        <span className="font-medium text-slate-100">{value}</span>
-      </div>
-      <ProgressBar value={progress} />
+      <p className="mt-1 text-[0.58rem] font-medium uppercase tracking-[0.08em] text-muted sm:text-[0.62rem]">
+        {label}
+      </p>
     </div>
   );
 }
 
 function WritingCenterCard({ className }: { className?: string }) {
   const [essayText, setEssayText] = useState("");
-  const [fileName, setFileName] = useState<string | undefined>();
-  const [result, setResult] = useState("");
+  const [fileName, setFileName] = useState<string>();
+  const [message, setMessage] = useState("");
 
   const wordCount = essayText.trim().split(/\s+/).filter(Boolean).length;
-  const paragraphCount = essayText.split(/\n+/).filter((part) => part.trim().length > 0).length;
 
   function handleCorrection() {
     if (!essayText.trim() && !fileName) {
-      setResult("Cole sua redação ou envie uma imagem antes de iniciar a correção.");
+      setMessage("Cole sua redaÃ§Ã£o ou envie uma imagem antes de iniciar.");
       return;
     }
-
-    const density = wordCount >= 240 ? "extensão adequada" : "texto ainda curto";
-    const structure = paragraphCount >= 4 ? "estrutura detectada" : "estrutura incompleta";
-    setResult(`Pré-análise: ${density}, ${structure}. Cada redação corrigida é um erro a menos no dia da prova.`);
+    setMessage(
+      "ConteÃºdo preparado. O motor de correÃ§Ã£o por IA ainda nÃ£o estÃ¡ conectado e nenhum crÃ©dito foi consumido."
+    );
   }
 
   return (
-    <Card className={`premium-glow p-5 sm:p-6 lg:p-7 ${className ?? ""}`}>
+    <Card id="centro-redacao" className={`premium-glow p-5 sm:p-6 lg:p-7 ${className ?? ""}`}>
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-medium uppercase tracking-[0.20em] text-aura">centro de redação</p>
-          <h2 className="mt-2 text-3xl font-semibold text-white sm:text-4xl">Corrigir minha redação</h2>
+          <p className="text-xs font-medium uppercase tracking-[0.20em] text-aura">Centro de RedaÃ§Ã£o</p>
+          <h2 className="mt-2 text-3xl font-semibold text-white sm:text-4xl">Corrigir minha redaÃ§Ã£o</h2>
         </div>
-        <div className="grid h-11 w-11 place-items-center rounded-lg border border-accent/25 bg-accent/10 text-aura">
+        <div className="grid h-11 w-11 shrink-0 place-items-center rounded-lg border border-accent/25 bg-accent/10 text-aura">
           <FileText className="h-5 w-5" />
         </div>
       </div>
       <p className="mt-3 max-w-2xl text-sm leading-6 text-muted">
-        Cole sua redação ou envie uma imagem para receber uma análise detalhada. A aprovação fica mais próxima quando os erros aparecem com clareza.
+        Cole sua redaÃ§Ã£o, envie uma imagem ou suba um arquivo para receber uma anÃ¡lise detalhada.
       </p>
-
-      <div className="mt-6 grid grid-cols-2 gap-2 rounded-lg border border-white/10 bg-black/25 p-1 text-sm text-muted">
-        <span className="rounded-md bg-white/10 px-3 py-2 text-center text-white">Texto</span>
-        <span className="px-3 py-2 text-center">Imagem</span>
-      </div>
 
       <textarea
         value={essayText}
         onChange={(event) => setEssayText(event.target.value)}
-        placeholder="Cole sua redação aqui..."
-        className="mt-4 min-h-56 w-full resize-none rounded-lg border border-white/10 bg-black/40 px-3 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-accent/50 focus:shadow-[0_0_28px_rgba(124,58,237,0.16)]"
+        placeholder="Cole sua redaÃ§Ã£o aqui..."
+        className="mt-6 min-h-64 w-full resize-y rounded-lg border border-white/10 bg-black/40 px-4 py-4 text-sm leading-6 text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-accent/50 focus:shadow-[0_0_28px_rgba(124,58,237,0.16)]"
       />
 
       <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-        <label className="inline-flex min-h-11 flex-1 cursor-pointer items-center justify-center rounded-lg border border-white/10 bg-white/[0.045] px-3 text-sm font-semibold text-slate-200 transition hover:border-accent/40 hover:bg-white/[0.07]">
-          {fileName ?? "Enviar imagem"}
+        <label className="inline-flex min-h-12 flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/[0.045] px-3 text-sm font-semibold text-slate-200 transition hover:border-accent/40 hover:bg-white/[0.07]">
+          <Upload className="h-4 w-4" />
+          {fileName ?? "Enviar imagem ou arquivo"}
           <input
             type="file"
-            accept="image/*"
+            accept="image/*,.pdf,.doc,.docx,.txt"
             className="hidden"
             onChange={(event) => setFileName(event.target.files?.[0]?.name)}
           />
         </label>
-        <Button onClick={handleCorrection} className="flex-1">
-          Iniciar Correção
+        <Button onClick={handleCorrection} className="min-h-12 flex-1">
+          Iniciar correÃ§Ã£o
         </Button>
       </div>
 
-      <div className="mt-4 grid grid-cols-2 gap-3">
-        <Stat label="palavras" value={`${wordCount}`} tone="blue" />
-        <Stat label="parágrafos" value={`${paragraphCount}`} tone="green" />
+      <div className="mt-4 flex items-center justify-between gap-3 text-xs text-muted">
+        <span>{wordCount} palavras</span>
+        <span>Cada redaÃ§Ã£o corrigida Ã© um erro a menos no dia da prova.</span>
       </div>
-      {result && <p className="mt-3 rounded-lg border border-accent/20 bg-black/30 p-3 text-sm leading-6 text-slate-300">{result}</p>}
+      {message && (
+        <p className="mt-3 rounded-lg border border-accent/20 bg-black/30 p-3 text-sm leading-6 text-slate-300">
+          {message}
+        </p>
+      )}
     </Card>
   );
 }
 
-type HabitReport = {
-  consistency: number;
-  status: string;
-  summary: string;
-  insight: string;
-  risk: string;
-};
-
-function analyzeHabits(state: StudyState, progressPercent: number): HabitReport {
-  const activeDays = state.weeklyMinutes.filter((minutes) => minutes > 0).length;
-  const consistency = Math.round((activeDays / 7) * 100);
-  const bestIndex = state.weeklyMinutes.reduce((best, minutes, index) => (minutes > state.weeklyMinutes[best] ? index : best), 0);
-  const bestDay = dayNames[bestIndex];
-  const average = Math.round(state.weeklyMinutes.reduce((sum, minutes) => sum + minutes, 0) / 7);
-  const todayGap = Math.max(0, state.dailyGoalMinutes - state.studiedMinutesToday);
-
-  if (progressPercent >= 100) {
-    return {
-      consistency,
-      status: "Ritmo sob controle",
-      summary: `Hoje você já cumpriu a meta. O sistema registrou ${activeDays} dias ativos nesta semana e média de ${average} minutos por dia.`,
-      insight: `Seu melhor ponto recente foi ${bestDay}. Repita esse padrão antes que a energia do dia caia.`,
-      risk: "baixo"
-    };
-  }
-
-  if (state.studiedMinutesToday > 0) {
-    return {
-      consistency,
-      status: "Você começou, mas ainda não fechou",
-      summary: `Faltam ${todayGap} minutos para fechar a meta de hoje. O painel está acompanhando sua consistência, não só seu esforço isolado.`,
-      insight: `Seu histórico mostra ${activeDays} dias ativos na semana. O próximo bloco precisa ser curto, claro e executado agora.`,
-      risk: todayGap > 45 ? "médio" : "baixo"
-    };
-  }
-
-  return {
-    consistency,
-    status: "Nenhum sinal de estudo hoje",
-    summary: `Até agora não há registro de estudo hoje. A semana tem ${activeDays} dias ativos, mas hoje ainda está vazio no radar.`,
-    insight: "O sistema não está julgando motivação. Ele está registrando comportamento. Sem registro, a rota fica invisível.",
-    risk: "alto"
-  };
+function RecommendedAction() {
+  return (
+    <Card>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-xs font-medium uppercase tracking-[0.18em] text-aura">
+            PrÃ³xima aÃ§Ã£o recomendada
+          </p>
+          <h2 className="mt-2 text-2xl font-semibold leading-tight text-white">
+            Descubra onde sua redaÃ§Ã£o perde pontos.
+          </h2>
+        </div>
+        <Route className="h-5 w-5 shrink-0 text-aura" />
+      </div>
+      <p className="mt-3 text-sm leading-6 text-muted">
+        Envie uma redaÃ§Ã£o hoje e transforme erro invisÃ­vel em direÃ§Ã£o objetiva.
+      </p>
+      <Button
+        className="mt-5 w-full"
+        onClick={() => document.getElementById("centro-redacao")?.scrollIntoView({ behavior: "smooth" })}
+      >
+        Corrigir minha redaÃ§Ã£o
+        <ArrowDown className="h-4 w-4" />
+      </Button>
+    </Card>
+  );
 }
 
-function getCountdown(now: Date) {
-  const diff = Math.max(0, enemDate.getTime() - now.getTime());
-  const totalSeconds = Math.floor(diff / 1000);
-  const totalDays = Math.floor(totalSeconds / 86400);
-  const months = Math.floor(totalDays / 30);
-  const days = totalDays % 30;
-  const hours = Math.floor((totalSeconds % 86400) / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
-
-  return { months, days, hours, minutes, seconds };
+function CreditsCard({ balance, planTag }: { balance: number | null; planTag: PlanTag }) {
+  return (
+    <Card className="premium-glow">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted">
+            CrÃ©ditos disponÃ­veis
+          </p>
+          <div className="energy-text mt-2 min-h-16 text-6xl font-semibold text-white">
+            {balance === null ? <Loader size="sm" /> : balance}
+          </div>
+        </div>
+        <CreditCard className="h-5 w-5 text-aura" />
+      </div>
+      <p className="mt-3 text-sm leading-6 text-muted">
+        Use crÃ©ditos para acessar ferramentas avanÃ§adas. Plano atual: {planTag === "premium" ? "Premium" : "Free"}.
+      </p>
+    </Card>
+  );
 }
 
 function formatHours(minutes: number) {
   if (minutes < 60) return `${minutes}m`;
   return `${Math.round((minutes / 60) * 10) / 10}h`;
-}
-
-function nextRankTarget(xp: number) {
-  const targets = [
-    { label: "Persistente", xp: 120 },
-    { label: "Estrategista", xp: 450 },
-    { label: "Competidor", xp: 900 },
-    { label: "Elite", xp: 1500 },
-    { label: "Aprovado", xp: 2200 },
-    { label: "Lendário", xp: 3000 }
-  ];
-  const previous = [...targets].reverse().find((target) => xp >= target.xp)?.xp ?? 0;
-  const next = targets.find((target) => xp < target.xp) ?? targets[targets.length - 1];
-  const range = Math.max(1, next.xp - previous);
-  const progress = next.xp === previous ? 100 : Math.round(((xp - previous) / range) * 100);
-
-  return {
-    label: next.label,
-    remaining: Math.max(0, next.xp - xp),
-    progress
-  };
 }

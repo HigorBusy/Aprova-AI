@@ -13,61 +13,61 @@ import type {
 
 export const difficulties: Array<{ id: Difficulty; label: string; detail: string }> = [
   { id: "start", label: "Preciso de uma rota inicial", detail: "O primeiro comando precisa ser claro." },
-  { id: "routine", label: "Eu perco consistência", detail: "A nave precisa de sequência para chegar." },
+  { id: "routine", label: "Eu perco consistÃªncia", detail: "A nave precisa de sequÃªncia para chegar." },
   { id: "subjects", label: "Tenho setores fracos", detail: "Vamos revelar onde recalcular a rota." },
-  { id: "motivation", label: "Eu desligo fácil", detail: "O sistema vai transformar presença em pilotagem." }
+  { id: "motivation", label: "Eu desligo fÃ¡cil", detail: "O sistema vai transformar presenÃ§a em pilotagem." }
 ];
 
 export const studyTimes: Array<{ id: StudyTime; label: string; minutes: number }> = [
-  { id: "30m", label: "30 minutos de navegação real", minutes: 30 },
+  { id: "30m", label: "30 minutos de navegaÃ§Ã£o real", minutes: 30 },
   { id: "1h", label: "1 hora de rota", minutes: 60 },
-  { id: "2h", label: "2 horas de missão", minutes: 120 },
+  { id: "2h", label: "2 horas de missÃ£o", minutes: 120 },
   { id: "3h", label: "3 horas ou mais de comando", minutes: 180 }
 ];
 
 export const areas: Array<{ id: Area; label: string; subject: string }> = [
-  { id: "math", label: "Matemática", subject: "Matemática" },
-  { id: "essay", label: "Redação", subject: "Redação" },
+  { id: "math", label: "MatemÃ¡tica", subject: "MatemÃ¡tica" },
+  { id: "essay", label: "RedaÃ§Ã£o", subject: "RedaÃ§Ã£o" },
   { id: "nature", label: "Natureza", subject: "Natureza" },
   { id: "humanities", label: "Humanas", subject: "Humanas" },
   { id: "languages", label: "Linguagens", subject: "Linguagens" }
 ];
 
 export const levels: Array<{ id: Level; label: string }> = [
-  { id: "zero", label: "Ainda estou na base de lançamento" },
-  { id: "basic", label: "Tenho combustível, falta rota" },
-  { id: "messy", label: "Tenho esforço, falta painel" },
-  { id: "improve", label: "Quero pilotar em outro nível" }
+  { id: "zero", label: "Ainda estou na base de lanÃ§amento" },
+  { id: "basic", label: "Tenho combustÃ­vel, falta rota" },
+  { id: "messy", label: "Tenho esforÃ§o, falta painel" },
+  { id: "improve", label: "Quero pilotar em outro nÃ­vel" }
 ];
 
-export const dailyPhrases = ["Ninguém está vindo te salvar"];
+export const dailyPhrases = ["NinguÃ©m estÃ¡ vindo te salvar, entÃ£o faÃ§a acontecer"];
 
-export const subjects = ["Matemática", "Redação", "Linguagens", "Humanas", "Natureza"];
+export const subjects = ["MatemÃ¡tica", "RedaÃ§Ã£o", "Linguagens", "Humanas", "Natureza"];
 
 export const defaultTopics: Topic[] = [
-  { id: "math-1", subject: "Matemática", title: "Razão, proporção e porcentagem", status: "Não iniciado" },
-  { id: "math-2", subject: "Matemática", title: "Funções e leitura de gráficos", status: "Não iniciado" },
-  { id: "essay-1", subject: "Redação", title: "Tese, repertório e projeto de texto", status: "Não iniciado" },
-  { id: "essay-2", subject: "Redação", title: "Argumentação e intervenção", status: "Não iniciado" },
-  { id: "lang-1", subject: "Linguagens", title: "Interpretação e intenção comunicativa", status: "Não iniciado" },
-  { id: "hum-1", subject: "Humanas", title: "Brasil República e cidadania", status: "Não iniciado" },
-  { id: "nat-1", subject: "Natureza", title: "Ecologia e ciclos biogeoquímicos", status: "Não iniciado" }
+  { id: "math-1", subject: "MatemÃ¡tica", title: "RazÃ£o, proporÃ§Ã£o e porcentagem", status: "NÃ£o iniciado" },
+  { id: "math-2", subject: "MatemÃ¡tica", title: "FunÃ§Ãµes e leitura de grÃ¡ficos", status: "NÃ£o iniciado" },
+  { id: "essay-1", subject: "RedaÃ§Ã£o", title: "Tese, repertÃ³rio e projeto de texto", status: "NÃ£o iniciado" },
+  { id: "essay-2", subject: "RedaÃ§Ã£o", title: "ArgumentaÃ§Ã£o e intervenÃ§Ã£o", status: "NÃ£o iniciado" },
+  { id: "lang-1", subject: "Linguagens", title: "InterpretaÃ§Ã£o e intenÃ§Ã£o comunicativa", status: "NÃ£o iniciado" },
+  { id: "hum-1", subject: "Humanas", title: "Brasil RepÃºblica e cidadania", status: "NÃ£o iniciado" },
+  { id: "nat-1", subject: "Natureza", title: "Ecologia e ciclos biogeoquÃ­micos", status: "NÃ£o iniciado" }
 ];
 
 export const defaultTasks: DailyTask[] = [
-  { id: "study-topic", title: "Avançar no setor prioritário", xp: 15, done: false },
+  { id: "study-topic", title: "AvanÃ§ar no setor prioritÃ¡rio", xp: 15, done: false },
   { id: "questions", title: "Resolver 10 sinais de prova", xp: 20, done: false },
   { id: "review", title: "Corrigir falhas de rota", xp: 15, done: false },
-  { id: "log-hours", title: "Registrar tempo de navegação", xp: 10, done: false },
-  { id: "note", title: "Salvar uma descoberta da missão", xp: 10, done: false }
+  { id: "log-hours", title: "Registrar tempo de navegaÃ§Ã£o", xp: 10, done: false },
+  { id: "note", title: "Salvar uma descoberta da missÃ£o", xp: 10, done: false }
 ];
 
 export const achievements: Achievement[] = [
-  { id: "first-task", title: "Primeiro comando", description: "Execute sua primeira ação de missão.", target: 1, metric: "tasks", rewardXp: 20, icon: "✓" },
-  { id: "first-week", title: "Órbita estável", description: "Mantenha 7 dias seguidos de navegação.", target: 7, metric: "streak", rewardXp: 100, icon: "◆" },
-  { id: "ten-hours", title: "Motores ativos", description: "Acumule 10 horas de voo.", target: 10, metric: "hours", rewardXp: 80, icon: "⚡" },
-  { id: "thirty-hours", title: "Rota profunda", description: "Acumule 30 horas de missão.", target: 30, metric: "hours", rewardXp: 160, icon: "◇" },
-  { id: "hundred-questions", title: "Radar calibrado", description: "Registre 100 questões vencidas.", target: 100, metric: "questions", rewardXp: 120, icon: "◎" }
+  { id: "first-task", title: "Primeiro comando", description: "Execute sua primeira aÃ§Ã£o de missÃ£o.", target: 1, metric: "tasks", rewardXp: 20, icon: "âœ“" },
+  { id: "first-week", title: "Ã“rbita estÃ¡vel", description: "Mantenha 7 dias seguidos de navegaÃ§Ã£o.", target: 7, metric: "streak", rewardXp: 100, icon: "â—†" },
+  { id: "ten-hours", title: "Motores ativos", description: "Acumule 10 horas de voo.", target: 10, metric: "hours", rewardXp: 80, icon: "âš¡" },
+  { id: "thirty-hours", title: "Rota profunda", description: "Acumule 30 horas de missÃ£o.", target: 30, metric: "hours", rewardXp: 160, icon: "â—‡" },
+  { id: "hundred-questions", title: "Radar calibrado", description: "Registre 100 questÃµes vencidas.", target: 100, metric: "questions", rewardXp: 120, icon: "â—Ž" }
 ];
 
 export function todayKey(date = new Date()) {
@@ -81,7 +81,7 @@ export function initialState(): StudyState {
     dailyGoalMinutes: 60,
     studiedMinutesToday: 0,
     totalMinutes: 0,
-    weeklyMinutes: [20, 45, 0, 80, 60, 30, 0],
+    weeklyMinutes: [0, 0, 0, 0, 0, 0, 0],
     lastProgressDate: todayKey(),
     currentStreak: 0,
     bestStreak: 0,
@@ -90,7 +90,7 @@ export function initialState(): StudyState {
     questionCount: 0,
     topics: defaultTopics,
     tasks: defaultTasks,
-    notifications: ["A nave está pronta. Falta o primeiro comando do dia."],
+    notifications: ["A nave estÃ¡ pronta. Falta o primeiro comando do dia."],
     mentorMessages: [
       {
         id: "welcome",
@@ -104,8 +104,8 @@ export function initialState(): StudyState {
 
 export function profileFromAnswers(answers: QuizAnswers): ProfileKind {
   if (answers.difficulty === "routine" || answers.level === "messy") return "Sem Rotina";
-  if (answers.studyTime === "3h" || answers.level === "improve") return "Evolução Acelerada";
-  if (answers.studyTime === "30m" && answers.level !== "zero") return "Última Hora";
+  if (answers.studyTime === "3h" || answers.level === "improve") return "EvoluÃ§Ã£o Acelerada";
+  if (answers.studyTime === "30m" && answers.level !== "zero") return "Ãšltima Hora";
   return "Iniciante Perdido";
 }
 
@@ -114,11 +114,11 @@ export function minutesFromStudyTime(studyTime?: StudyTime) {
 }
 
 export function prioritySubject(area?: Area) {
-  return areas.find((item) => item.id === area)?.subject ?? "Matemática";
+  return areas.find((item) => item.id === area)?.subject ?? "MatemÃ¡tica";
 }
 
 export function rankFromXp(xp: number) {
-  if (xp >= 3000) return "Lendário";
+  if (xp >= 3000) return "LendÃ¡rio";
   if (xp >= 2200) return "Aprovado";
   if (xp >= 1500) return "Elite";
   if (xp >= 900) return "Competidor";

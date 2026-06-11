@@ -1,5 +1,5 @@
-import { AchievementsPage } from "@/components/achievements-page";
+import { redirect } from "next/navigation";
 
 export default function Page() {
-  return <AchievementsPage />;
+  redirect("/");
 }

@@ -15,22 +15,22 @@ export function Progress({ state }: ProgressProps) {
   const thisWeek = state.weeklyMinutes.reduce((sum, item) => sum + item, 0);
   const previousWeek = Math.max(1, Math.round(thisWeek * 0.78));
   const growth = Math.round(((thisWeek - previousWeek) / previousWeek) * 100);
-  const concluded = state.topics.filter((topic) => topic.status === "Concluído").length;
+  const concluded = state.topics.filter((topic) => topic.status === "ConcluÃ­do").length;
   const totalTopics = Math.max(1, state.topics.length);
 
   return (
     <div className="grid gap-4 animate-float-in lg:grid-cols-12 lg:gap-5">
       <Card className="command-surface p-5 lg:col-span-5 lg:p-6">
         <p className="text-xs font-medium uppercase tracking-[0.20em] text-sky-200">registro de jornada</p>
-        <h2 className="mt-3 text-3xl font-light leading-tight text-white">Sua rota está deixando rastro.</h2>
+        <h2 className="mt-3 text-3xl font-light leading-tight text-white">Sua rota estÃ¡ deixando rastro.</h2>
         <p className="mt-3 text-sm leading-6 text-slate-300">
-          Progresso real é telemetria: horas, setores concluídos, sequência e evolução semanal.
+          Progresso real Ã© telemetria: horas, setores concluÃ­dos, sequÃªncia e evoluÃ§Ã£o semanal.
         </p>
         <div className="mt-5 grid grid-cols-2 gap-3">
           <Stat label="horas de voo" value={formatHours(state.totalMinutes)} tone="blue" />
           <Stat label="setores" value={`${concluded}/${totalTopics}`} tone="green" />
           <Stat label="semana" value={`+${growth}%`} tone="purple" />
-          <Stat label="sequência" value={`${state.currentStreak}d`} tone="orange" />
+          <Stat label="sequÃªncia" value={`${state.currentStreak}d`} tone="orange" />
         </div>
       </Card>
 
@@ -43,7 +43,7 @@ export function Progress({ state }: ProgressProps) {
           {state.weeklyMinutes.map((minutes, index) => (
             <div key={`${index}-${minutes}`} className="flex flex-1 flex-col items-center gap-2">
               <div
-                className="w-full rounded-t bg-gradient-to-t from-blue-700 via-sky-500 to-sky-200 opacity-85 shadow-[0_0_18px_rgba(56,189,248,0.18)] transition-all duration-700"
+                className="w-full rounded-t bg-gradient-to-t from-cosmic via-violet to-aura opacity-80 shadow-[0_0_18px_rgba(168,85,247,0.18)] transition-all duration-700"
                 style={{ height: `${Math.max(8, (minutes / max) * 100)}%` }}
               />
               <span className="text-xs text-slate-500">{dayLabels[index]}</span>
@@ -55,8 +55,8 @@ export function Progress({ state }: ProgressProps) {
       <Card className="p-5 lg:col-span-12 lg:p-6">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <h2 className="text-xl font-light text-white">Constelação de estudos</h2>
-            <p className="mt-1 text-sm leading-6 text-slate-400">Cada ponto aceso é um dia em que a nave não ficou parada.</p>
+            <h2 className="text-xl font-light text-white">ConstelaÃ§Ã£o de estudos</h2>
+            <p className="mt-1 text-sm leading-6 text-slate-400">Cada ponto aceso Ã© um dia em que a nave nÃ£o ficou parada.</p>
           </div>
           <CalendarDays className="h-5 w-5 text-sky-300" />
         </div>
