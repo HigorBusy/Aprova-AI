@@ -44,7 +44,7 @@ export function SignInPage({
         <div className="w-full max-w-md animate-float-in">
           <div className="mb-8 flex items-center gap-3 lg:hidden">
             <Image
-              src="/aprova-ai-glow.png"
+              src="/aprova-ai-glow.jpg"
               alt="AprovaAI"
               width={180}
               height={72}
@@ -57,10 +57,10 @@ export function SignInPage({
             Central de controle
           </p>
           <h1 className="energy-text mt-4 text-4xl font-semibold leading-[1.04] text-white sm:text-5xl">
-            {mode === "login" ? "Retome sua rota." : "Comece sua missÃ£o."}
+            {mode === "login" ? "Retome sua rota." : "Comece sua missão."}
           </h1>
           <p className="mt-4 max-w-sm text-sm leading-6 text-muted">
-            Entre para acessar seu plano, seus crÃ©ditos e a ferramenta que transforma cada redaÃ§Ã£o em direÃ§Ã£o.
+            Entre para acessar seu plano, seus créditos e a ferramenta que transforma cada redação em direção.
           </p>
 
           <form className="mt-8 space-y-4" onSubmit={handleSubmit}>
@@ -71,7 +71,7 @@ export function SignInPage({
                   name="name"
                   type="text"
                   autoComplete="name"
-                  placeholder="Como devemos chamar vocÃª?"
+                  placeholder="Como devemos chamar você?"
                   className="mt-2 h-12 w-full rounded-lg border border-white/10 bg-white/[0.045] px-4 text-sm text-white outline-none backdrop-blur-xl transition placeholder:text-slate-600 focus:border-accent/60 focus:bg-accent/10 focus:shadow-[0_0_28px_rgba(124,58,237,0.16)]"
                 />
               </label>
@@ -100,7 +100,7 @@ export function SignInPage({
                   autoComplete={mode === "login" ? "current-password" : "new-password"}
                   required
                   minLength={6}
-                  placeholder="MÃ­nimo de 6 caracteres"
+                  placeholder="Mínimo de 6 caracteres"
                   className="h-12 w-full rounded-lg border border-white/10 bg-white/[0.045] px-4 pr-12 text-sm text-white outline-none backdrop-blur-xl transition placeholder:text-slate-600 focus:border-accent/60 focus:bg-accent/10 focus:shadow-[0_0_28px_rgba(124,58,237,0.16)]"
                 />
                 <button
@@ -148,7 +148,7 @@ export function SignInPage({
           )}
 
           <p className="mt-6 text-center text-sm text-muted">
-            {mode === "login" ? "Ainda nÃ£o tem conta?" : "JÃ¡ possui uma conta?"}{" "}
+            {mode === "login" ? "Ainda não tem conta?" : "Já possui uma conta?"}{" "}
             <button
               type="button"
               onClick={() => onModeChange(mode === "login" ? "signup" : "login")}
@@ -163,7 +163,7 @@ export function SignInPage({
       <section className="relative hidden min-h-[100dvh] overflow-hidden border-l border-white/10 lg:block">
         <div className="absolute inset-4 overflow-hidden rounded-lg border border-white/10 bg-black/40 shadow-command">
           <Image
-            src="/aprova-ai-glow.png"
+            src="/aprova-ai-glow.jpg"
             alt="Identidade visual AprovaAI"
             fill
             priority
@@ -178,11 +178,11 @@ export function SignInPage({
                 <span className="text-xs font-medium uppercase tracking-[0.18em]">AprovaAI</span>
               </div>
               <p className="mt-4 text-2xl font-semibold leading-tight text-white xl:text-3xl">
-                NinguÃ©m estÃ¡ vindo te salvar, entÃ£o faÃ§a acontecer.
+                Ninguém está vindo te salvar, então faça acontecer.
               </p>
               <p className="mt-3 flex items-center gap-2 text-sm text-slate-300">
                 <ShieldCheck className="h-4 w-4 text-aura" />
-                Sua rota e seus crÃ©ditos protegidos pela sua conta.
+                Sua rota e seus créditos protegidos pela sua conta.
               </p>
             </div>
           </div>

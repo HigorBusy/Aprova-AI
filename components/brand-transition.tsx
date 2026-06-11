@@ -2,12 +2,12 @@
 
 import Image from "next/image";
 
-export function BrandTransition({ label = "Sincronizando sua missÃ£o" }: { label?: string }) {
+export function BrandTransition({ label = "Sincronizando sua missão" }: { label?: string }) {
   return (
     <div className="brand-transition fixed inset-0 z-[100] grid place-items-center bg-canvas px-6">
       <div className="brand-transition-mark text-center">
         <Image
-          src="/aprova-ai-glow.png"
+          src="/aprova-ai-glow.jpg"
           alt="AprovaAI"
           width={720}
           height={300}

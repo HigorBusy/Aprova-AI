@@ -293,7 +293,7 @@ export function AprovaApp() {
     <main className="mission-grid min-h-screen bg-canvas text-white lg:grid lg:grid-cols-[284px_1fr]">
       <aside className="sticky top-0 hidden h-screen flex-col border-r border-white/10 bg-black/40 px-5 py-6 backdrop-blur-2xl lg:flex">
         <Image
-          src="/aprova-ai-glow.png"
+          src="/aprova-ai-glow.jpg"
           alt="AprovaAI"
           width={220}
           height={90}
@@ -355,7 +355,7 @@ export function AprovaApp() {
         <header className="mx-auto w-full max-w-7xl animate-float-in lg:hidden">
           <div className="flex items-center justify-between gap-3">
             <Image
-              src="/aprova-ai-glow.png"
+              src="/aprova-ai-glow.jpg"
               alt="AprovaAI"
               width={170}
               height={70}
