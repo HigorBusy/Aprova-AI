@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -33,7 +34,7 @@ export function Dashboard({
   const consistency = Math.round((activeDays / 7) * 100);
 
   return (
-    <div className="grid gap-4 animate-float-in lg:grid-cols-12 lg:gap-5">
+    <div className="grid min-w-0 gap-4 animate-float-in lg:grid-cols-12 lg:gap-5">
       <CountdownPanel className="lg:col-span-12" />
 
       <WritingCenterCard
@@ -114,7 +115,7 @@ function CountdownPanel({ className }: { className?: string }) {
         </div>
       </div>
 
-      <div className="mt-7 grid grid-cols-5 gap-2 rounded-lg border border-white/10 bg-black/25 p-2 sm:gap-3 sm:p-3">
+      <div className="mt-7 grid grid-cols-3 gap-2 rounded-lg border border-white/10 bg-black/25 p-2 sm:grid-cols-5 sm:gap-3 sm:p-3">
         <CountdownUnit label="meses" value={countdown.months} />
         <CountdownUnit label="dias" value={countdown.days} />
         <CountdownUnit label="horas" value={countdown.hours} />
