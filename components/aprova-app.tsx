@@ -1,6 +1,4 @@
-Exit code: 0
-Wall time: 0.4 seconds
-Output:
+
 "use client";
 
 import Image from "next/image";
@@ -442,4 +440,3 @@ function LoadingScreen({ label }: { label: string }) {
     </main>
   );
 }
-
