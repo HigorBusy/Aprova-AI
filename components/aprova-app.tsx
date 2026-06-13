@@ -1,3 +1,6 @@
+Exit code: 0
+Wall time: 0.4 seconds
+Output:
 "use client";
 
 import Image from "next/image";
@@ -217,10 +220,30 @@ export function AprovaApp() {
     setState((current) => updater(current));
   }
 
-  function finishQuiz() {
+  async function finishQuiz() {
     const profileKind = profileFromAnswers(answers);
     const dailyGoalMinutes = minutesFromStudyTime(answers.studyTime);
     const priority = prioritySubject(answers.area);
+    const supabase = getSupabaseClient();
+
+    if (!supabase || !user) return;
+
+    setAccountLoading(true);
+    const { error } = await supabase
+      .from("profiles")
+      .update({
+        name: state.name,
+        full_name: state.name,
+        quiz_profile: profileKind,
+        daily_goal_minutes: dailyGoalMinutes
+      })
+      .eq("id", user.id);
+
+    if (error) {
+      setAccountError("Não foi possível salvar seu diagnóstico. Tente novamente.");
+      setAccountLoading(false);
+      return;
+    }
 
     updateState((current) => ({
       ...current,
@@ -234,8 +257,9 @@ export function AprovaApp() {
         topic.subject === priority && topic.status === "Não iniciado"
           ? { ...topic, status: "Estudando" as const }
           : topic
-      )
+        )
     }));
+    setAccountLoading(false);
   }
 
   async function handleSignOut() {
@@ -283,7 +307,9 @@ export function AprovaApp() {
         daysToEnem={daysToEnem}
         step={quizStep}
         onAnswer={(next) => setAnswers((current) => ({ ...current, ...next }))}
-        onNext={() => (quizStep >= 3 ? finishQuiz() : setQuizStep((step) => step + 1))}
+        onNext={() =>
+          quizStep >= 3 ? void finishQuiz() : setQuizStep((step) => step + 1)
+        }
         onBack={() => setQuizStep((step) => Math.max(0, step - 1))}
       />
     );
@@ -416,3 +442,4 @@ function LoadingScreen({ label }: { label: string }) {
     </main>
   );
 }
+
