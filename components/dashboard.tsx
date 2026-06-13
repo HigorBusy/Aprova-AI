@@ -34,7 +34,7 @@ export function Dashboard({
   const consistency = Math.round((activeDays / 7) * 100);
 
   return (
-    <div className="grid min-w-0 gap-4 animate-float-in lg:grid-cols-12 lg:gap-5">
+    <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-4 animate-float-in lg:grid-cols-12 lg:gap-5">
       <CountdownPanel className="lg:col-span-12" />
 
       <WritingCenterCard
