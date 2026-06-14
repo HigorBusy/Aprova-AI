@@ -1,13 +1,14 @@
+
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { CreditCard, Home, LogOut, MessageCircle, ShieldCheck } from "lucide-react";
 
 import { AuthScreen } from "@/components/auth-screen";
 import { BrandTransition } from "@/components/brand-transition";
-import { Copilot } from "@/components/copilot";
 import { Dashboard } from "@/components/dashboard";
 import { Quiz } from "@/components/quiz";
 import { GhostButton } from "@/components/ui";
@@ -26,11 +27,9 @@ import { getSupabaseClient } from "@/lib/supabase/client";
 import type { PlanTag, ProfileKind, QuizAnswers, StudyState } from "@/lib/types";
 
 const tabs = [
-  { id: "home", label: "Central de controle", icon: Home },
-  { id: "copilot", label: "Copiloto IA", icon: MessageCircle }
+  { id: "home", label: "Central de controle", icon: Home, href: "/" },
+  { id: "commander", label: "Comandante IA", icon: MessageCircle, href: "/comandante" }
 ] as const;
-
-type TabId = (typeof tabs)[number]["id"];
 
 type ProfileRow = {
   full_name: string | null;
@@ -44,7 +43,6 @@ export function AprovaApp() {
   const [state, setState] = useState<StudyState>(() => initialState());
   const [answers, setAnswers] = useState<QuizAnswers>({});
   const [quizStep, setQuizStep] = useState(0);
-  const [activeTab, setActiveTab] = useState<TabId>("home");
   const [user, setUser] = useState<User | null>(null);
   const [localReady, setLocalReady] = useState(false);
   const [authLoading, setAuthLoading] = useState(true);
@@ -333,11 +331,11 @@ export function AprovaApp() {
         <nav className="mt-8 grid gap-2">
           {tabs.map((tab) => {
             const Icon = tab.icon;
-            const active = activeTab === tab.id;
+            const active = tab.id === "home";
             return (
-              <button
+              <Link
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                href={tab.href}
                 className={`flex min-h-12 items-center gap-3 rounded-lg px-3 text-left text-sm transition duration-300 ${
                   active
                     ? "border border-accent/25 bg-accent/10 text-aura shadow-[0_0_28px_rgba(124,58,237,0.14)]"
@@ -346,7 +344,7 @@ export function AprovaApp() {
               >
                 <Icon className="h-4 w-4" />
                 {tab.label}
-              </button>
+              </Link>
             );
           })}
         </nav>
@@ -399,16 +397,14 @@ export function AprovaApp() {
         </header>
 
         <div className="mx-auto mt-5 w-full max-w-7xl lg:mt-0">
-          {activeTab === "home" && (
-            <Dashboard
-              state={state}
-              user={user}
-              planTag={planTag}
-              creditBalance={creditBalance}
-              onSignOut={() => void handleSignOut()}
-            />
-          )}
-          {activeTab === "copilot" && <Copilot />}
+          <Dashboard
+            state={state}
+            user={user}
+            planTag={planTag}
+            creditBalance={creditBalance}
+            onCreditBalanceChange={setCreditBalance}
+            onSignOut={() => void handleSignOut()}
+          />
         </div>
       </section>
 
@@ -416,18 +412,18 @@ export function AprovaApp() {
         <div className="mx-auto grid max-w-md grid-cols-2 gap-2">
           {tabs.map((tab) => {
             const Icon = tab.icon;
-            const active = activeTab === tab.id;
+            const active = tab.id === "home";
             return (
-              <button
+              <Link
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                href={tab.href}
                 className={`rounded-lg px-2 py-2 text-xs transition duration-300 ${
                   active ? "bg-accent/10 text-aura" : "text-slate-500 hover:text-slate-200"
                 }`}
               >
                 <Icon className="mx-auto h-5 w-5" />
                 <span className="mt-1 block">{tab.label}</span>
-              </button>
+              </Link>
             );
           })}
         </div>
