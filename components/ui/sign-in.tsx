@@ -44,12 +44,12 @@ export function SignInPage({
         <div className="w-full max-w-md animate-float-in">
           <div className="mb-8 flex items-center gap-3 lg:hidden">
             <Image
-              src="/aprova-ai-glow.jpg"
+              src="/aprova-ai-logo-hd.png"
               alt="AprovaAI"
-              width={180}
-              height={72}
+              width={1449}
+              height={676}
               priority
-              className="h-auto w-40 object-contain"
+              className="h-12 w-auto max-w-full object-contain"
             />
           </div>
 
@@ -162,14 +162,17 @@ export function SignInPage({
 
       <section className="relative hidden min-h-[100dvh] overflow-hidden border-l border-white/10 lg:block">
         <div className="absolute inset-4 overflow-hidden rounded-lg border border-white/10 bg-black/40 shadow-command">
-          <Image
-            src="/aprova-ai-glow.jpg"
-            alt="Identidade visual AprovaAI"
-            fill
-            priority
-            sizes="55vw"
-            className="object-cover object-center opacity-90"
-          />
+          <div className="absolute inset-x-8 bottom-[34%] top-[10%] flex items-center justify-center">
+            <Image
+              src="/aprova-ai-logo-hd.png"
+              alt="Identidade visual AprovaAI"
+              width={1449}
+              height={676}
+              priority
+              sizes="(min-width: 1280px) 48vw, 44vw"
+              className="h-auto w-full max-w-[760px] object-contain"
+            />
+          </div>
           <div className="absolute inset-0 bg-gradient-to-t from-canvas via-canvas/20 to-transparent" />
           <div className="absolute inset-x-0 bottom-0 p-8 xl:p-12">
             <div className="max-w-xl rounded-lg border border-white/10 bg-black/50 p-5 backdrop-blur-2xl">
