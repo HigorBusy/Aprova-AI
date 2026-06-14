@@ -1,4 +1,3 @@
-
 "use client";
 
 import Image from "next/image";
@@ -270,11 +269,11 @@ export function AprovaApp() {
   }
 
   if (!localReady || authLoading) {
-    return <LoadingScreen label="Inicializando AprovaAI" />;
+    return <LoadingScreen />;
   }
 
   if (transitionLabel) {
-    return <BrandTransition label={transitionLabel} />;
+    return <BrandTransition />;
   }
 
   if (!user) {
@@ -282,7 +281,7 @@ export function AprovaApp() {
   }
 
   if (accountLoading) {
-    return <LoadingScreen label="Carregando perfil e créditos" />;
+    return <LoadingScreen />;
   }
 
   if (accountError) {
@@ -316,14 +315,16 @@ export function AprovaApp() {
   return (
     <main className="mission-grid min-h-screen bg-canvas text-white lg:grid lg:grid-cols-[284px_1fr]">
       <aside className="sticky top-0 hidden h-screen flex-col border-r border-white/10 bg-black/40 px-5 py-6 backdrop-blur-2xl lg:flex">
-        <Image
-          src="/aprova-ai-glow.jpg"
-          alt="AprovaAI"
-          width={220}
-          height={90}
-          priority
-          className="h-auto w-44 object-contain"
-        />
+        <div className="flex h-12 w-44 items-center justify-center">
+          <Image
+            src="/aprova-ai-logo-hd.png"
+            alt="AprovaAI"
+            width={1449}
+            height={676}
+            priority
+            className="h-10 w-auto max-w-full object-contain"
+          />
+        </div>
 
         <p className="energy-text mt-5 rounded-lg border border-accent/20 bg-accent/[0.07] p-4 text-center text-sm font-medium leading-6 text-white">
           {phrase}
@@ -378,14 +379,16 @@ export function AprovaApp() {
       <section className="flex min-h-screen flex-col px-4 pb-28 pt-5 sm:px-6 lg:px-8 lg:pb-10 lg:pt-8">
         <header className="mx-auto w-full max-w-7xl animate-float-in lg:hidden">
           <div className="flex items-center justify-between gap-3">
-            <Image
-              src="/aprova-ai-glow.jpg"
-              alt="AprovaAI"
-              width={170}
-              height={70}
-              priority
-              className="h-auto w-36 object-contain"
-            />
+            <div className="flex h-12 w-40 items-center justify-center">
+              <Image
+                src="/aprova-ai-logo-hd.png"
+                alt="AprovaAI"
+                width={1449}
+                height={676}
+                priority
+                className="h-10 w-auto max-w-full object-contain"
+              />
+            </div>
             <div className="grid h-11 w-11 place-items-center rounded-lg border border-white/10 bg-white/[0.045] text-slate-300">
               {state.name.slice(0, 1).toUpperCase()}
             </div>
@@ -433,10 +436,10 @@ export function AprovaApp() {
   );
 }
 
-function LoadingScreen({ label }: { label: string }) {
+function LoadingScreen() {
   return (
     <main className="mission-grid grid min-h-[100dvh] place-items-center bg-canvas px-5">
-      <Loader size="lg" label={label} />
+      <Loader size="lg" />
     </main>
   );
 }
