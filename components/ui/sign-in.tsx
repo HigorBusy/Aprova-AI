@@ -49,7 +49,7 @@ export function SignInPage({
               width={1449}
               height={676}
               priority
-              className="h-12 w-auto max-w-full object-contain"
+              className="h-auto w-40 max-w-full object-contain"
             />
           </div>
 
