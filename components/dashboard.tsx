@@ -1,14 +1,16 @@
-
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import type { User } from "@supabase/supabase-js";
-import { ArrowDown, CreditCard, FileText, Radar, Route, Upload } from "lucide-react";
+import { Bot, CreditCard, FileText, Radar } from "lucide-react";
 
 import { AuthCard } from "@/components/auth-card";
 import { Button, Card, Stat } from "@/components/ui";
 import { Loader } from "@/components/ui/loader-15";
+import type { EssayReview } from "@/lib/ai/types";
 import { getDaysToEnem, getEnemCountdown } from "@/lib/constants";
+import { getSupabaseClient } from "@/lib/supabase/client";
 import type { PlanTag, StudyState } from "@/lib/types";
 
 type DashboardProps = {
@@ -16,6 +18,7 @@ type DashboardProps = {
   user: User;
   planTag: PlanTag;
   creditBalance: number | null;
+  onCreditBalanceChange: (balance: number) => void;
   onSignOut: () => void;
 };
 
@@ -26,6 +29,7 @@ export function Dashboard({
   user,
   planTag,
   creditBalance,
+  onCreditBalanceChange,
   onSignOut
 }: DashboardProps) {
   const studiedHours = formatHours(state.studiedMinutesToday);
@@ -40,11 +44,11 @@ export function Dashboard({
       <WritingCenterCard
         className="lg:col-span-8 lg:row-span-2"
         balance={creditBalance}
-        planTag={planTag}
+        onBalanceChange={onCreditBalanceChange}
       />
 
       <div className="grid content-start gap-4 lg:col-span-4">
-        <RecommendedAction />
+        <CommanderCard />
         <CreditsCard balance={creditBalance} planTag={planTag} />
       </div>
 
@@ -157,33 +161,67 @@ function CountdownUnit({ label, value, pulse }: { label: string; value: number; 
 function WritingCenterCard({
   className,
   balance,
-  planTag
+  onBalanceChange
 }: {
   className?: string;
   balance: number | null;
-  planTag: PlanTag;
+  onBalanceChange: (balance: number) => void;
 }) {
   const [essayText, setEssayText] = useState("");
-  const [fileName, setFileName] = useState<string>();
   const [message, setMessage] = useState("");
-  const hasCredits = planTag === "premium" || (balance ?? 0) > 0;
-
+  const [submitting, setSubmitting] = useState(false);
+  const [review, setReview] = useState<EssayReview | null>(null);
+  const hasCredits = (balance ?? 0) >= 5;
   const wordCount = essayText.trim().split(/\s+/).filter(Boolean).length;
 
-  function handleCorrection() {
+  async function handleCorrection() {
     if (!hasCredits) {
-      setMessage(
-        "Seus créditos terminaram. Nenhuma correção foi iniciada e seu saldo permanece protegido."
-      );
+      setMessage("Você precisa de 5 créditos para corrigir uma redação.");
       return;
     }
-    if (!essayText.trim() && !fileName) {
-      setMessage("Cole sua redação ou envie uma imagem antes de iniciar.");
+    if (essayText.trim().length < 50) {
+      setMessage("Cole uma redação com pelo menos 50 caracteres antes de iniciar.");
       return;
     }
-    setMessage(
-      "Conteúdo preparado. O motor de correção por IA ainda não está conectado e nenhum crédito foi consumido."
-    );
+
+    const supabase = getSupabaseClient();
+    if (!supabase) return;
+    setSubmitting(true);
+    setMessage("");
+    setReview(null);
+
+    try {
+      const { data } = await supabase.auth.getSession();
+      const accessToken = data.session?.access_token;
+      if (!accessToken) throw new Error("Sua sessão expirou. Entre novamente.");
+
+      const response = await fetch("/api/essay-review", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ essay: essayText.trim() })
+      });
+      const result = (await response.json()) as {
+        review?: EssayReview;
+        balance?: number;
+        error?: string;
+      };
+
+      if (!response.ok || !result.review) {
+        if (typeof result.balance === "number") onBalanceChange(result.balance);
+        throw new Error(result.error || "Não foi possível corrigir a redação.");
+      }
+
+      setReview(result.review);
+      if (typeof result.balance === "number") onBalanceChange(result.balance);
+      setMessage("Correção concluída. Cinco créditos foram consumidos.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Não foi possível corrigir a redação.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -198,31 +236,24 @@ function WritingCenterCard({
         </div>
       </div>
       <p className="mt-3 max-w-2xl text-sm leading-6 text-muted">
-        Cole sua redação, envie uma imagem ou suba um arquivo para receber uma análise detalhada.
+        Cole sua redação para receber nota estimada, análise das cinco competências e melhorias práticas.
       </p>
 
       <textarea
         value={essayText}
         onChange={(event) => setEssayText(event.target.value)}
         placeholder="Cole sua redação aqui..."
+        maxLength={30_000}
         className="mt-6 min-h-64 w-full resize-y rounded-lg border border-white/10 bg-black/40 px-4 py-4 text-sm leading-6 text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-accent/50 focus:shadow-[0_0_28px_rgba(124,58,237,0.16)]"
       />
 
-      <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-        <label className="inline-flex min-h-12 flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/[0.045] px-3 text-sm font-semibold text-slate-200 transition hover:border-accent/40 hover:bg-white/[0.07]">
-          <Upload className="h-4 w-4" />
-          {fileName ?? "Enviar imagem ou arquivo"}
-          <input
-            type="file"
-            accept="image/*,.pdf,.doc,.docx,.txt"
-            className="hidden"
-            onChange={(event) => setFileName(event.target.files?.[0]?.name)}
-          />
-        </label>
-        <Button disabled={!hasCredits} onClick={handleCorrection} className="min-h-12 flex-1">
-          {hasCredits ? "Iniciar correção" : "Sem créditos"}
-        </Button>
-      </div>
+      <Button
+        disabled={!hasCredits || submitting}
+        onClick={() => void handleCorrection()}
+        className="mt-3 min-h-12 w-full"
+      >
+        {submitting ? <Loader size="sm" /> : hasCredits ? "Iniciar correção · 5 créditos" : "Créditos insuficientes"}
+      </Button>
 
       <div className="mt-4 flex items-center justify-between gap-3 text-xs text-muted">
         <span>{wordCount} palavras</span>
@@ -233,53 +264,90 @@ function WritingCenterCard({
           {message}
         </p>
       )}
+      {review && <EssayReviewResult review={review} />}
       {!hasCredits && !message && (
         <p className="mt-3 rounded-lg border border-white/10 bg-black/30 p-3 text-sm leading-6 text-slate-300">
-          Seu saldo chegou a zero. A ferramenta não inicia cobranças nem permite saldo negativo.
+          São necessários 5 créditos. A ferramenta não inicia cobranças nem permite saldo negativo.
         </p>
       )}
     </Card>
   );
 }
 
-function RecommendedAction() {
+function CommanderCard() {
   return (
-    <Card>
+    <Card className="premium-glow">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-medium uppercase tracking-[0.18em] text-aura">
-            Próxima ação recomendada
-          </p>
+          <p className="text-xs font-medium uppercase tracking-[0.18em] text-aura">Comandante IA</p>
           <h2 className="mt-2 text-2xl font-semibold leading-tight text-white">
-            Descubra onde sua redação perde pontos.
+            Orientação para avançar com direção.
           </h2>
         </div>
-        <Route className="h-5 w-5 shrink-0 text-aura" />
+        <Bot className="h-5 w-5 shrink-0 text-aura" />
       </div>
       <p className="mt-3 text-sm leading-6 text-muted">
-        Envie uma redação hoje e transforme erro invisível em direção objetiva.
+        Tire dúvidas, organize seus estudos e receba orientação personalizada.
       </p>
-      <Button
-        className="mt-5 w-full"
-        onClick={() => document.getElementById("centro-redacao")?.scrollIntoView({ behavior: "smooth" })}
+      <Link
+        href="/comandante"
+        className="mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-lg border border-accent/30 bg-accent px-4 py-2 text-sm font-semibold text-white shadow-[0_0_34px_rgba(124,58,237,0.30)] transition hover:bg-violet"
       >
-        Corrigir minha redação
-        <ArrowDown className="h-4 w-4" />
-      </Button>
+        Abrir Comandante
+      </Link>
     </Card>
   );
 }
 
+function EssayReviewResult({ review }: { review: EssayReview }) {
+  const competencies = Object.entries(review.competencies);
+
+  return (
+    <div className="mt-5 rounded-lg border border-accent/25 bg-black/35 p-4 sm:p-5">
+      <div className="flex items-end justify-between gap-4">
+        <div>
+          <p className="text-xs font-medium uppercase tracking-[0.18em] text-aura">Nota estimada</p>
+          <p className="energy-text mt-1 text-5xl font-semibold text-white">{review.estimatedScore}</p>
+        </div>
+        <p className="pb-1 text-sm text-muted">de 1000 pontos</p>
+      </div>
+      <div className="mt-5 grid gap-3 sm:grid-cols-2">
+        {competencies.map(([key, competency], index) => (
+          <div key={key} className="rounded-lg border border-white/10 bg-white/[0.035] p-3">
+            <div className="flex items-center justify-between gap-3">
+              <p className="font-semibold text-white">Competência {index + 1}</p>
+              <span className="text-sm text-aura">{competency.score}/200</span>
+            </div>
+            <p className="mt-2 text-sm leading-6 text-muted">{competency.analysis}</p>
+          </div>
+        ))}
+      </div>
+      <ReviewList title="Pontos fortes" items={review.strengths} />
+      <ReviewList title="Pontos fracos" items={review.weaknesses} />
+      <ReviewList title="Próximas melhorias" items={review.improvements} />
+    </div>
+  );
+}
+
+function ReviewList({ title, items }: { title: string; items: string[] }) {
+  return (
+    <div className="mt-5">
+      <h3 className="font-semibold text-white">{title}</h3>
+      <ul className="mt-2 space-y-2 text-sm leading-6 text-muted">
+        {items.map((item, index) => <li key={`${title}-${index}`}>• {item}</li>)}
+      </ul>
+    </div>
+  );
+}
+
 function CreditsCard({ balance, planTag }: { balance: number | null; planTag: PlanTag }) {
-  const isEmpty = planTag !== "premium" && balance === 0;
+  const isEmpty = balance === 0;
 
   return (
     <Card className="premium-glow">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted">
-            Créditos disponíveis
-          </p>
+          <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted">Créditos disponíveis</p>
           <div className="energy-text mt-2 min-h-16 text-6xl font-semibold text-white">
             {balance === null ? <Loader size="sm" /> : balance}
           </div>
@@ -289,7 +357,7 @@ function CreditsCard({ balance, planTag }: { balance: number | null; planTag: Pl
       <p className="mt-3 text-sm leading-6 text-muted">
         {isEmpty
           ? "Saldo esgotado. Nenhuma operação poderá gerar saldo negativo."
-          : "Use créditos para acessar ferramentas avançadas."}{" "}
+          : "Cada pergunta usa 1 crédito e cada correção de redação usa 5."}{" "}
         Plano atual: {planTag === "premium" ? "Premium" : "Free"}.
       </p>
     </Card>
