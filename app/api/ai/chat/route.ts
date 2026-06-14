@@ -49,88 +49,40 @@ export async function POST(request: NextRequest) {
 
   try {
     const reply = await callGroq([
-      { role: "system", content: COMMANDER…6817 tokens truncated…mt-2 truncate text-sm text-slate-200">{user.email}</p>
-          <div className="mt-4 grid grid-cols-2 gap-2">
-            <div className="rounded-lg border border-white/10 bg-black/25 px-3 py-2">
-              <p className="text-[0.62rem] uppercase tracking-[0.14em] text-muted">plano</p>
-              <p className="mt-1 text-sm text-aura">{planTag === "premium" ? "Premium" : "Free"}</p>
-            </div>
-            <div className="rounded-lg border border-white/10 bg-black/25 px-3 py-2">
-              <p className="flex items-center gap-1 text-[0.62rem] uppercase tracking-[0.14em] text-muted">
-                <CreditCard className="h-3 w-3" /> créditos
-              </p>
-              <p className="mt-1 text-sm text-aura">{creditBalance ?? 0}</p>
-            </div>
-          </div>
-          <GhostButton onClick={() => void handleSignOut()} className="mt-3 w-full">
-            <LogOut className="h-4 w-4" />
-            Sair
-          </GhostButton>
-        </div>
-      </aside>
+      { role: "system", content: COMMANDER_SYSTEM_PROMPT },
+      ...[...(recentMessages ?? [])]
+        .reverse()
+        .map((item) => ({ role: item.role as "user" | "assistant", content: item.content })),
+      { role: "user", content: message }
+    ]);
 
-      <section className="flex min-h-screen flex-col px-4 pb-28 pt-5 sm:px-6 lg:px-8 lg:pb-10 lg:pt-8">
-        <header className="mx-auto w-full max-w-7xl animate-float-in lg:hidden">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex h-12 w-40 items-center justify-center">
-              <Image
-                src="/aprova-ai-logo-hd.png"
-                alt="AprovaAI"
-                width={1449}
-                height={676}
-                priority
-                className="h-10 w-auto max-w-full object-contain"
-              />
-            </div>
-            <div className="grid h-11 w-11 place-items-center rounded-lg border border-white/10 bg-white/[0.045] text-slate-300">
-              {state.name.slice(0, 1).toUpperCase()}
-            </div>
-          </div>
-          <p className="energy-text mt-4 rounded-lg border border-accent/20 bg-accent/[0.07] p-3 text-center text-sm font-medium leading-6 text-white">
-            {phrase}
-          </p>
-        </header>
+    const { data: completion, error: completionError } = await supabase.rpc(
+      "complete_ai_exchange",
+      {
+        p_user_content: message,
+        p_assistant_content: reply,
+        p_cost: CHAT_COST,
+        p_transaction_type: "ai_chat",
+        p_description: "Pergunta ao Comandante IA"
+      }
+    );
+    const result = Array.isArray(completion) ? completion[0] : completion;
 
-        <div className="mx-auto mt-5 w-full max-w-7xl lg:mt-0">
-          <Dashboard
-            state={state}
-            user={user}
-            planTag={planTag}
-            creditBalance={creditBalance}
-            onCreditBalanceChange={setCreditBalance}
-            onSignOut={() => void handleSignOut()}
-          />
-        </div>
-      </section>
+    if (completionError) throw completionError;
+    if (!result?.success) {
+      return NextResponse.json(
+        { error: "Você ficou sem créditos.", balance: result?.balance ?? 0 },
+        { status: 402 }
+      );
+    }
 
-      <nav className="safe-bottom fixed inset-x-0 bottom-0 z-20 border-t border-white/10 bg-black/80 px-3 py-2 backdrop-blur-xl lg:hidden">
-        <div className="mx-auto grid max-w-md grid-cols-2 gap-2">
-          {tabs.map((tab) => {
-            const Icon = tab.icon;
-            const active = tab.id === "home";
-            return (
-              <Link
-                key={tab.id}
-                href={tab.href}
-                className={`rounded-lg px-2 py-2 text-xs transition duration-300 ${
-                  active ? "bg-accent/10 text-aura" : "text-slate-500 hover:text-slate-200"
-                }`}
-              >
-                <Icon className="mx-auto h-5 w-5" />
-                <span className="mt-1 block">{tab.label}</span>
-              </Link>
-            );
-          })}
-        </div>
-      </nav>
-    </main>
-  );
-}
-
-function LoadingScreen() {
-  return (
-    <main className="mission-grid grid min-h-[100dvh] place-items-center bg-canvas px-5">
-      <Loader size="lg" />
-    </main>
-  );
+    return NextResponse.json({ reply, balance: result.balance });
+  } catch (error) {
+    console.error("Commander chat failed", error);
+    const missingKey = error instanceof Error && error.message === "GROQ_API_KEY_NOT_CONFIGURED";
+    return NextResponse.json(
+      { error: missingKey ? "O Comandante ainda não foi ativado no servidor." : "O Comandante não conseguiu responder agora. Nenhum crédito foi consumido." },
+      { status: missingKey ? 503 : 502 }
+    );
+  }
 }

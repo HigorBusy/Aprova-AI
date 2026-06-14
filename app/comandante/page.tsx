@@ -1,4 +1,3 @@
-
 import type { Metadata } from "next";
 
 import { Comandante } from "@/components/comandante";
