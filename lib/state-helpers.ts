@@ -1,12 +1,14 @@
-import type { MentorMessage, StudyState, TopicStatus } from "@/lib/types";
+import { getBrasiliaDayDifference } from "@/lib/date-br";
 import { todayKey } from "@/lib/study-data";
+import type { MentorMessage, StudyState, TopicStatus } from "@/lib/types";
 
 export function normalizeDailyReset(state: StudyState): StudyState {
   const today = todayKey();
   if (state.lastProgressDate === today) return state;
 
-  const studiedYesterday = state.studiedMinutesToday > 0;
-  const currentStreak = studiedYesterday ? state.currentStreak + 1 : 0;
+  const daysSinceLastProgress = getBrasiliaDayDifference(state.lastProgressDate, today);
+  const studiedPreviousBrasiliaDay = daysSinceLastProgress === 1 && state.studiedMinutesToday > 0;
+  const currentStreak = studiedPreviousBrasiliaDay ? state.currentStreak + 1 : 0;
 
   return {
     ...state,
@@ -16,7 +18,7 @@ export function normalizeDailyReset(state: StudyState): StudyState {
     currentStreak,
     bestStreak: Math.max(state.bestStreak, currentStreak),
     tasks: state.tasks.map((task) => ({ ...task, done: false })),
-    notifications: studiedYesterday
+    notifications: studiedPreviousBrasiliaDay
       ? ["Você protegeu a sequência. Hoje é dia de subir mais um nível.", ...state.notifications.slice(0, 2)]
       : ["Você perdeu presença ontem. O sistema não pune: ele chama você de volta.", ...state.notifications.slice(0, 2)]
   };
