@@ -25,7 +25,7 @@ export function AuthCard({ user, planTag, creditBalance, onSignOut }: AuthCardPr
           </p>
           <p className="mt-2 truncate text-sm text-slate-200">{user.email}</p>
           <p className="mt-1 text-xs uppercase tracking-[0.14em] text-muted">
-            Plano {planTag === "premium" ? "Premium" : "Free"}
+            Plano {formatPlanTag(planTag)}
           </p>
         </div>
         <div className="text-right">
@@ -33,13 +33,18 @@ export function AuthCard({ user, planTag, creditBalance, onSignOut }: AuthCardPr
           <div className="mt-2 min-h-7 text-xl font-semibold text-white">
             {creditBalance === null ? <Loader size="sm" /> : creditBalance}
           </div>
-          <p className="text-[0.65rem] uppercase tracking-[0.12em] text-muted">créditos</p>
+          <p className="text-[0.65rem] uppercase tracking-[0.12em] text-muted">crÃ©ditos</p>
         </div>
       </div>
       <GhostButton onClick={onSignOut} className="mt-4 w-full">
         <LogOut className="h-4 w-4" />
-        Encerrar sessão
+        Encerrar sessÃ£o
       </GhostButton>
     </Card>
   );
+}
+
+function formatPlanTag(planTag: PlanTag) {
+  if (planTag === "ADM") return "ADM";
+  return planTag === "premium" ? "Premium" : "Free";
 }
