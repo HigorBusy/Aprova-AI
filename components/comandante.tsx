@@ -3,9 +3,18 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import type React from "react";
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, BookOpen, Bot, CalendarDays, CreditCard, SendHorizonal, Sparkles, Target, UserRound } from "lucide-react";
+import type { DragEvent } from "react";
+import {
+  ArrowLeft,
+  Bot,
+  CreditCard,
+  Mic,
+  Paperclip,
+  Sparkles,
+  UploadCloud,
+  Volume2
+} from "lucide-react";
 
 import { Card } from "@/components/ui";
 import { AiInput } from "@/components/ui/ai-input";
@@ -13,21 +22,63 @@ import { Loader } from "@/components/ui/loader-15";
 import type { AiMessage } from "@/lib/ai/types";
 import { getSupabaseClient } from "@/lib/supabase/client";
 
-type ToolFormState = {
-  subject: string;
-  deadline: string;
-  hoursPerDay: string;
-  theme: string;
-  competency: string;
-  socialProblem: string;
+type SpeechRecognitionEventLike = {
+  results: ArrayLike<ArrayLike<{ transcript: string }>>;
 };
 
+type SpeechRecognitionLike = {
+  lang: string;
+  interimResults: boolean;
+  maxAlternatives: number;
+  onresult: ((event: SpeechRecognitionEventLike) => void) | null;
+  onerror: (() => void) | null;
+  onend: (() => void) | null;
+  start: () => void;
+  stop: () => void;
+};
+
+type SpeechRecognitionConstructor = new () => SpeechRecognitionLike;
+
+type FileTool = {
+  name: string;
+  prompt: string;
+};
+
+const TEXT_COST = 1;
+const TOOL_COST = 2;
+const FILE_COST = 3;
+const PDF_MAX_BYTES = 10 * 1024 * 1024;
+const IMAGE_MAX_BYTES = 5 * 1024 * 1024;
+const ACCEPTED_FILE_TYPES = ["application/pdf", "image/png", "image/jpeg", "image/webp"];
+
 const quickSuggestions = [
-  "Monte meu plano de estudo",
-  "Explique minha nota",
-  "Como melhorar minha C3?",
-  "Me dê um repertório",
-  "Crie uma missão para hoje"
+  "Monte meu plano de estudo para esta semana",
+  "Explique um tema provavel de redacao",
+  "Como melhorar minha competencia 3?",
+  "Crie uma missao de revisao para hoje"
+];
+
+const fileTools: FileTool[] = [
+  {
+    name: "RESUMIR PDF",
+    prompt: "Resuma este PDF em topicos claros, com pontos cobraveis no ENEM e uma tarefa de revisao."
+  },
+  {
+    name: "EXPLICAR ARQUIVO",
+    prompt: "Explique o conteudo do arquivo de forma didatica e transforme em acao pratica de estudo."
+  },
+  {
+    name: "GERAR QUESTOES",
+    prompt: "Gere questoes de treino com gabarito comentado a partir do conteudo extraido."
+  },
+  {
+    name: "EXPLICAR IMAGEM",
+    prompt: "Explique o texto extraido da imagem e aponte o que o aluno deve fazer agora."
+  },
+  {
+    name: "ANALISAR REDACAO POR FOTO",
+    prompt: "Analise a redacao fotografada usando criterios do ENEM. Seja rigoroso e indique melhorias."
+  }
 ];
 
 export function Comandante() {
@@ -36,15 +87,11 @@ export function Comandante() {
   const [balance, setBalance] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [fileSending, setFileSending] = useState(false);
+  const [listening, setListening] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [fileError, setFileError] = useState("");
   const [error, setError] = useState("");
-  const [toolForm, setToolForm] = useState<ToolFormState>({
-    subject: "Redação",
-    deadline: "14 dias",
-    hoursPerDay: "1 hora",
-    theme: "desigualdade educacional",
-    competency: "C3",
-    socialProblem: "uso excessivo de tecnologia"
-  });
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -75,7 +122,7 @@ export function Comandante() {
 
       if (!active) return;
       if (historyResult.error || creditsResult.error) {
-        setError("Não foi possível carregar o histórico do Comandante.");
+        setError("Nao foi possivel carregar o historico do Comandante.");
       } else {
         setMessages([...(historyResult.data as AiMessage[])].reverse());
         setBalance(creditsResult.data?.balance ?? 0);
@@ -90,14 +137,22 @@ export function Comandante() {
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, sending]);
+  }, [messages, sending, fileSending]);
 
-  async function sendMessage(content: string, options: { cost?: number; mode?: "chat" | "tool"; toolName?: string } = {}) {
+  async function getAccessToken() {
     const supabase = getSupabaseClient();
-    const cost = options.cost ?? 1;
-    if (!supabase || sending) return;
+    if (!supabase) throw new Error("Cliente Supabase indisponivel.");
+    const { data } = await supabase.auth.getSession();
+    const token = data.session?.access_token;
+    if (!token) throw new Error("Sessao expirada.");
+    return token;
+  }
+
+  async function sendMessage(content: string, options: { mode?: "chat" | "tool"; toolName?: string } = {}) {
+    const cost = options.mode === "tool" ? TOOL_COST : TEXT_COST;
+    if (sending || fileSending) return;
     if ((balance ?? 0) < cost) {
-      setError(`Você precisa de ${cost} créditos para esta ação.`);
+      setError(cost === TEXT_COST ? "Voce ficou sem creditos." : `Voce precisa de ${cost} creditos para esta ferramenta.`);
       return;
     }
 
@@ -112,10 +167,7 @@ export function Comandante() {
     setError("");
 
     try {
-      const { data } = await supabase.auth.getSession();
-      const token = data.session?.access_token;
-      if (!token) throw new Error("Sessão expirada.");
-
+      const token = await getAccessToken();
       const response = await fetch("/api/ai/chat", {
         method: "POST",
         headers: {
@@ -124,30 +176,151 @@ export function Comandante() {
         },
         body: JSON.stringify({
           message: content,
-          mode: options.mode === "tool" ? "tool" : "chat",
+          mode: options.mode ?? "chat",
           toolName: options.toolName
         })
       });
       const result = (await response.json()) as { reply?: string; balance?: number; error?: string };
       if (!response.ok || !result.reply) throw new Error(result.error || "Falha ao consultar o Comandante.");
-      const reply = result.reply;
 
       setMessages((current) => [
         ...current,
         {
           id: `assistant-${Date.now()}`,
           role: "assistant",
-          content: reply,
+          content: result.reply as string,
           created_at: new Date().toISOString()
         }
       ]);
       setBalance(result.balance ?? balance);
     } catch (requestError) {
       setMessages((current) => current.filter((message) => message.id !== optimisticMessage.id));
-      setError(requestError instanceof Error ? requestError.message : "Não foi possível enviar a mensagem.");
+      setError(requestError instanceof Error ? requestError.message : "Nao foi possivel enviar a mensagem.");
     } finally {
       setSending(false);
     }
+  }
+
+  function validateFile(file: File) {
+    if (!ACCEPTED_FILE_TYPES.includes(file.type)) return "Formato nao aceito. Envie PDF, PNG, JPG, JPEG ou WEBP.";
+    if (file.type === "application/pdf" && file.size > PDF_MAX_BYTES) return "PDF deve ter no maximo 10MB.";
+    if (file.type !== "application/pdf" && file.size > IMAGE_MAX_BYTES) return "Imagem deve ter no maximo 5MB.";
+    return "";
+  }
+
+  function chooseFile(file: File | null) {
+    if (!file) return;
+    const validation = validateFile(file);
+    setFileError(validation);
+    setSelectedFile(validation ? null : file);
+  }
+
+  async function sendFile(tool: FileTool) {
+    if (!selectedFile || sending || fileSending) return;
+    if ((balance ?? 0) < FILE_COST) {
+      setError("Voce precisa de 3 creditos para analisar arquivo.");
+      return;
+    }
+
+    const optimisticMessage: AiMessage = {
+      id: `file-${Date.now()}`,
+      role: "user",
+      content: `[ARQUIVO: ${selectedFile.name}]\nFerramenta: ${tool.name}`,
+      created_at: new Date().toISOString()
+    };
+    setMessages((current) => [...current, optimisticMessage]);
+    setFileSending(true);
+    setError("");
+
+    try {
+      const token = await getAccessToken();
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+      formData.append("toolName", tool.name);
+      formData.append("prompt", tool.prompt);
+
+      const response = await fetch("/api/ai/file", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData
+      });
+      const result = (await response.json()) as { reply?: string; balance?: number; error?: string };
+      if (!response.ok || !result.reply) throw new Error(result.error || "Nao foi possivel analisar o arquivo.");
+
+      setMessages((current) => [
+        ...current,
+        {
+          id: `assistant-file-${Date.now()}`,
+          role: "assistant",
+          content: result.reply as string,
+          created_at: new Date().toISOString()
+        }
+      ]);
+      setBalance(result.balance ?? balance);
+      setSelectedFile(null);
+    } catch (requestError) {
+      setMessages((current) => current.filter((message) => message.id !== optimisticMessage.id));
+      setError(requestError instanceof Error ? requestError.message : "Nao foi possivel analisar o arquivo.");
+    } finally {
+      setFileSending(false);
+    }
+  }
+
+  function startVoiceCommand(mode: "transcribe" | "summary") {
+    if ((balance ?? 0) < TOOL_COST) {
+      setError("Voce precisa de 2 creditos para usar audio.");
+      return;
+    }
+
+    const speechWindow = window as Window & {
+      SpeechRecognition?: SpeechRecognitionConstructor;
+      webkitSpeechRecognition?: SpeechRecognitionConstructor;
+    };
+    const Recognition = speechWindow.SpeechRecognition ?? speechWindow.webkitSpeechRecognition;
+    if (!Recognition) {
+      setError("Seu navegador nao liberou reconhecimento de voz. Use Chrome ou digite a mensagem.");
+      return;
+    }
+
+    const recognition = new Recognition();
+    recognition.lang = "pt-BR";
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    setListening(true);
+    setError("");
+
+    const timeout = window.setTimeout(() => recognition.stop(), 5 * 60 * 1000);
+    recognition.onresult = (event) => {
+      const transcript = event.results[0]?.[0]?.transcript?.trim();
+      if (!transcript) {
+        setError("Nao consegui entender o audio.");
+        return;
+      }
+      const prompt = mode === "summary"
+        ? `Audio transcrito do aluno: ${transcript}\n\nCrie um resumo de estudo e proximos passos.`
+        : `Transcricao de audio do aluno: ${transcript}\n\nResponda e organize a duvida em acao pratica.`;
+      void sendMessage(prompt, { mode: "tool", toolName: mode === "summary" ? "CRIAR RESUMO DE AUDIO" : "TRANSCREVER AUDIO" });
+    };
+    recognition.onerror = () => setError("Nao foi possivel capturar o audio.");
+    recognition.onend = () => {
+      window.clearTimeout(timeout);
+      setListening(false);
+    };
+    recognition.start();
+  }
+
+  function speak(text: string) {
+    if (typeof window === "undefined" || !window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "pt-BR";
+    utterance.rate = 1;
+    window.speechSynthesis.speak(utterance);
+  }
+
+  function handleDrop(event: DragEvent<HTMLLabelElement>) {
+    event.preventDefault();
+    chooseFile(event.dataTransfer.files.item(0));
   }
 
   if (loading) {
@@ -158,8 +331,7 @@ export function Comandante() {
     );
   }
 
-  const hasCredits = (balance ?? 0) > 0;
-  const hasToolCredits = (balance ?? 0) >= 2;
+  const busy = sending || fileSending;
 
   return (
     <main className="mission-grid min-h-[100dvh] bg-canvas px-4 py-4 text-white sm:px-6 lg:px-8 lg:py-6">
@@ -182,289 +354,169 @@ export function Comandante() {
               className="hidden h-9 w-auto object-contain sm:block"
             />
             <div className="min-w-0">
-              <p className="text-[0.65rem] font-medium uppercase tracking-[0.2em] text-aura">Módulo ativo</p>
+              <p className="text-[0.65rem] font-medium uppercase tracking-[0.2em] text-aura">Modulo ativo</p>
               <h1 className="truncate text-xl font-semibold text-white sm:text-2xl">Comandante IA</h1>
             </div>
           </div>
           <div className="flex items-center gap-2 rounded-lg border border-accent/25 bg-accent/[0.08] px-3 py-2 shadow-[0_0_24px_rgba(124,58,237,0.14)]">
             <CreditCard className="h-4 w-4 text-aura" />
             <span className="text-sm font-semibold text-white">{balance ?? 0}</span>
-            <span className="hidden text-xs text-muted sm:inline">créditos</span>
+            <span className="hidden text-xs text-muted sm:inline">creditos</span>
           </div>
         </header>
 
-        <div className="grid min-h-0 flex-1 gap-4 pt-4 lg:grid-cols-[minmax(0,1fr)_260px]">
-          <Card className="flex min-h-[70dvh] min-w-0 flex-col overflow-hidden p-0 lg:min-h-0">
-            <div className="min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-6">
+        <section className="grid flex-1 gap-4 py-4 lg:grid-cols-[minmax(0,1fr)_350px]">
+          <Card className="flex min-h-[68dvh] flex-col p-0">
+            <div className="border-b border-white/10 p-4">
+              <div className="flex items-center gap-3">
+                <div className="grid h-10 w-10 place-items-center rounded-lg border border-accent/30 bg-accent/[0.12] shadow-[0_0_30px_rgba(124,58,237,0.2)]">
+                  <Bot className="h-5 w-5 text-aura" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-white">Centro de comando</h2>
+                  <p className="text-sm text-muted">Texto: 1 credito. Ferramentas e audio: 2. Arquivos: 3.</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex-1 space-y-4 overflow-y-auto p-4">
               {messages.length === 0 ? (
-                <div className="grid h-full min-h-[400px] place-items-center text-center">
-                  <div>
-                    <div className="ai-orb mx-auto h-28 w-28" aria-hidden="true">
-                      <div className="ai-orb-core" />
-                    </div>
-                    <p className="mt-7 text-xs font-medium uppercase tracking-[0.22em] text-aura">Canal aberto</p>
-                    <h2 className="mt-3 text-3xl font-semibold text-white">Qual é o bloqueio da missão?</h2>
-                    <p className="mx-auto mt-3 max-w-lg text-sm leading-6 text-muted">
-                      Tire dúvidas do ENEM, organize sua rotina ou peça uma estratégia objetiva para avançar hoje.
-                    </p>
+                <div className="grid min-h-[260px] place-items-center text-center">
+                  <div className="max-w-md">
+                    <Sparkles className="mx-auto mb-4 h-8 w-8 text-aura" />
+                    <h3 className="text-2xl font-semibold text-white">Ninguem esta vindo te salvar.</h3>
+                    <p className="mt-2 text-sm text-muted">Envie texto, arquivo ou voz. O Comandante transforma isso em rota de estudo.</p>
                   </div>
                 </div>
               ) : (
-                <div className="space-y-5">
-                  {messages.map((message) => (
-                    <MessageBubble key={message.id} message={message} />
-                  ))}
-                  {sending && (
-                    <div className="flex items-center gap-3 text-sm text-muted">
-                      <Loader size="sm" />
-                      Comandante recalculando a rota...
-                    </div>
-                  )}
-                  <div ref={bottomRef} />
+                messages.map((message) => <MessageBubble key={message.id} message={message} onSpeak={speak} />)
+              )}
+              {(sending || fileSending) && (
+                <div className="flex items-center gap-3 rounded-lg border border-white/10 bg-white/[0.035] p-3 text-sm text-muted">
+                  <Loader size="sm" />
+                  <span>{fileSending ? "Extraindo contexto do arquivo..." : "Comandante analisando..."}</span>
                 </div>
               )}
+              <div ref={bottomRef} />
             </div>
-            <div className="border-t border-white/10 bg-black/30 p-3 sm:p-4">
-              {error && <p className="mb-3 text-sm text-rose-200">{error}</p>}
-              {!hasCredits && (
-                <p className="mb-3 rounded-lg border border-rose-400/20 bg-rose-500/[0.07] p-3 text-sm text-rose-100">
-                  Você ficou sem créditos.
-                </p>
-              )}
-              <QuickSuggestions disabled={!hasCredits || sending} onSelect={(prompt) => void sendMessage(prompt)} />
-              <AiInput
-                disabled={!hasCredits}
-                loading={sending}
-                placeholder={hasCredits ? "Pergunte ao Comandante IA..." : "Saldo esgotado"}
-                onSubmit={(message) => void sendMessage(message)}
-              />
-              <p className="mt-2 text-center text-[0.68rem] text-slate-600">
-                Chat normal usa 1 crédito. Ferramentas usam 2 créditos. Confirme informações críticas em fontes oficiais.
-              </p>
+
+            {error && <div className="mx-4 mb-3 rounded-lg border border-rose-400/25 bg-rose-500/10 p-3 text-sm text-rose-100">{error}</div>}
+
+            <div className="border-t border-white/10 p-4">
+              <div className="mb-3 flex flex-wrap gap-2">
+                {quickSuggestions.map((suggestion) => (
+                  <button
+                    key={suggestion}
+                    type="button"
+                    disabled={busy || (balance ?? 0) < TEXT_COST}
+                    onClick={() => void sendMessage(suggestion)}
+                    className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-xs text-slate-200 transition hover:border-accent/35 hover:bg-accent/[0.08] disabled:opacity-50"
+                  >
+                    {suggestion}
+                  </button>
+                ))}
+              </div>
+              <AiInput disabled={busy || (balance ?? 0) < TEXT_COST} loading={sending} onSubmit={(message) => void sendMessage(message)} />
             </div>
           </Card>
 
-          <aside className="grid content-start gap-4">
-            <ToolsPanel
-              values={toolForm}
-              disabled={!hasToolCredits || sending}
-              onChange={setToolForm}
-              onRun={(toolName, prompt) => void sendMessage(prompt, { cost: 2, mode: "tool", toolName })}
-            />
-            <Card className="premium-glow">
-              <div className="flex items-center gap-2 text-aura">
-                <Sparkles className="h-4 w-4" />
-                <p className="text-xs font-medium uppercase tracking-[0.18em]">Diretriz</p>
+          <aside className="space-y-4">
+            <Card className="space-y-4">
+              <div>
+                <p className="text-[0.65rem] font-medium uppercase tracking-[0.2em] text-aura">Anexar arquivo</p>
+                <h3 className="mt-1 text-lg font-semibold text-white">PDF ou imagem</h3>
+                <p className="mt-1 text-sm text-muted">PDF ate 10MB. PNG, JPG, JPEG ou WEBP ate 5MB. Consumo: 3 creditos.</p>
               </div>
-              <p className="mt-4 text-lg font-semibold leading-7 text-white">
-                Ninguém está vindo te salvar, então faça acontecer.
-              </p>
+
+              <label
+                onDragOver={(event) => event.preventDefault()}
+                onDrop={handleDrop}
+                className="flex min-h-36 cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-accent/35 bg-accent/[0.06] p-4 text-center transition hover:bg-accent/[0.1]"
+              >
+                <UploadCloud className="mb-3 h-7 w-7 text-aura" />
+                <span className="text-sm font-semibold text-white">Arraste ou selecione um arquivo</span>
+                <span className="mt-1 max-w-full truncate text-xs text-muted">{selectedFile ? selectedFile.name : "PDF, PNG, JPG, JPEG, WEBP"}</span>
+                <input
+                  type="file"
+                  accept=".pdf,.png,.jpg,.jpeg,.webp,application/pdf,image/png,image/jpeg,image/webp"
+                  className="hidden"
+                  onChange={(event) => chooseFile(event.target.files?.item(0) ?? null)}
+                />
+              </label>
+              {fileError && <p className="text-sm text-rose-200">{fileError}</p>}
+
+              <div className="grid gap-2">
+                {fileTools.map((tool) => (
+                  <button
+                    key={tool.name}
+                    type="button"
+                    disabled={!selectedFile || busy || (balance ?? 0) < FILE_COST}
+                    onClick={() => void sendFile(tool)}
+                    className="flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/[0.045] px-3 py-3 text-left text-sm font-semibold text-white transition hover:border-accent/35 hover:bg-accent/[0.08] disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <span>{tool.name}</span>
+                    <span className="text-xs text-muted">3 creditos</span>
+                  </button>
+                ))}
+              </div>
             </Card>
-            <Card>
-              <div className="flex items-center gap-2">
-                <Bot className="h-4 w-4 text-aura" />
-                <h2 className="font-semibold text-white">Especialidades</h2>
+
+            <Card className="space-y-4">
+              <div>
+                <p className="text-[0.65rem] font-medium uppercase tracking-[0.2em] text-aura">Voz</p>
+                <h3 className="mt-1 text-lg font-semibold text-white">Comando por audio</h3>
+                <p className="mt-1 text-sm text-muted">Usa o reconhecimento do navegador. Nada e gravado permanentemente.</p>
               </div>
-              <ul className="mt-4 space-y-3 text-sm text-muted">
-                <li>Estratégia para o ENEM</li>
-                <li>Organização e rotina</li>
-                <li>Técnicas de estudo</li>
-                <li>Dúvidas de matérias</li>
-                <li>Orientação de redação</li>
-              </ul>
+              <button
+                type="button"
+                disabled={busy || listening || (balance ?? 0) < TOOL_COST}
+                onClick={() => startVoiceCommand("transcribe")}
+                className="flex w-full items-center justify-between rounded-lg border border-white/10 bg-white/[0.045] px-3 py-3 text-sm font-semibold text-white transition hover:border-accent/35 hover:bg-accent/[0.08] disabled:opacity-50"
+              >
+                <span className="inline-flex items-center gap-2"><Mic className="h-4 w-4 text-aura" />TRANSCREVER AUDIO</span>
+                <span className="text-xs text-muted">2 creditos</span>
+              </button>
+              <button
+                type="button"
+                disabled={busy || listening || (balance ?? 0) < TOOL_COST}
+                onClick={() => startVoiceCommand("summary")}
+                className="flex w-full items-center justify-between rounded-lg border border-white/10 bg-white/[0.045] px-3 py-3 text-sm font-semibold text-white transition hover:border-accent/35 hover:bg-accent/[0.08] disabled:opacity-50"
+              >
+                <span className="inline-flex items-center gap-2"><Paperclip className="h-4 w-4 text-aura" />CRIAR RESUMO DE AUDIO</span>
+                <span className="text-xs text-muted">2 creditos</span>
+              </button>
+              {listening && <p className="text-sm text-aura">Ouvindo... limite de 5 minutos.</p>}
             </Card>
           </aside>
-        </div>
+        </section>
       </div>
     </main>
   );
 }
 
-function QuickSuggestions({
-  disabled,
-  onSelect
-}: {
-  disabled: boolean;
-  onSelect: (prompt: string) => void;
-}) {
+function MessageBubble({ message, onSpeak }: { message: AiMessage; onSpeak: (text: string) => void }) {
+  const isAssistant = message.role === "assistant";
   return (
-    <div className="mb-3 flex gap-2 overflow-x-auto pb-1">
-      {quickSuggestions.map((suggestion) => (
-        <button
-          key={suggestion}
-          type="button"
-          disabled={disabled}
-          onClick={() => onSelect(suggestion)}
-          className="shrink-0 rounded-full border border-white/10 bg-white/[0.045] px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-accent/35 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          {suggestion}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-function ToolsPanel({
-  values,
-  disabled,
-  onChange,
-  onRun
-}: {
-  values: ToolFormState;
-  disabled: boolean;
-  onChange: (values: ToolFormState) => void;
-  onRun: (toolName: string, prompt: string) => void;
-}) {
-  function update(key: keyof ToolFormState, value: string) {
-    onChange({ ...values, [key]: value });
-  }
-
-  return (
-    <Card className="premium-glow">
-      <div className="flex items-center gap-2 text-aura">
-        <Sparkles className="h-4 w-4" />
-        <p className="text-xs font-medium uppercase tracking-[0.18em]">Ferramentas IA</p>
-      </div>
-      <p className="mt-3 text-sm leading-6 text-muted">Atalhos com prompts guiados. Cada ferramenta usa 2 créditos.</p>
-      {disabled && (
-        <p className="mt-3 rounded-lg border border-amber-300/20 bg-amber-400/[0.06] p-3 text-xs leading-5 text-amber-100">
-          Você precisa de 2 créditos para usar ferramentas rápidas.
-        </p>
-      )}
-
-      <div className="mt-4 space-y-4">
-        <ToolBox
-          icon={<CalendarDays className="h-4 w-4" />}
-          title="Plano de Estudo"
-          disabled={disabled}
-          onRun={() => onRun("Plano de Estudo", `Monte um plano de estudo prático para ${values.subject}, com prazo de ${values.deadline} e ${values.hoursPerDay} por dia. Entregue por dias, prioridades e revisões.`)}
-        >
-          <ToolInput label="Matéria" value={values.subject} onChange={(value) => update("subject", value)} />
-          <ToolInput label="Prazo" value={values.deadline} onChange={(value) => update("deadline", value)} />
-          <ToolInput label="Horas/dia" value={values.hoursPerDay} onChange={(value) => update("hoursPerDay", value)} />
-        </ToolBox>
-
-        <ToolBox
-          icon={<BookOpen className="h-4 w-4" />}
-          title="Repertório ENEM"
-          disabled={disabled}
-          onRun={() => onRun("Repertório ENEM", `Indique repertórios úteis para o tema "${values.theme}". Explique como usar na redação e dê exemplos de frases.`)}
-        >
-          <ToolInput label="Tema" value={values.theme} onChange={(value) => update("theme", value)} />
-        </ToolBox>
-
-        <ToolBox
-          icon={<Target className="h-4 w-4" />}
-          title="Melhorar Competência"
-          disabled={disabled}
-          onRun={() => onRun("Melhorar Competência", `Faça um diagnóstico prático para melhorar a ${values.competency} da redação ENEM. Entregue exercício prático e missão curta para hoje.`)}
-        >
-          <ToolInput label="Competência" value={values.competency} onChange={(value) => update("competency", value)} />
-        </ToolBox>
-
-        <ToolBox
-          icon={<SendHorizonal className="h-4 w-4" />}
-          title="Simular Tema"
-          disabled={disabled}
-          onRun={() => onRun("Simular Tema", `Crie um tema modelo ENEM sobre "${values.socialProblem}". Traga ideias de argumentos e repertórios possíveis.`)}
-        >
-          <ToolInput label="Área/problema" value={values.socialProblem} onChange={(value) => update("socialProblem", value)} />
-        </ToolBox>
-      </div>
-    </Card>
-  );
-}
-
-function ToolBox({
-  title,
-  icon,
-  disabled,
-  children,
-  onRun
-}: {
-  title: string;
-  icon: React.ReactNode;
-  disabled: boolean;
-  children: React.ReactNode;
-  onRun: () => void;
-}) {
-  return (
-    <div className="rounded-lg border border-white/10 bg-black/25 p-3">
-      <div className="flex items-center gap-2 text-sm font-semibold text-white">
-        <span className="text-aura">{icon}</span>
-        {title}
-      </div>
-      <div className="mt-3 grid gap-2">{children}</div>
-      <button
-        type="button"
-        disabled={disabled}
-        onClick={onRun}
-        className="mt-3 min-h-9 w-full rounded-lg border border-accent/30 bg-accent/15 px-3 py-2 text-xs font-semibold text-aura transition hover:bg-accent/20 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/[0.03] disabled:text-slate-600"
-      >
-        Executar · 2 créditos
-      </button>
-    </div>
-  );
-}
-
-function ToolInput({
-  label,
-  value,
-  onChange
-}: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-}) {
-  return (
-    <label className="grid gap-1">
-      <span className="text-[0.64rem] uppercase tracking-[0.12em] text-muted">{label}</span>
-      <input
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className="h-9 rounded-lg border border-white/10 bg-white/[0.045] px-3 text-xs text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-accent/40"
-      />
-    </label>
-  );
-}
-
-function MessageBubble({ message }: { message: AiMessage }) {
-  const isUser = message.role === "user";
-  const essayLabel = message.content.startsWith("[REDAÇÃO PARA CORREÇÃO]");
-
-  return (
-    <div className={`flex gap-3 ${isUser ? "justify-end" : "justify-start"}`}>
-      {!isUser && (
-        <div className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-accent/30 bg-accent/10 text-aura">
-          <Bot className="h-4 w-4" />
-        </div>
-      )}
+    <article className={`flex ${isAssistant ? "justify-start" : "justify-end"}`}>
       <div
-        className={`max-w-[88%] whitespace-pre-wrap rounded-lg border px-4 py-3 text-sm leading-6 sm:max-w-[76%] ${
-          isUser
-            ? "border-accent/25 bg-accent/15 text-slate-100"
-            : "border-white/10 bg-white/[0.045] text-slate-200"
+        className={`max-w-[92%] rounded-lg border p-4 text-sm leading-7 sm:max-w-[78%] ${
+          isAssistant
+            ? "border-white/10 bg-white/[0.045] text-slate-100"
+            : "border-accent/25 bg-accent/[0.13] text-white shadow-[0_0_24px_rgba(124,58,237,0.12)]"
         }`}
       >
-        {essayLabel ? "Redação enviada para correção." : formatAssistantContent(message.content)}
+        <p className="whitespace-pre-wrap">{message.content}</p>
+        {isAssistant && (
+          <button
+            type="button"
+            onClick={() => onSpeak(message.content)}
+            className="mt-3 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-semibold text-slate-200 transition hover:border-accent/35 hover:text-white"
+          >
+            <Volume2 className="h-3.5 w-3.5 text-aura" />
+            Ouvir resposta
+          </button>
+        )}
       </div>
-      {isUser && (
-        <div className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-white/10 bg-white/[0.04] text-slate-400">
-          <UserRound className="h-4 w-4" />
-        </div>
-      )}
-    </div>
+    </article>
   );
-}
-
-function formatAssistantContent(content: string) {
-  try {
-    const parsed = JSON.parse(content) as { type?: string; estimatedScore?: number; summary?: string };
-    if (parsed.type === "essay_review") {
-      return `Correção de redação concluída. Nota estimada: ${parsed.estimatedScore ?? 0}/1000. ${parsed.summary ?? ""}`;
-    }
-  } catch {
-    return content;
-  }
-  return content;
 }
