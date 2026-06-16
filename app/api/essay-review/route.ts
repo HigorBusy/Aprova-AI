@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
         { role: "system", content: runtimeContext },
         {
           role: "user",
-          content: `Corrija esta redacao com rigor de banca ENEM. Se for curta, generica, sem repertorio ou sem proposta completa, penalize de verdade.\n\n${essay}`
+          content: `Corrija esta redacao com rigor de banca ENEM. Se for curta, generica, sem repertorio ou sem proposta completa, penalize de verdade. Se for excelente, reconheca excelencia com base em evidencias objetivas e nao invente penalizacoes genericas.\n\n${essay}`
         }
       ],
       { temperature: 0.2, maxTokens: 2_400, json: true }
