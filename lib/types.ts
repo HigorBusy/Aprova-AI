@@ -10,8 +10,8 @@ export type QuizAnswers = {
   level?: Level;
 };
 
-export type ProfileKind = "Iniciante Perdido" | "Sem Rotina" | "EvoluÃ§Ã£o Acelerada" | "Ãšltima Hora";
-export type TopicStatus = "NÃ£o iniciado" | "Estudando" | "ConcluÃ­do";
+export type ProfileKind = "Iniciante Perdido" | "Sem Rotina" | "Evolução Acelerada" | "Última Hora";
+export type TopicStatus = "Não iniciado" | "Estudando" | "Concluído";
 export type PlanTag = "free" | "premium" | "ADM";
 
 export type Topic = {
