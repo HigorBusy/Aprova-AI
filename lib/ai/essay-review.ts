@@ -65,19 +65,36 @@ export function normalizeEssayReview(raw: RawEssayReview, essay: string): EssayR
     c4 = capCompetency(c4, 140, "A coesao esta limitada por poucos conectivos ou encadeamento fraco.");
   }
 
+  if (heuristics.hasProductiveRepertoire) {
+    c2 = floorCompetency(c2, 180, "Repertorio legitimado e conectado ao argumento foi identificado; C2 nao deve ser penalizada por estilo ou formalidade.");
+  }
+
+  if (heuristics.hasStrongCohesion) {
+    c4 = floorCompetency(c4, 180, "O texto apresenta conectivos variados, progressao textual e encadeamento funcional.");
+  }
+
+  if (heuristics.hasCompleteIntervention) {
+    c5 = floorCompetency(c5, 180, "A proposta apresenta agente, acao, meio, finalidade e detalhamento.");
+  }
+
   let competencies = { c1, c2, c3, c4, c5 };
   let total = sumCompetencies(competencies);
+
+  if (heuristics.excellenceMode) {
+    competencies = calibrateExcellentEssay(competencies);
+    total = sumCompetencies(competencies);
+  }
 
   if (heuristics.shortOrSuperficial && total > 600) {
     competencies = scaleCompetenciesToCap(competencies, 600);
     total = sumCompetencies(competencies);
   }
 
-  const principaisErros = asStringArray(raw.principais_erros ?? raw.weaknesses, [
+  const principaisErros = filterGenericCriticism(asStringArray(raw.principais_erros ?? raw.weaknesses, [
     "Argumentos pouco desenvolvidos.",
     "Falta de repertorio produtivo.",
     "Proposta de intervencao incompleta."
-  ]);
+  ]));
   const pontosFortes = asStringArray(raw.pontos_fortes ?? raw.strengths, ["Ha uma tentativa de organizar uma tese."]);
   const plano = asStringArray(raw.plano_de_melhoria ?? raw.improvements, [
     "Escreva uma tese mais precisa.",
@@ -144,6 +161,25 @@ function capCompetency(competency: EssayCompetency, cap: number, reason: string)
   };
 }
 
+function floorCompetency(competency: EssayCompetency, floor: number, reason: string): EssayCompetency {
+  if (competency.score >= floor) return competency;
+  return {
+    ...competency,
+    score: floor,
+    analysis: `${competency.analysis} Calibragem aplicada: ${reason}`
+  };
+}
+
+function calibrateExcellentEssay(competencies: EssayReview["competencies"]) {
+  return {
+    c1: floorCompetency(competencies.c1, 190, "Modo excelencia ativado: texto com projeto argumentativo completo nao deve receber C1 baixa sem desvios graves apontados."),
+    c2: floorCompetency(competencies.c2, 190, "Modo excelencia ativado: tema e repertorio produtivo sustentam faixa alta em C2."),
+    c3: floorCompetency(competencies.c3, 190, "Modo excelencia ativado: tese e progressao argumentativa sustentam faixa alta em C3."),
+    c4: floorCompetency(competencies.c4, 190, "Modo excelencia ativado: coesao funcional sustenta faixa alta em C4."),
+    c5: floorCompetency(competencies.c5, 190, "Modo excelencia ativado: intervencao completa sustenta faixa alta em C5.")
+  };
+}
+
 function scaleCompetenciesToCap(competencies: EssayReview["competencies"], cap: number) {
   const current = sumCompetencies(competencies);
   if (current <= cap) return competencies;
@@ -176,16 +212,62 @@ function inspectEssay(essay: string) {
   const lower = essay.toLowerCase();
   const words = essay.split(/\s+/).filter(Boolean);
   const paragraphCount = essay.split(/\n+/).map((p) => p.trim()).filter(Boolean).length;
-  const repertoireTerms = ["constituicao", "paulo freire", "bourdieu", "bauman", "milton santos", "hannah arendt", "ibge", "inep", "onu", "oms", "filosof", "sociolog"];
-  const interventionTerms = ["governo", "estado", "ministerio", "escola", "sociedade", "familia", "midia", "ong", "deve", "por meio", "a fim de", "para que"];
-  const connectiveTerms = ["alem disso", "portanto", "contudo", "entretanto", "desse modo", "por conseguinte", "nesse sentido", "assim", "dessa forma", "visto que"];
+  const repertoireTerms = ["constituicao", "paulo freire", "bourdieu", "bauman", "milton santos", "hannah arendt", "achille mbembe", "foucault", "george orwell", "aldous huxley", "o cortico", "ibge", "inep", "onu", "oms", "filosof", "sociolog"];
+  const thesisTerms = ["defende-se", "nesse sentido", "sob essa perspectiva", "torna-se evidente", "e necessario", "observa-se", "nota-se", "configura-se"];
+  const developmentTerms = ["primeiramente", "em primeiro lugar", "ademais", "alem disso", "outrossim", "entretanto", "nesse contexto", "desse modo", "sob esse vies", "por conseguinte"];
+  const interventionAgents = ["governo", "estado", "ministerio", "poder publico", "escola", "instituicoes", "midia", "sociedade civil", "ongs", "familia"];
+  const interventionActions = ["deve", "devem", "promover", "criar", "ampliar", "implementar", "fiscalizar", "garantir", "realizar", "investir"];
+  const interventionMeans = ["por meio", "por intermedio", "mediante", "atraves", "a partir", "com campanhas", "com investimentos", "com fiscalizacao"];
+  const interventionPurposes = ["a fim de", "para que", "com o intuito", "com o objetivo", "visando", "de modo a"];
+  const interventionDetails = ["campanhas", "palestras", "formacao", "capacitar", "fiscalizacao", "recursos", "verbas", "parcerias", "plataformas", "profissionais"];
+  const connectiveTerms = ["alem disso", "portanto", "contudo", "entretanto", "desse modo", "por conseguinte", "nesse sentido", "assim", "dessa forma", "visto que", "ademais", "nesse contexto", "outrossim"];
+  const conclusionArea = lower.slice(Math.max(0, Math.floor(lower.length * 0.65)));
+  const repertoireHits = repertoireTerms.filter((term) => lower.includes(term)).length;
+  const connectiveHits = connectiveTerms.filter((term) => lower.includes(term)).length;
+  const hasClearThesis = thesisTerms.some((term) => lower.includes(term)) || /\b(defendo|defende|tese|problema|necessario)\b/.test(lower);
+  const hasProgression = developmentTerms.filter((term) => lower.includes(term)).length >= 3 && paragraphCount >= 4;
+  const hasCompleteIntervention =
+    interventionAgents.some((term) => conclusionArea.includes(term)) &&
+    interventionActions.some((term) => conclusionArea.includes(term)) &&
+    interventionMeans.some((term) => conclusionArea.includes(term)) &&
+    interventionPurposes.some((term) => conclusionArea.includes(term)) &&
+    interventionDetails.some((term) => conclusionArea.includes(term));
+  const hasProductiveRepertoire = repertoireHits >= 1 && hasClearThesis && words.length >= 220;
+  const hasStrongCohesion = connectiveHits >= 5 && hasProgression;
 
   return {
     shortOrSuperficial: words.length < 180 || paragraphCount < 3,
-    hasRepertoire: repertoireTerms.some((term) => lower.includes(term)),
-    hasIntervention: interventionTerms.filter((term) => lower.includes(term)).length >= 3,
-    hasConnectiveVariety: connectiveTerms.filter((term) => lower.includes(term)).length >= 3
+    hasRepertoire: repertoireHits >= 1,
+    hasProductiveRepertoire,
+    hasIntervention: hasCompleteIntervention || countAny(lower, [...interventionAgents, ...interventionActions, ...interventionMeans, ...interventionPurposes]) >= 4,
+    hasCompleteIntervention,
+    hasConnectiveVariety: connectiveHits >= 3,
+    hasStrongCohesion,
+    excellenceMode: words.length >= 220 && paragraphCount >= 4 && hasClearThesis && hasProgression && hasProductiveRepertoire && hasStrongCohesion && hasCompleteIntervention
   };
+}
+
+function countAny(text: string, terms: string[]) {
+  return terms.filter((term) => text.includes(term)).length;
+}
+
+function filterGenericCriticism(items: string[]) {
+  const blocked = [
+    "linguagem excessivamente formal",
+    "frases longas",
+    "analise superficial",
+    "texto superficial"
+  ];
+  const filtered = items.filter((item) => {
+    const lower = item.toLowerCase();
+    const isGeneric = blocked.some((term) => lower.includes(term));
+    const hasEvidence = item.includes("\"") || item.includes("'") || lower.includes("trecho") || lower.includes("quando afirma") || lower.includes("ao dizer");
+    return !isGeneric || hasEvidence;
+  });
+
+  return filtered.length > 0 ? filtered : [
+    "Nao ha critica especifica suficiente para reduzir a nota sem apontar trecho, problema e impacto."
+  ];
 }
 
 function sumCompetencies(competencies: EssayReview["competencies"]) {
