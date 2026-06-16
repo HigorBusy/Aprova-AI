@@ -7,19 +7,23 @@ import { authenticateRequest } from "@/lib/supabase/server";
 export const runtime = "nodejs";
 
 const CHAT_COST = 1;
+const TOOL_COST = 2;
 
 export async function POST(request: NextRequest) {
   const auth = await authenticateRequest(request);
   if (!auth) return NextResponse.json({ error: "Nao autorizado." }, { status: 401 });
 
-  let body: { message?: unknown };
+  let body: { message?: unknown; mode?: unknown; toolName?: unknown };
   try {
-    body = (await request.json()) as { message?: unknown };
+    body = (await request.json()) as { message?: unknown; mode?: unknown; toolName?: unknown };
   } catch {
     return NextResponse.json({ error: "Requisicao invalida." }, { status: 400 });
   }
 
   const message = typeof body.message === "string" ? body.message.trim() : "";
+  const isTool = body.mode === "tool";
+  const cost = isTool ? TOOL_COST : CHAT_COST;
+  const toolName = typeof body.toolName === "string" ? body.toolName.trim().slice(0, 80) : "Ferramenta IA";
   if (!message || message.length > 8_000) {
     return NextResponse.json(
       { error: "Envie uma mensagem entre 1 e 8.000 caracteres." },
@@ -35,7 +39,7 @@ export async function POST(request: NextRequest) {
     .maybeSingle();
 
   if (creditError) return NextResponse.json({ error: "Nao foi possivel verificar seus creditos." }, { status: 500 });
-  if (!creditRow || creditRow.balance < CHAT_COST) {
+  if (!creditRow || creditRow.balance < cost) {
     return NextResponse.json({ error: "Voce ficou sem creditos.", balance: creditRow?.balance ?? 0 }, { status: 402 });
   }
 
@@ -89,9 +93,9 @@ export async function POST(request: NextRequest) {
       {
         p_user_content: message,
         p_assistant_content: reply,
-        p_cost: CHAT_COST,
+        p_cost: cost,
         p_transaction_type: "ai_chat",
-        p_description: "Pergunta ao Comandante IA"
+        p_description: isTool ? `Ferramenta IA: ${toolName}` : "Pergunta ao Comandante IA"
       }
     );
     const result = Array.isArray(completion) ? completion[0] : completion;
