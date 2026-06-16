@@ -87,7 +87,7 @@ export function AprovaApp() {
     let mounted = true;
     void supabase.auth.getSession().then(({ data }) => {
       if (!mounted) return;
-      if (data.session?.user) beginSession(data.session.user, "Restaurando sua missÃ£o");
+      if (data.session?.user) beginSession(data.session.user, "Restaurando sua missão");
       else setAuthLoading(false);
     });
 
@@ -148,7 +148,7 @@ export function AprovaApp() {
         }
         setCreditBalance(creditsResult.data?.balance ?? 0);
       } catch {
-        if (mounted) setAccountError("NÃ£o foi possÃ­vel carregar seu perfil e seus crÃ©ditos.");
+        if (mounted) setAccountError("Não foi possível carregar seu perfil e seus créditos.");
       } finally {
         if (mounted) setAccountLoading(false);
       }
@@ -234,7 +234,7 @@ export function AprovaApp() {
       .eq("id", user.id);
 
     if (error) {
-      setAccountError("NÃ£o foi possÃ­vel salvar seu diagnÃ³stico. Tente novamente.");
+      setAccountError("Não foi possível salvar seu diagnóstico. Tente novamente.");
       setAccountLoading(false);
       return;
     }
@@ -244,11 +244,11 @@ export function AprovaApp() {
       profileKind,
       dailyGoalMinutes,
       notifications: [
-        `${priority} virou seu primeiro setor de navegaÃ§Ã£o. A rota comeÃ§a hoje.`,
+        `${priority} virou seu primeiro setor de navegação. A rota começa hoje.`,
         ...current.notifications.slice(0, 2)
       ],
       topics: current.topics.map((topic) =>
-        topic.subject === priority && topic.status === "NÃ£o iniciado"
+        topic.subject === priority && topic.status === "Não iniciado"
           ? { ...topic, status: "Estudando" as const }
           : topic
       )
@@ -259,7 +259,7 @@ export function AprovaApp() {
   async function handleSignOut() {
     const supabase = getSupabaseClient();
     if (!supabase) return;
-    setTransitionLabel("Encerrando sua missÃ£o");
+    setTransitionLabel("Encerrando sua missão");
     await new Promise((resolve) => window.setTimeout(resolve, 1200));
     const { error } = await supabase.auth.signOut();
     if (error) setTransitionLabel(null);
@@ -361,7 +361,7 @@ export function AprovaApp() {
             </div>
             <div className="rounded-lg border border-white/10 bg-black/25 px-3 py-2">
               <p className="flex items-center gap-1 text-[0.62rem] uppercase tracking-[0.14em] text-muted">
-                <CreditCard className="h-3 w-3" /> crÃ©ditos
+                <CreditCard className="h-3 w-3" /> créditos
               </p>
               <p className="mt-1 text-sm text-aura">{creditBalance ?? 0}</p>
             </div>
