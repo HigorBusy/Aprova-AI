@@ -130,13 +130,14 @@ export function Comandante() {
       });
       const result = (await response.json()) as { reply?: string; balance?: number; error?: string };
       if (!response.ok || !result.reply) throw new Error(result.error || "Falha ao consultar o Comandante.");
+      const reply = result.reply;
 
       setMessages((current) => [
         ...current,
         {
           id: `assistant-${Date.now()}`,
           role: "assistant",
-          content: result.reply,
+          content: reply,
           created_at: new Date().toISOString()
         }
       ]);
