@@ -1,3 +1,4 @@
+import { getBrasiliaDateKey } from "@/lib/date-br";
 import type {
   Achievement,
   Area,
@@ -71,7 +72,7 @@ export const achievements: Achievement[] = [
 ];
 
 export function todayKey(date = new Date()) {
-  return date.toISOString().slice(0, 10);
+  return getBrasiliaDateKey(date);
 }
 
 export function initialState(): StudyState {
