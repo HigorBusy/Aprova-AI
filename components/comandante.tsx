@@ -3,8 +3,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import type React from "react";
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, Bot, CreditCard, Sparkles, UserRound } from "lucide-react";
+import { ArrowLeft, BookOpen, Bot, CalendarDays, CreditCard, SendHorizonal, Sparkles, Target, UserRound } from "lucide-react";
 
 import { Card } from "@/components/ui";
 import { AiInput } from "@/components/ui/ai-input";
@@ -19,6 +20,14 @@ export function Comandante() {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
+  const [toolForm, setToolForm] = useState({
+    subject: "RedaÃ§Ã£o",
+    deadline: "14 dias",
+    hoursPerDay: "1 hora",
+    theme: "desigualdade educacional",
+    competency: "C3",
+    socialProblem: "uso excessivo de tecnologia"
+  });
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -49,7 +58,7 @@ export function Comandante() {
 
       if (!active) return;
       if (historyResult.error || creditsResult.error) {
-        setError("Não foi possível carregar o histórico do Comandante.");
+        setError("NÃ£o foi possÃ­vel carregar o histÃ³rico do Comandante.");
       } else {
         setMessages([...(historyResult.data as AiMessage[])].reverse());
         setBalance(creditsResult.data?.balance ?? 0);
@@ -66,9 +75,14 @@ export function Comandante() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, sending]);
 
-  async function sendMessage(content: string) {
+  async function sendMessage(content: string, options: { cost?: number; mode?: "chat" | "tool"; toolName?: string } = {}) {
     const supabase = getSupabaseClient();
-    if (!supabase || sending || (balance ?? 0) < 1) return;
+    const cost = options.cost ?? 1;
+    if (!supabase || sending) return;
+    if ((balance ?? 0) < cost) {
+      setError(`VocÃª precisa de ${cost} crÃ©ditos para esta aÃ§Ã£o.`);
+      return;
+    }
 
     const optimisticMessage: AiMessage = {
       id: `local-${Date.now()}`,
@@ -83,7 +97,7 @@ export function Comandante() {
     try {
       const { data } = await supabase.auth.getSession();
       const token = data.session?.access_token;
-      if (!token) throw new Error("Sessão expirada.");
+      if (!token) throw new Error("SessÃ£o expirada.");
 
       const response = await fetch("/api/ai/chat", {
         method: "POST",
@@ -91,7 +105,11 @@ export function Comandante() {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ message: content })
+        body: JSON.stringify({
+          message: content,
+          mode: options.mode === "tool" ? "tool" : "chat",
+          toolName: options.toolName
+        })
       });
       const result = (await response.json()) as { reply?: string; balance?: number; error?: string };
       if (!response.ok || !result.reply) throw new Error(result.error || "Falha ao consultar o Comandante.");
@@ -108,7 +126,7 @@ export function Comandante() {
       setBalance(result.balance ?? balance);
     } catch (requestError) {
       setMessages((current) => current.filter((message) => message.id !== optimisticMessage.id));
-      setError(requestError instanceof Error ? requestError.message : "Não foi possível enviar a mensagem.");
+      setError(requestError instanceof Error ? requestError.message : "NÃ£o foi possÃ­vel enviar a mensagem.");
     } finally {
       setSending(false);
     }
@@ -123,6 +141,7 @@ export function Comandante() {
   }
 
   const hasCredits = (balance ?? 0) > 0;
+  const hasToolCredits = (balance ?? 0) >= 2;
 
   return (
     <main className="mission-grid min-h-[100dvh] bg-canvas px-4 py-4 text-white sm:px-6 lg:px-8 lg:py-6">
@@ -145,14 +164,14 @@ export function Comandante() {
               className="hidden h-9 w-auto object-contain sm:block"
             />
             <div className="min-w-0">
-              <p className="text-[0.65rem] font-medium uppercase tracking-[0.2em] text-aura">Módulo ativo</p>
+              <p className="text-[0.65rem] font-medium uppercase tracking-[0.2em] text-aura">MÃ³dulo ativo</p>
               <h1 className="truncate text-xl font-semibold text-white sm:text-2xl">Comandante IA</h1>
             </div>
           </div>
           <div className="flex items-center gap-2 rounded-lg border border-accent/25 bg-accent/[0.08] px-3 py-2 shadow-[0_0_24px_rgba(124,58,237,0.14)]">
             <CreditCard className="h-4 w-4 text-aura" />
             <span className="text-sm font-semibold text-white">{balance ?? 0}</span>
-            <span className="hidden text-xs text-muted sm:inline">créditos</span>
+            <span className="hidden text-xs text-muted sm:inline">crÃ©ditos</span>
           </div>
         </header>
 
@@ -166,9 +185,9 @@ export function Comandante() {
                       <div className="ai-orb-core" />
                     </div>
                     <p className="mt-7 text-xs font-medium uppercase tracking-[0.22em] text-aura">Canal aberto</p>
-                    <h2 className="mt-3 text-3xl font-semibold text-white">Qual é o bloqueio da missão?</h2>
+                    <h2 className="mt-3 text-3xl font-semibold text-white">Qual Ã© o bloqueio da missÃ£o?</h2>
                     <p className="mx-auto mt-3 max-w-lg text-sm leading-6 text-muted">
-                      Tire dúvidas do ENEM, organize sua rotina ou peça uma estratégia objetiva para avançar hoje.
+                      Tire dÃºvidas do ENEM, organize sua rotina ou peÃ§a uma estratÃ©gia objetiva para avanÃ§ar hoje.
                     </p>
                   </div>
                 </div>
@@ -191,9 +210,10 @@ export function Comandante() {
               {error && <p className="mb-3 text-sm text-rose-200">{error}</p>}
               {!hasCredits && (
                 <p className="mb-3 rounded-lg border border-rose-400/20 bg-rose-500/[0.07] p-3 text-sm text-rose-100">
-                  Você ficou sem créditos.
+                  VocÃª ficou sem crÃ©ditos.
                 </p>
               )}
+              <QuickSuggestions disabled={!hasCredits || sending} onSelect={(prompt) => void sendMessage(prompt)} />
               <AiInput
                 disabled={!hasCredits}
                 loading={sending}
@@ -201,19 +221,25 @@ export function Comandante() {
                 onSubmit={(message) => void sendMessage(message)}
               />
               <p className="mt-2 text-center text-[0.68rem] text-slate-600">
-                Cada pergunta consome 1 crédito. Confirme informações críticas em fontes oficiais.
+                Chat normal usa 1 crÃ©dito. Ferramentas usam 2 crÃ©ditos. Confirme informaÃ§Ãµes crÃ­ticas em fontes oficiais.
               </p>
             </div>
           </Card>
 
           <aside className="grid content-start gap-4">
+            <ToolsPanel
+              values={toolForm}
+              disabled={!hasToolCredits || sending}
+              onChange={setToolForm}
+              onRun={(toolName, prompt) => void sendMessage(prompt, { cost: 2, mode: "tool", toolName })}
+            />
             <Card className="premium-glow">
               <div className="flex items-center gap-2 text-aura">
                 <Sparkles className="h-4 w-4" />
                 <p className="text-xs font-medium uppercase tracking-[0.18em]">Diretriz</p>
               </div>
               <p className="mt-4 text-lg font-semibold leading-7 text-white">
-                Ninguém está vindo te salvar, então faça acontecer.
+                NinguÃ©m estÃ¡ vindo te salvar, entÃ£o faÃ§a acontecer.
               </p>
             </Card>
             <Card>
@@ -222,11 +248,11 @@ export function Comandante() {
                 <h2 className="font-semibold text-white">Especialidades</h2>
               </div>
               <ul className="mt-4 space-y-3 text-sm text-muted">
-                <li>Estratégia para o ENEM</li>
-                <li>Organização e rotina</li>
-                <li>Técnicas de estudo</li>
-                <li>Dúvidas de matérias</li>
-                <li>Orientação de redação</li>
+                <li>EstratÃ©gia para o ENEM</li>
+                <li>OrganizaÃ§Ã£o e rotina</li>
+                <li>TÃ©cnicas de estudo</li>
+                <li>DÃºvidas de matÃ©rias</li>
+                <li>OrientaÃ§Ã£o de redaÃ§Ã£o</li>
               </ul>
             </Card>
           </aside>
@@ -236,9 +262,174 @@ export function Comandante() {
   );
 }
 
+const quickSuggestions = [
+  "Monte meu plano de estudo",
+  "Explique minha nota",
+  "Como melhorar minha C3?",
+  "Me dÃª um repertÃ³rio",
+  "Crie uma missÃ£o para hoje"
+];
+
+function QuickSuggestions({
+  disabled,
+  onSelect
+}: {
+  disabled: boolean;
+  onSelect: (prompt: string) => void;
+}) {
+  return (
+    <div className="mb-3 flex gap-2 overflow-x-auto pb-1">
+      {quickSuggestions.map((suggestion) => (
+        <button
+          key={suggestion}
+          type="button"
+          disabled={disabled}
+          onClick={() => onSelect(suggestion)}
+          className="shrink-0 rounded-full border border-white/10 bg-white/[0.045] px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-accent/35 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          {suggestion}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+type ToolFormState = {
+  subject: string;
+  deadline: string;
+  hoursPerDay: string;
+  theme: string;
+  competency: string;
+  socialProblem: string;
+};
+
+function ToolsPanel({
+  values,
+  disabled,
+  onChange,
+  onRun
+}: {
+  values: ToolFormState;
+  disabled: boolean;
+  onChange: (values: ToolFormState) => void;
+  onRun: (toolName: string, prompt: string) => void;
+}) {
+  function update(key: keyof ToolFormState, value: string) {
+    onChange({ ...values, [key]: value });
+  }
+
+  return (
+    <Card className="premium-glow">
+      <div className="flex items-center gap-2 text-aura">
+        <Sparkles className="h-4 w-4" />
+        <p className="text-xs font-medium uppercase tracking-[0.18em]">Ferramentas IA</p>
+      </div>
+      <p className="mt-3 text-sm leading-6 text-muted">Atalhos com prompts guiados. Cada ferramenta usa 2 crÃ©ditos.</p>
+      {disabled && (
+        <p className="mt-3 rounded-lg border border-amber-300/20 bg-amber-400/[0.06] p-3 text-xs leading-5 text-amber-100">
+          VocÃª precisa de 2 crÃ©ditos para usar ferramentas rÃ¡pidas.
+        </p>
+      )}
+
+      <div className="mt-4 space-y-4">
+        <ToolBox
+          icon={<CalendarDays className="h-4 w-4" />}
+          title="Plano de Estudo"
+          disabled={disabled}
+          onRun={() => onRun("Plano de Estudo", `Monte um plano de estudo prÃ¡tico para ${values.subject}, com prazo de ${values.deadline} e ${values.hoursPerDay} por dia. Entregue por dias, prioridades e revisÃµes.`)}
+        >
+          <ToolInput label="MatÃ©ria" value={values.subject} onChange={(value) => update("subject", value)} />
+          <ToolInput label="Prazo" value={values.deadline} onChange={(value) => update("deadline", value)} />
+          <ToolInput label="Horas/dia" value={values.hoursPerDay} onChange={(value) => update("hoursPerDay", value)} />
+        </ToolBox>
+
+        <ToolBox
+          icon={<BookOpen className="h-4 w-4" />}
+          title="RepertÃ³rio ENEM"
+          disabled={disabled}
+          onRun={() => onRun("RepertÃ³rio ENEM", `Indique repertÃ³rios Ãºteis para o tema "${values.theme}". Explique como usar na redaÃ§Ã£o e dÃª exemplos de frases.`)}
+        >
+          <ToolInput label="Tema" value={values.theme} onChange={(value) => update("theme", value)} />
+        </ToolBox>
+
+        <ToolBox
+          icon={<Target className="h-4 w-4" />}
+          title="Melhorar CompetÃªncia"
+          disabled={disabled}
+          onRun={() => onRun("Melhorar CompetÃªncia", `FaÃ§a um diagnÃ³stico prÃ¡tico para melhorar a ${values.competency} da redaÃ§Ã£o ENEM. Entregue exercÃ­cio prÃ¡tico e missÃ£o curta para hoje.`)}
+        >
+          <ToolInput label="CompetÃªncia" value={values.competency} onChange={(value) => update("competency", value)} />
+        </ToolBox>
+
+        <ToolBox
+          icon={<SendHorizonal className="h-4 w-4" />}
+          title="Simular Tema"
+          disabled={disabled}
+          onRun={() => onRun("Simular Tema", `Crie um tema modelo ENEM sobre "${values.socialProblem}". Traga ideias de argumentos e repertÃ³rios possÃ­veis.`)}
+        >
+          <ToolInput label="Ãrea/problema" value={values.socialProblem} onChange={(value) => update("socialProblem", value)} />
+        </ToolBox>
+      </div>
+    </Card>
+  );
+}
+
+function ToolBox({
+  title,
+  icon,
+  disabled,
+  children,
+  onRun
+}: {
+  title: string;
+  icon: React.ReactNode;
+  disabled: boolean;
+  children: React.ReactNode;
+  onRun: () => void;
+}) {
+  return (
+    <div className="rounded-lg border border-white/10 bg-black/25 p-3">
+      <div className="flex items-center gap-2 text-sm font-semibold text-white">
+        <span className="text-aura">{icon}</span>
+        {title}
+      </div>
+      <div className="mt-3 grid gap-2">{children}</div>
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={onRun}
+        className="mt-3 min-h-9 w-full rounded-lg border border-accent/30 bg-accent/15 px-3 py-2 text-xs font-semibold text-aura transition hover:bg-accent/20 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/[0.03] disabled:text-slate-600"
+      >
+        Executar Â· 2 crÃ©ditos
+      </button>
+    </div>
+  );
+}
+
+function ToolInput({
+  label,
+  value,
+  onChange
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <label className="grid gap-1">
+      <span className="text-[0.64rem] uppercase tracking-[0.12em] text-muted">{label}</span>
+      <input
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className="h-9 rounded-lg border border-white/10 bg-white/[0.045] px-3 text-xs text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-accent/40"
+      />
+    </label>
+  );
+}
+
 function MessageBubble({ message }: { message: AiMessage }) {
   const isUser = message.role === "user";
-  const essayLabel = message.content.startsWith("[REDAÇÃO PARA CORREÇÃO]");
+  const essayLabel = message.content.startsWith("[REDAÃ‡ÃƒO PARA CORREÃ‡ÃƒO]");
 
   return (
     <div className={`flex gap-3 ${isUser ? "justify-end" : "justify-start"}`}>
@@ -254,7 +445,7 @@ function MessageBubble({ message }: { message: AiMessage }) {
             : "border-white/10 bg-white/[0.045] text-slate-200"
         }`}
       >
-        {essayLabel ? "Redação enviada para correção." : formatAssistantContent(message.content)}
+        {essayLabel ? "RedaÃ§Ã£o enviada para correÃ§Ã£o." : formatAssistantContent(message.content)}
       </div>
       {isUser && (
         <div className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-white/10 bg-white/[0.04] text-slate-400">
@@ -269,7 +460,7 @@ function formatAssistantContent(content: string) {
   try {
     const parsed = JSON.parse(content) as { type?: string; estimatedScore?: number; summary?: string };
     if (parsed.type === "essay_review") {
-      return `Correção de redação concluída. Nota estimada: ${parsed.estimatedScore ?? 0}/1000. ${parsed.summary ?? ""}`;
+      return `CorreÃ§Ã£o de redaÃ§Ã£o concluÃ­da. Nota estimada: ${parsed.estimatedScore ?? 0}/1000. ${parsed.summary ?? ""}`;
     }
   } catch {
     return content;
