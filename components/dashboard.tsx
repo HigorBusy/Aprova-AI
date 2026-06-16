@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import type { User } from "@supabase/supabase-js";
-import { Bot, CreditCard, FileText, Radar } from "lucide-react";
+import { Bot, CheckCircle2, ChevronDown, CreditCard, FileText, Radar, Target } from "lucide-react";
 
 import { AuthCard } from "@/components/auth-card";
 import { Button, Card, Stat } from "@/components/ui";
@@ -20,6 +20,19 @@ type DashboardProps = {
   creditBalance: number | null;
   onCreditBalanceChange: (balance: number) => void;
   onSignOut: () => void;
+};
+
+type EssayReviewRow = {
+  id: string;
+  score: number;
+  c1: number;
+  c2: number;
+  c3: number;
+  c4: number;
+  c5: number;
+  theme: string | null;
+  review: EssayReview;
+  created_at: string;
 };
 
 const flightBars = [18, 22, 28, 34, 42, 56, 68, 76, 72, 84, 66, 58, 49, 40, 31, 24];
@@ -171,8 +184,43 @@ function WritingCenterCard({
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [review, setReview] = useState<EssayReview | null>(null);
+  const [history, setHistory] = useState<EssayReviewRow[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(true);
   const hasCredits = (balance ?? 0) >= 5;
   const wordCount = essayText.trim().split(/\s+/).filter(Boolean).length;
+
+  useEffect(() => {
+    const supabase = getSupabaseClient();
+    if (!supabase) {
+      setHistoryLoading(false);
+      return;
+    }
+
+    let active = true;
+    void (async () => {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const user = sessionData.session?.user;
+      if (!user) {
+        if (active) setHistoryLoading(false);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("essay_reviews")
+        .select("id,score,c1,c2,c3,c4,c5,theme,review,created_at")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(6);
+
+      if (!active) return;
+      if (!error) setHistory((data ?? []) as EssayReviewRow[]);
+      setHistoryLoading(false);
+    })();
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   async function handleCorrection() {
     if (!hasCredits) {
@@ -214,7 +262,23 @@ function WritingCenterCard({
         throw new Error(result.error || "Não foi possível corrigir a redação.");
       }
 
-      setReview(result.review);
+      const completedReview = result.review;
+      setReview(completedReview);
+      setHistory((current) => [
+        {
+          id: `local-${Date.now()}`,
+          score: completedReview.estimatedScore,
+          c1: completedReview.competencies.c1.score,
+          c2: completedReview.competencies.c2.score,
+          c3: completedReview.competencies.c3.score,
+          c4: completedReview.competencies.c4.score,
+          c5: completedReview.competencies.c5.score,
+          theme: essayText.trim().slice(0, 90),
+          review: completedReview,
+          created_at: new Date().toISOString()
+        },
+        ...current
+      ].slice(0, 6));
       if (typeof result.balance === "number") onBalanceChange(result.balance);
       setMessage("Correção concluída. Cinco créditos foram consumidos.");
     } catch (error) {
@@ -264,7 +328,28 @@ function WritingCenterCard({
           {message}
         </p>
       )}
-      {review && <EssayReviewResult review={review} />}
+      {review && (
+        <EssayReviewResult
+          review={review}
+          onNewEssay={() => {
+            setEssayText("");
+            setReview(null);
+            setMessage("");
+          }}
+          onRewrite={() => {
+            setReview(null);
+            setMessage("Reescreva abaixo usando a correção como guia. Esta nova correção usará 5 créditos.");
+          }}
+        />
+      )}
+      <EssayHistory
+        history={history}
+        loading={historyLoading}
+        onSelect={(selectedReview) => {
+          setReview(selectedReview);
+          setMessage("Correção do histórico carregada.");
+        }}
+      />
       {!hasCredits && !message && (
         <p className="mt-3 rounded-lg border border-white/10 bg-black/30 p-3 text-sm leading-6 text-slate-300">
           São necessários 5 créditos. A ferramenta não inicia cobranças nem permite saldo negativo.
@@ -299,32 +384,101 @@ function CommanderCard() {
   );
 }
 
-function EssayReviewResult({ review }: { review: EssayReview }) {
-  const competencies = Object.entries(review.competencies);
+function EssayReviewResult({
+  review,
+  onNewEssay,
+  onRewrite
+}: {
+  review: EssayReview;
+  onNewEssay: () => void;
+  onRewrite: () => void;
+}) {
+  const [openCompetency, setOpenCompetency] = useState<number | null>(null);
+  const score = review.nota_total ?? review.estimatedScore;
+  const classification = classifyEssay(score);
+  const competencies = buildCompetencyCards(review);
 
   return (
-    <div className="mt-5 rounded-lg border border-accent/25 bg-black/35 p-4 sm:p-5">
-      <div className="flex items-end justify-between gap-4">
+    <div className="mt-5 space-y-4 rounded-lg border border-accent/25 bg-black/35 p-4 shadow-[0_0_42px_rgba(124,58,237,0.12)] sm:p-5">
+      <div className="grid gap-4 rounded-lg border border-white/10 bg-gradient-to-br from-accent/20 via-white/[0.04] to-black/30 p-4 sm:grid-cols-[1fr_auto] sm:p-5">
         <div>
-          <p className="text-xs font-medium uppercase tracking-[0.18em] text-aura">Nota estimada</p>
-          <p className="energy-text mt-1 text-5xl font-semibold text-white">{review.estimatedScore}</p>
-        </div>
-        <p className="pb-1 text-sm text-muted">de 1000 pontos</p>
-      </div>
-      <div className="mt-5 grid gap-3 sm:grid-cols-2">
-        {competencies.map(([key, competency], index) => (
-          <div key={key} className="rounded-lg border border-white/10 bg-white/[0.035] p-3">
-            <div className="flex items-center justify-between gap-3">
-              <p className="font-semibold text-white">Competência {index + 1}</p>
-              <span className="text-sm text-aura">{competency.score}/200</span>
-            </div>
-            <p className="mt-2 text-sm leading-6 text-muted">{competency.analysis}</p>
+          <p className="text-xs font-medium uppercase tracking-[0.18em] text-aura">Resultado da correção</p>
+          <div className="mt-3 flex flex-wrap items-end gap-3">
+            <p className="energy-text text-6xl font-semibold leading-none text-white sm:text-7xl">{score}</p>
+            <p className="pb-2 text-lg font-semibold text-slate-300">/ 1000</p>
           </div>
-        ))}
+          <p className="mt-3 text-sm leading-6 text-slate-300">Análise estimada pelas cinco competências do ENEM.</p>
+        </div>
+        <div className={`self-start rounded-lg border px-4 py-3 text-center ${classification.className}`}>
+          <p className="text-[0.62rem] uppercase tracking-[0.16em] opacity-80">classificação</p>
+          <p className="mt-1 text-lg font-semibold">{classification.label}</p>
+        </div>
       </div>
-      <ReviewList title="Pontos fortes" items={review.strengths} />
-      <ReviewList title="Pontos fracos" items={review.weaknesses} />
-      <ReviewList title="Próximas melhorias" items={review.improvements} />
+      <div className="grid gap-3 lg:grid-cols-5">
+        {competencies.map((competency) => {
+          const open = openCompetency === competency.numero;
+          return (
+            <div key={competency.numero} className="rounded-lg border border-white/10 bg-white/[0.035] p-3">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-[0.65rem] font-medium uppercase tracking-[0.14em] text-muted">
+                    Competência {competency.numero}
+                  </p>
+                  <h3 className="mt-1 text-sm font-semibold leading-5 text-white">{competency.nome}</h3>
+                </div>
+                <span className={`rounded-md px-2 py-1 text-xs font-semibold ${competency.statusClass}`}>
+                  {competency.status}
+                </span>
+              </div>
+              <p className="energy-text mt-4 text-3xl font-semibold text-white">{competency.nota}/200</p>
+              <p className="mt-2 min-h-10 text-xs leading-5 text-muted">{competency.descricao}</p>
+              <p className="mt-3 text-sm leading-6 text-slate-300">{competency.resumo}</p>
+              <button
+                type="button"
+                onClick={() => setOpenCompetency(open ? null : competency.numero)}
+                className="mt-3 flex w-full items-center justify-between rounded-lg border border-white/10 bg-black/25 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:border-accent/30"
+              >
+                Ver detalhes
+                <ChevronDown className={`h-4 w-4 transition ${open ? "rotate-180" : ""}`} />
+              </button>
+              {open && <p className="mt-3 text-sm leading-6 text-muted">{competency.detalhes}</p>}
+            </div>
+          );
+        })}
+      </div>
+      <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
+        <section className="rounded-lg border border-white/10 bg-white/[0.035] p-4">
+          <p className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.16em] text-aura">
+            <Target className="h-4 w-4" />
+            Diagnóstico do Comandante
+          </p>
+          <p className="mt-3 text-sm leading-6 text-slate-300">{review.diagnostico_geral ?? review.summary}</p>
+        </section>
+        <section className="rounded-lg border border-accent/25 bg-accent/[0.08] p-4">
+          <p className="text-xs font-medium uppercase tracking-[0.16em] text-aura">Missão de hoje</p>
+          <h3 className="mt-2 text-lg font-semibold text-white">Faça isso antes de enviar sua próxima redação.</h3>
+          <Checklist items={review.missao_de_hoje ?? review.improvements} />
+        </section>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-3">
+        <ReviewPanel title="Pontos fortes" items={review.pontos_fortes ?? review.strengths} tone="good" />
+        <ReviewPanel title="Pontos fracos" items={review.principais_erros ?? review.weaknesses} tone="warn" />
+        <ReviewPanel title="Plano de melhoria" items={review.plano_de_melhoria ?? review.improvements} tone="action" ordered />
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        <Button onClick={onRewrite} className="min-h-12">
+          Reescrever com base na correção
+        </Button>
+        <button
+          type="button"
+          onClick={onNewEssay}
+          className="min-h-12 rounded-lg border border-white/10 bg-white/[0.045] px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-accent/35 hover:text-white"
+        >
+          Enviar nova redação
+        </button>
+      </div>
     </div>
   );
 }
@@ -338,6 +492,192 @@ function ReviewList({ title, items }: { title: string; items: string[] }) {
       </ul>
     </div>
   );
+}
+
+function EssayHistory({
+  history,
+  loading,
+  onSelect
+}: {
+  history: EssayReviewRow[];
+  loading: boolean;
+  onSelect: (review: EssayReview) => void;
+}) {
+  return (
+    <div className="mt-5 rounded-lg border border-white/10 bg-black/30 p-4">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <p className="text-xs font-medium uppercase tracking-[0.16em] text-aura">Histórico de Redações</p>
+          <h3 className="mt-1 text-lg font-semibold text-white">Últimas correções</h3>
+        </div>
+        {loading && <Loader size="sm" />}
+      </div>
+      {!loading && history.length === 0 && (
+        <p className="mt-4 text-sm leading-6 text-muted">Seu histórico aparecerá aqui depois da primeira correção.</p>
+      )}
+      <div className="mt-4 grid gap-3">
+        {history.map((item) => {
+          const best = bestCompetency(item);
+          const worst = worstCompetency(item);
+          return (
+            <div key={item.id} className="grid gap-3 rounded-lg border border-white/10 bg-white/[0.035] p-3 sm:grid-cols-[1fr_auto] sm:items-center">
+              <div className="min-w-0">
+                <p className="text-xs text-muted">{formatDate(item.created_at)}</p>
+                <p className="mt-1 truncate text-sm font-semibold text-white">{item.theme || "Tema não identificado"}</p>
+                <p className="mt-1 text-xs text-muted">Melhor: {best} · Pior: {worst}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="energy-text min-w-16 text-right text-2xl font-semibold text-white">{item.score}</span>
+                <button
+                  type="button"
+                  onClick={() => onSelect(normalizeStoredReview(item.review, item))}
+                  className="rounded-lg border border-accent/30 bg-accent/10 px-3 py-2 text-xs font-semibold text-aura transition hover:bg-accent/15"
+                >
+                  Ver correção
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function ReviewPanel({
+  title,
+  items,
+  tone,
+  ordered = false
+}: {
+  title: string;
+  items: string[];
+  tone: "good" | "warn" | "action";
+  ordered?: boolean;
+}) {
+  const toneClass = {
+    good: "border-emerald-300/20 bg-emerald-400/[0.05]",
+    warn: "border-amber-300/20 bg-amber-400/[0.05]",
+    action: "border-accent/25 bg-accent/[0.06]"
+  }[tone];
+
+  return (
+    <section className={`rounded-lg border p-4 ${toneClass}`}>
+      <h3 className="font-semibold text-white">{title}</h3>
+      <div className="mt-3 space-y-2">
+        {items.map((item, index) => (
+          <div key={`${title}-${index}`} className="flex gap-2 rounded-lg border border-white/10 bg-black/20 p-3 text-sm leading-6 text-slate-300">
+            <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-white/[0.06] text-[0.68rem] text-aura">
+              {ordered ? index + 1 : <CheckCircle2 className="h-3.5 w-3.5" />}
+            </span>
+            <span>{item}</span>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function Checklist({ items }: { items: string[] }) {
+  return (
+    <div className="mt-4 space-y-2">
+      {items.slice(0, 5).map((item, index) => (
+        <label key={`${item}-${index}`} className="flex gap-3 rounded-lg border border-white/10 bg-black/20 p-3 text-sm leading-6 text-slate-200">
+          <input type="checkbox" className="mt-1 h-4 w-4 rounded border-white/20 bg-black accent-violet" />
+          <span>{item}</span>
+        </label>
+      ))}
+    </div>
+  );
+}
+
+function classifyEssay(score: number) {
+  if (score >= 900) return { label: "Excelente", className: "border-emerald-300/25 bg-emerald-400/10 text-emerald-100" };
+  if (score >= 760) return { label: "Boa", className: "border-aura/25 bg-accent/10 text-aura" };
+  if (score >= 600) return { label: "Média", className: "border-sky-300/25 bg-sky-400/10 text-sky-100" };
+  if (score >= 400) return { label: "Fraca", className: "border-amber-300/25 bg-amber-400/10 text-amber-100" };
+  return { label: "Crítica", className: "border-rose-300/25 bg-rose-400/10 text-rose-100" };
+}
+
+const competencyInfo = [
+  { nome: "Norma padrão", descricao: "Gramática, pontuação, concordância e clareza formal." },
+  { nome: "Tema e repertório", descricao: "Compreensão da proposta e uso produtivo de repertório." },
+  { nome: "Argumentação", descricao: "Tese, projeto de texto, profundidade e progressão." },
+  { nome: "Coesão", descricao: "Conectivos, retomadas e encadeamento textual." },
+  { nome: "Intervenção", descricao: "Agente, ação, meio, finalidade e detalhamento." }
+];
+
+function buildCompetencyCards(review: EssayReview) {
+  const entries = [review.competencies.c1, review.competencies.c2, review.competencies.c3, review.competencies.c4, review.competencies.c5];
+  return entries.map((competency, index) => {
+    const status = competency.score >= 180 ? "excelente" : competency.score >= 140 ? "bom" : "atenção";
+    const statusClass = {
+      excelente: "bg-emerald-400/10 text-emerald-100",
+      bom: "bg-accent/10 text-aura",
+      atenção: "bg-amber-400/10 text-amber-100"
+    }[status];
+    return {
+      numero: index + 1,
+      nome: competencyInfo[index].nome,
+      descricao: competencyInfo[index].descricao,
+      nota: competency.score,
+      status,
+      statusClass,
+      resumo: competency.justificativa || competency.analysis.split(" Problemas:")[0] || "Análise registrada.",
+      detalhes: competency.analysis
+    };
+  });
+}
+
+function normalizeStoredReview(review: EssayReview, row: EssayReviewRow): EssayReview {
+  return {
+    ...review,
+    estimatedScore: review.estimatedScore ?? row.score,
+    competencies: review.competencies ?? {
+      c1: { score: row.c1, analysis: "Histórico salvo." },
+      c2: { score: row.c2, analysis: "Histórico salvo." },
+      c3: { score: row.c3, analysis: "Histórico salvo." },
+      c4: { score: row.c4, analysis: "Histórico salvo." },
+      c5: { score: row.c5, analysis: "Histórico salvo." }
+    },
+    strengths: review.strengths ?? review.pontos_fortes ?? [],
+    weaknesses: review.weaknesses ?? review.principais_erros ?? [],
+    improvements: review.improvements ?? review.missao_de_hoje ?? [],
+    summary: review.summary ?? review.diagnostico_geral ?? "Correção salva no histórico."
+  };
+}
+
+function bestCompetency(row: EssayReviewRow) {
+  return scoreLabel([
+    ["C1", row.c1],
+    ["C2", row.c2],
+    ["C3", row.c3],
+    ["C4", row.c4],
+    ["C5", row.c5]
+  ].sort((a, b) => Number(b[1]) - Number(a[1]))[0]);
+}
+
+function worstCompetency(row: EssayReviewRow) {
+  return scoreLabel([
+    ["C1", row.c1],
+    ["C2", row.c2],
+    ["C3", row.c3],
+    ["C4", row.c4],
+    ["C5", row.c5]
+  ].sort((a, b) => Number(a[1]) - Number(b[1]))[0]);
+}
+
+function scoreLabel(entry: (string | number)[]) {
+  return `${entry[0]} ${entry[1]}/200`;
+}
+
+function formatDate(value: string) {
+  return new Intl.DateTimeFormat("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit"
+  }).format(new Date(value));
 }
 
 function CreditsCard({ balance, planTag }: { balance: number | null; planTag: PlanTag }) {
@@ -358,10 +698,15 @@ function CreditsCard({ balance, planTag }: { balance: number | null; planTag: Pl
         {isEmpty
           ? "Saldo esgotado. Nenhuma operação poderá gerar saldo negativo."
           : "Cada pergunta usa 1 crédito e cada correção de redação usa 5."}{" "}
-        Plano atual: {planTag === "premium" ? "Premium" : "Free"}.
+        Plano atual: {formatPlanTag(planTag)}.
       </p>
     </Card>
   );
+}
+
+function formatPlanTag(planTag: PlanTag) {
+  if (planTag === "ADM") return "ADM";
+  return planTag === "premium" ? "Premium" : "Free";
 }
 
 function formatHours(minutes: number) {
