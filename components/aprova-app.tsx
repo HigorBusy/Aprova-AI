@@ -175,23 +175,26 @@ export function AprovaApp() {
     const supabase = getSupabaseClient();
     if (!supabase || !user || !state.profileKind || accountLoading) return;
 
+    const dateKey = todayKey();
     void Promise.all([
       supabase.from("daily_progress").upsert(
         {
           user_id: user.id,
-          progress_date: todayKey(),
+          progress_date: dateKey,
+          date_key: dateKey,
           studied_minutes: state.studiedMinutesToday,
           tasks_completed: state.completedTasks,
           questions_answered: state.questionCount
         },
-        { onConflict: "user_id,progress_date" }
+        { onConflict: "user_id,date_key" }
       ),
       supabase.from("streaks").upsert(
         {
           user_id: user.id,
           current_streak: state.currentStreak,
           best_streak: state.bestStreak,
-          last_study_date: state.studiedMinutesToday > 0 ? todayKey() : null
+          last_study_date: state.studiedMinutesToday > 0 ? dateKey : null,
+          last_study_date_key: state.studiedMinutesToday > 0 ? dateKey : null
         },
         { onConflict: "user_id" }
       )
