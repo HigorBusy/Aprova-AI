@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { callGroq, COMMANDER_SYSTEM_PROMPT } from "@/lib/ai/groq";
+import { formatRepertoryContext, formatStudentContext } from "@/lib/ai/student-context";
 import { authenticateRequest } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
@@ -9,13 +10,13 @@ const CHAT_COST = 1;
 
 export async function POST(request: NextRequest) {
   const auth = await authenticateRequest(request);
-  if (!auth) return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
+  if (!auth) return NextResponse.json({ error: "Nao autorizado." }, { status: 401 });
 
   let body: { message?: unknown };
   try {
     body = (await request.json()) as { message?: unknown };
   } catch {
-    return NextResponse.json({ error: "Requisição inválida." }, { status: 400 });
+    return NextResponse.json({ error: "Requisicao invalida." }, { status: 400 });
   }
 
   const message = typeof body.message === "string" ? body.message.trim() : "";
@@ -33,9 +34,9 @@ export async function POST(request: NextRequest) {
     .eq("user_id", user.id)
     .maybeSingle();
 
-  if (creditError) return NextResponse.json({ error: "Não foi possível verificar seus créditos." }, { status: 500 });
+  if (creditError) return NextResponse.json({ error: "Nao foi possivel verificar seus creditos." }, { status: 500 });
   if (!creditRow || creditRow.balance < CHAT_COST) {
-    return NextResponse.json({ error: "Você ficou sem créditos.", balance: creditRow?.balance ?? 0 }, { status: 402 });
+    return NextResponse.json({ error: "Voce ficou sem creditos.", balance: creditRow?.balance ?? 0 }, { status: 402 });
   }
 
   const { data: recentMessages, error: historyError } = await supabase
@@ -45,16 +46,43 @@ export async function POST(request: NextRequest) {
     .order("created_at", { ascending: false })
     .limit(12);
 
-  if (historyError) return NextResponse.json({ error: "Não foi possível carregar o histórico." }, { status: 500 });
+  if (historyError) return NextResponse.json({ error: "Nao foi possivel carregar o historico." }, { status: 500 });
+
+  const [{ data: repertorios }, { data: profile }, { data: essays }] = await Promise.all([
+    supabase
+      .from("repertorios")
+      .select("autor,obra,tema,explicacao,categoria")
+      .limit(12),
+    supabase
+      .from("student_profile")
+      .select("average_score,best_score,worst_competency,best_competency,total_essays,last_essay_date")
+      .eq("user_id", user.id)
+      .maybeSingle(),
+    supabase
+      .from("essay_reviews")
+      .select("score,c1,c2,c3,c4,c5,theme,created_at")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(3)
+  ]);
+
+  const runtimeContext = [
+    formatStudentContext(profile, essays),
+    formatRepertoryContext(repertorios)
+  ].join("\n\n");
 
   try {
-    const reply = await callGroq([
-      { role: "system", content: COMMANDER_SYSTEM_PROMPT },
-      ...[...(recentMessages ?? [])]
-        .reverse()
-        .map((item) => ({ role: item.role as "user" | "assistant", content: item.content })),
-      { role: "user", content: message }
-    ]);
+    const reply = await callGroq(
+      [
+        { role: "system", content: COMMANDER_SYSTEM_PROMPT },
+        { role: "system", content: runtimeContext },
+        ...[...(recentMessages ?? [])]
+          .reverse()
+          .map((item) => ({ role: item.role as "user" | "assistant", content: item.content })),
+        { role: "user", content: message }
+      ],
+      { temperature: 0.5, maxTokens: 1_100 }
+    );
 
     const { data: completion, error: completionError } = await supabase.rpc(
       "complete_ai_exchange",
@@ -71,7 +99,7 @@ export async function POST(request: NextRequest) {
     if (completionError) throw completionError;
     if (!result?.success) {
       return NextResponse.json(
-        { error: "Você ficou sem créditos.", balance: result?.balance ?? 0 },
+        { error: "Voce ficou sem creditos.", balance: result?.balance ?? 0 },
         { status: 402 }
       );
     }
@@ -81,7 +109,7 @@ export async function POST(request: NextRequest) {
     console.error("Commander chat failed", error);
     const missingKey = error instanceof Error && error.message === "GROQ_API_KEY_NOT_CONFIGURED";
     return NextResponse.json(
-      { error: missingKey ? "O Comandante ainda não foi ativado no servidor." : "O Comandante não conseguiu responder agora. Nenhum crédito foi consumido." },
+      { error: missingKey ? "O Comandante ainda nao foi ativado no servidor." : "O Comandante nao conseguiu responder agora. Nenhum credito foi consumido." },
       { status: missingKey ? 503 : 502 }
     );
   }
