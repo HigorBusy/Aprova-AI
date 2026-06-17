@@ -1,5 +1,5 @@
-import { AprovaApp } from "@/components/aprova-app";
+import { HomeEntry } from "@/components/home-entry";
 
 export default function HomePage() {
-  return <AprovaApp />;
+  return <HomeEntry />;
 }
