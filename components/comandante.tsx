@@ -71,20 +71,21 @@ type SpeechRecognitionLike = {
 
 type SpeechRecognitionConstructor = new () => SpeechRecognitionLike;
 
+type PlanTag = "free" | "premium" | "ADM";
+
 const quickSuggestions = [
-  "Monte meu plano de estudo",
-  "Explique minha nota",
-  "Como melhorar minha C3?",
-  "Me dÃª um repertÃ³rio",
-  "Crie uma missÃ£o para hoje"
+  "Corrija minha estratégia de redação",
+  "Monte um plano de estudos",
+  "Me dê repertórios para redação",
+  "Como melhorar minha competência 3?"
 ];
 
 const fileTools = [
   "Explicar arquivo",
   "Resumir PDF",
-  "Gerar questÃµes",
+  "Gerar questões",
   "Explicar imagem",
-  "Analisar redaÃ§Ã£o por foto"
+  "Analisar redação por foto"
 ];
 
 export function Comandante() {
@@ -97,8 +98,9 @@ export function Comandante() {
   const [presentationSending, setPresentationSending] = useState(false);
   const [listening, setListening] = useState(false);
   const [error, setError] = useState("");
+  const [planTag, setPlanTag] = useState<PlanTag>("free");
   const [toolForm, setToolForm] = useState<ToolFormState>({
-    subject: "RedaÃ§Ã£o",
+    subject: "Redação",
     deadline: "14 dias",
     hoursPerDay: "1 hora",
     theme: "desigualdade educacional",
@@ -111,7 +113,7 @@ export function Comandante() {
     course: "",
     examDate: "ENEM",
     hoursPerDay: "2 horas",
-    difficultSubjects: "Redacao, matematica e natureza"
+    difficultSubjects: "Redação, matemática e natureza"
   });
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -131,22 +133,24 @@ export function Comandante() {
         return;
       }
 
-      const [historyResult, creditsResult] = await Promise.all([
+      const [historyResult, creditsResult, profileResult] = await Promise.all([
         supabase
           .from("ai_messages")
           .select("id,role,content,created_at")
           .eq("user_id", user.id)
           .order("created_at", { ascending: false })
           .limit(60),
-        supabase.from("user_credits").select("balance").eq("user_id", user.id).maybeSingle()
+        supabase.from("user_credits").select("balance").eq("user_id", user.id).maybeSingle(),
+        supabase.from("profiles").select("plan_tag").eq("id", user.id).maybeSingle()
       ]);
 
       if (!active) return;
       if (historyResult.error || creditsResult.error) {
-        setError("NÃ£o foi possÃ­vel carregar o histÃ³rico do Comandante.");
+        setError("Não foi possível carregar o histórico do Comandante.");
       } else {
         setMessages([...(historyResult.data as AiMessage[])].reverse());
         setBalance(creditsResult.data?.balance ?? 0);
+        setPlanTag(normalizePlanTag(profileResult.data?.plan_tag));
       }
       setLoading(false);
     })();
@@ -166,11 +170,11 @@ export function Comandante() {
     if (!supabase || sending || fileSending || presentationSending) return;
     if (!options.forceChat && isComplexPresentationRequest(content)) {
       setPresentationForm((current) => ({ ...current, request: content }));
-      setError("Esse pedido pode virar uma apresentacao completa. Confira o painel lateral: ela utilizara 10 creditos.");
+      setError("Esse pedido pode virar uma apresentação completa. Confira o painel lateral: ela utilizará 10 créditos.");
       return;
     }
     if ((balance ?? 0) < cost) {
-      setError(`VocÃª precisa de ${cost} crÃ©ditos para esta aÃ§Ã£o.`);
+      setError(`Você precisa de ${cost} créditos para esta ação.`);
       return;
     }
 
@@ -187,7 +191,7 @@ export function Comandante() {
     try {
       const { data } = await supabase.auth.getSession();
       const token = data.session?.access_token;
-      if (!token) throw new Error("SessÃ£o expirada.");
+      if (!token) throw new Error("Sessão expirada.");
 
       const response = await fetch("/api/ai/chat", {
         method: "POST",
@@ -217,7 +221,7 @@ export function Comandante() {
       setBalance(result.balance ?? balance);
     } catch (requestError) {
       setMessages((current) => current.filter((message) => message.id !== optimisticMessage.id));
-      setError(requestError instanceof Error ? requestError.message : "NÃ£o foi possÃ­vel enviar a mensagem.");
+      setError(requestError instanceof Error ? requestError.message : "Não foi possível enviar a mensagem.");
     } finally {
       setSending(false);
     }
@@ -227,7 +231,7 @@ export function Comandante() {
     const supabase = getSupabaseClient();
     if (!supabase || sending || fileSending || presentationSending) return;
     if ((balance ?? 0) < 3) {
-      setError("VocÃª precisa de 3 crÃ©ditos para analisar arquivo.");
+      setError("Você precisa de 3 créditos para analisar arquivo.");
       return;
     }
 
@@ -244,7 +248,7 @@ export function Comandante() {
     try {
       const { data } = await supabase.auth.getSession();
       const token = data.session?.access_token;
-      if (!token) throw new Error("SessÃ£o expirada.");
+      if (!token) throw new Error("Sessão expirada.");
 
       const formData = new FormData();
       formData.append("file", file);
@@ -257,7 +261,7 @@ export function Comandante() {
         body: formData
       });
       const result = (await response.json()) as { reply?: string; balance?: number; error?: string };
-      if (!response.ok || !result.reply) throw new Error(result.error || "NÃ£o foi possÃ­vel analisar o arquivo.");
+      if (!response.ok || !result.reply) throw new Error(result.error || "Não foi possível analisar o arquivo.");
 
       setMessages((current) => [
         ...current,
@@ -271,7 +275,7 @@ export function Comandante() {
       setBalance(result.balance ?? balance);
     } catch (requestError) {
       setMessages((current) => current.filter((message) => message.id !== optimisticMessage.id));
-      setError(requestError instanceof Error ? requestError.message : "NÃ£o foi possÃ­vel analisar o arquivo.");
+      setError(requestError instanceof Error ? requestError.message : "Não foi possível analisar o arquivo.");
     } finally {
       setFileSending(false);
     }
@@ -281,14 +285,14 @@ export function Comandante() {
     const supabase = getSupabaseClient();
     if (!supabase || sending || fileSending || presentationSending) return;
     if ((balance ?? 0) < PRESENTATION_COST) {
-      setError(`Voce precisa de ${PRESENTATION_COST} creditos para gerar uma apresentacao.`);
+      setError(`Você precisa de ${PRESENTATION_COST} créditos para gerar uma apresentação.`);
       return;
     }
 
     const optimisticMessage: AiMessage = {
       id: `presentation-${Date.now()}`,
       role: "user",
-      content: `[APRESENTACAO SOLICITADA]\nTemplate: ${values.template}\n${values.request}`,
+      content: `[APRESENTAÇÃO SOLICITADA]\nTemplate: ${values.template}\n${values.request}`,
       created_at: new Date().toISOString()
     };
     setMessages((current) => [...current, optimisticMessage]);
@@ -298,7 +302,7 @@ export function Comandante() {
     try {
       const { data } = await supabase.auth.getSession();
       const token = data.session?.access_token;
-      if (!token) throw new Error("Sessao expirada.");
+      if (!token) throw new Error("Sessão expirada.");
 
       const response = await fetch("/api/ai/presentation", {
         method: "POST",
@@ -314,7 +318,7 @@ export function Comandante() {
         error?: string;
       };
       if (!response.ok || !result.presentation) {
-        throw new Error(result.error || "Nao foi possivel gerar a apresentacao.");
+        throw new Error(result.error || "Não foi possível gerar a apresentação.");
       }
 
       setMessages((current) => [
@@ -329,7 +333,7 @@ export function Comandante() {
       setBalance(result.balance ?? balance);
     } catch (requestError) {
       setMessages((current) => current.filter((message) => message.id !== optimisticMessage.id));
-      setError(requestError instanceof Error ? requestError.message : "Nao foi possivel gerar a apresentacao.");
+      setError(requestError instanceof Error ? requestError.message : "Não foi possível gerar a apresentação.");
     } finally {
       setPresentationSending(false);
     }
@@ -337,7 +341,7 @@ export function Comandante() {
 
   function startVoiceCommand(mode: "transcribe" | "summary") {
     if ((balance ?? 0) < 2) {
-      setError("VocÃª precisa de 2 crÃ©ditos para usar Ã¡udio.");
+      setError("Você precisa de 2 créditos para usar áudio.");
       return;
     }
 
@@ -347,7 +351,7 @@ export function Comandante() {
     };
     const Recognition = speechWindow.SpeechRecognition ?? speechWindow.webkitSpeechRecognition;
     if (!Recognition) {
-      setError("Seu navegador nÃ£o liberou reconhecimento de voz. Use Chrome ou digite a mensagem.");
+      setError("Seu navegador não liberou reconhecimento de voz. Use Chrome ou digite a mensagem.");
       return;
     }
 
@@ -361,15 +365,15 @@ export function Comandante() {
     recognition.onresult = (event) => {
       const transcript = event.results[0]?.[0]?.transcript?.trim();
       if (!transcript) {
-        setError("NÃ£o consegui entender o Ã¡udio.");
+        setError("Não consegui entender o áudio.");
         return;
       }
       const prompt = mode === "summary"
-        ? `Transcreva mentalmente este Ã¡udio e crie um resumo de estudo com prÃ³ximos passos: ${transcript}`
-        : `TranscriÃ§Ã£o de Ã¡udio do aluno: ${transcript}`;
-      void sendMessage(prompt, { cost: 2, mode: "tool", toolName: mode === "summary" ? "Criar resumo de Ã¡udio" : "Transcrever Ã¡udio" });
+        ? `Transcreva mentalmente este áudio e crie um resumo de estudo com próximos passos: ${transcript}`
+        : `Transcrição de áudio do aluno: ${transcript}`;
+      void sendMessage(prompt, { cost: 2, mode: "tool", toolName: mode === "summary" ? "Criar resumo de áudio" : "Transcrever áudio" });
     };
-    recognition.onerror = () => setError("NÃ£o foi possÃ­vel capturar o Ã¡udio.");
+    recognition.onerror = () => setError("Não foi possível capturar o áudio.");
     recognition.onend = () => setListening(false);
     recognition.start();
   }
@@ -397,8 +401,8 @@ export function Comandante() {
 
   return (
     <main className="mission-grid min-h-[100dvh] bg-canvas px-4 py-4 text-white sm:px-6 lg:px-8 lg:py-6">
-      <div className="mx-auto flex min-h-[calc(100dvh-2rem)] w-full max-w-6xl flex-col lg:min-h-[calc(100dvh-3rem)]">
-        <header className="flex items-center justify-between gap-4 border-b border-white/10 pb-4">
+      <div className="mx-auto flex min-h-[calc(100dvh-2rem)] w-full max-w-7xl flex-col lg:min-h-[calc(100dvh-3rem)]">
+        <header className="flex flex-col gap-4 border-b border-white/10 pb-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex min-w-0 items-center gap-3">
             <Link
               href="/"
@@ -416,28 +420,34 @@ export function Comandante() {
               className="hidden h-9 w-auto object-contain sm:block"
             />
             <div className="min-w-0">
-              <p className="text-[0.65rem] font-medium uppercase tracking-[0.2em] text-aura">MÃ³dulo ativo</p>
+              <p className="text-[0.65rem] font-medium uppercase tracking-[0.2em] text-aura">Canal estratégico</p>
               <h1 className="truncate text-xl font-semibold text-white sm:text-2xl">Comandante IA</h1>
+              <p className="mt-1 text-sm text-muted">Seu mentor estratégico para o ENEM</p>
             </div>
           </div>
-          <div className="flex items-center gap-2 rounded-lg border border-accent/25 bg-accent/[0.08] px-3 py-2 shadow-[0_0_24px_rgba(124,58,237,0.14)]">
-            <CreditCard className="h-4 w-4 text-aura" />
-            <span className="text-sm font-semibold text-white">{balance ?? 0}</span>
-            <span className="hidden text-xs text-muted sm:inline">crÃ©ditos</span>
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.045] px-3 py-2 text-xs font-semibold text-slate-200">
+              Plano {formatPlanTag(planTag)}
+            </div>
+            <div className="flex items-center gap-2 rounded-full border border-accent/25 bg-accent/[0.08] px-3 py-2 shadow-[0_0_24px_rgba(124,58,237,0.14)]">
+              <CreditCard className="h-4 w-4 text-aura" />
+              <span className="text-sm font-semibold text-white">{balance ?? 0}</span>
+              <span className="text-xs text-muted">créditos</span>
+            </div>
           </div>
         </header>
 
-        <div className="grid min-h-0 flex-1 gap-4 pt-4 lg:grid-cols-[minmax(0,1fr)_300px]">
-          <Card className="flex min-h-[70dvh] min-w-0 flex-col overflow-hidden p-0 lg:min-h-0">
-            <div className="min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-6">
+        <div className="grid min-h-0 flex-1 gap-4 pt-4 xl:grid-cols-[minmax(0,1fr)_330px]">
+          <Card className="flex min-h-[76dvh] min-w-0 flex-col overflow-hidden rounded-[28px] border-accent/10 bg-white/[0.035] p-0 shadow-[0_0_70px_rgba(76,29,149,0.16)] lg:min-h-0">
+            <div className="min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-6 lg:px-8">
               {messages.length === 0 ? (
                 <div className="grid h-full min-h-[400px] place-items-center text-center">
-                  <div>
+                  <div className="max-w-2xl">
                     <div className="ai-orb mx-auto h-28 w-28" aria-hidden="true">
                       <div className="ai-orb-core" />
                     </div>
                     <p className="mt-7 text-xs font-medium uppercase tracking-[0.22em] text-aura">Canal aberto</p>
-                    <h2 className="mt-3 text-3xl font-semibold text-white">Qual Ã© o bloqueio da missÃ£o?</h2>
+                    <h2 className="mt-3 text-3xl font-semibold text-white sm:text-4xl">Qual é sua missão de hoje?</h2>
                     <p className="mx-auto mt-3 max-w-lg text-sm leading-6 text-muted">
                       Envie texto, PDF, imagem ou fale com o Comandante. Ele transforma tudo em rota de estudo.
                     </p>
@@ -449,31 +459,31 @@ export function Comandante() {
                     <MessageBubble key={message.id} message={message} onSpeak={speak} />
                   ))}
                   {busy && (
-                    <div className="flex items-center gap-3 text-sm text-muted">
+                    <div className="flex w-fit items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.045] px-4 py-3 text-sm text-muted shadow-[0_0_30px_rgba(124,58,237,0.12)]">
                       <Loader size="sm" />
-                      {presentationSending ? "Comandante montando apresentacao..." : "Comandante processando contexto..."}
+                      {presentationSending ? "Comandante montando apresentação..." : "Comandante analisando..."}
                     </div>
                   )}
                   <div ref={bottomRef} />
                 </div>
               )}
             </div>
-            <div className="border-t border-white/10 bg-black/30 p-3 sm:p-4">
-              {error && <p className="mb-3 text-sm text-rose-200">{error}</p>}
+            <div className="border-t border-white/10 bg-black/35 p-3 backdrop-blur-xl sm:p-4">
+              {error && <p className="mb-3 rounded-2xl border border-rose-300/15 bg-rose-500/[0.07] px-4 py-3 text-sm text-rose-100">{repairMojibake(error)}</p>}
               {!hasCredits && (
                 <p className="mb-3 rounded-lg border border-rose-400/20 bg-rose-500/[0.07] p-3 text-sm text-rose-100">
-                  VocÃª ficou sem crÃ©ditos.
+                  Você ficou sem créditos.
                 </p>
               )}
               <QuickSuggestions disabled={!hasCredits || busy} onSelect={(prompt) => void sendMessage(prompt)} />
               <AiInput
                 disabled={!hasCredits}
                 loading={busy}
-                placeholder={hasCredits ? "Pergunte ao Comandante IA..." : "Saldo esgotado"}
+                placeholder={hasCredits ? "Pergunte ao Comandante sobre redação, estudos ou estratégia..." : "Saldo esgotado"}
                 onSubmit={(message) => void sendMessage(message)}
               />
               <p className="mt-2 text-center text-[0.68rem] text-slate-600">
-                Texto usa 1 credito. Ferramentas usam 2. PDF e imagem usam 3. Apresentacao usa 10.
+                Texto usa 1 crédito. Ferramentas usam 2. PDF e imagem usam 3. Apresentação usa 10.
               </p>
             </div>
           </Card>
@@ -507,7 +517,7 @@ export function Comandante() {
                 <p className="text-xs font-medium uppercase tracking-[0.18em]">Diretriz</p>
               </div>
               <p className="mt-4 text-lg font-semibold leading-7 text-white">
-                NinguÃ©m estÃ¡ vindo te salvar, entÃ£o faÃ§a acontecer.
+                Ninguém está vindo te salvar, então faça acontecer.
               </p>
             </Card>
           </aside>
@@ -560,13 +570,13 @@ function PresentationPanel({
     <Card className="premium-glow">
       <div className="flex items-center gap-2 text-aura">
         <Presentation className="h-4 w-4" />
-        <p className="text-xs font-medium uppercase tracking-[0.18em]">Apresentacao IA</p>
+        <p className="text-xs font-medium uppercase tracking-[0.18em]">Apresentação IA</p>
       </div>
       <p className="mt-3 text-sm leading-6 text-muted">
-        Gere um mapa em 8 slides para planos, cronogramas, redacao ou recuperacao de nota.
+        Gere um mapa em 8 slides para planos, cronogramas, redação ou recuperação de nota.
       </p>
       <div className="mt-3 rounded-lg border border-accent/25 bg-accent/[0.08] p-3 text-xs font-semibold text-aura">
-        Esta apresentacao utilizara {PRESENTATION_COST} creditos.
+        Esta apresentação utilizará {PRESENTATION_COST} créditos.
       </div>
       <div className="mt-4 grid gap-3">
         <label className="grid gap-1">
@@ -587,7 +597,7 @@ function PresentationPanel({
             value={values.request}
             onChange={(event) => update("request", event.target.value)}
             className="min-h-24 resize-none rounded-lg border border-white/10 bg-black/35 px-3 py-2 text-xs leading-5 text-slate-100 outline-none placeholder:text-slate-600 focus:border-accent/40"
-            placeholder="Ex: Quero sair de 600 para 900 na redacao."
+            placeholder="Ex: Quero sair de 600 para 900 na redação."
           />
         </label>
         <div className="grid grid-cols-2 gap-2">
@@ -603,7 +613,7 @@ function PresentationPanel({
         onClick={() => onSubmit(values)}
         className="mt-4 min-h-11 w-full rounded-lg border border-accent/30 bg-accent/20 px-3 py-2 text-xs font-semibold text-aura shadow-[0_0_28px_rgba(124,58,237,0.16)] transition hover:bg-accent/25 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/[0.03] disabled:text-slate-600"
       >
-        Gerar apresentacao
+        Gerar apresentação
       </button>
     </Card>
   );
@@ -643,7 +653,7 @@ function FileUploadPanel({
       >
         <UploadCloud className="h-6 w-6 text-aura" />
         <span className="mt-2 text-sm font-semibold text-white">{file ? file.name : "Clique ou arraste aqui"}</span>
-        <span className="mt-1 text-xs leading-5 text-muted">PDF atÃ© 10MB. PNG, JPG, JPEG ou WEBP atÃ© 5MB.</span>
+        <span className="mt-1 text-xs leading-5 text-muted">PDF até 10MB. PNG, JPG, JPEG ou WEBP até 5MB.</span>
         <input
           type="file"
           accept=".pdf,.png,.jpg,.jpeg,.webp,application/pdf,image/png,image/jpeg,image/webp"
@@ -661,7 +671,7 @@ function FileUploadPanel({
       <textarea
         value={prompt}
         onChange={(event) => setPrompt(event.target.value)}
-        placeholder="Pedido opcional: resumir, explicar, criar questÃµes..."
+        placeholder="Pedido opcional: resumir, explicar, criar questões..."
         className="mt-3 min-h-20 w-full resize-none rounded-lg border border-white/10 bg-black/35 px-3 py-2 text-sm text-slate-100 outline-none placeholder:text-slate-600 focus:border-accent/40"
       />
       <button
@@ -675,7 +685,7 @@ function FileUploadPanel({
         }}
         className="mt-3 min-h-10 w-full rounded-lg border border-accent/30 bg-accent/15 px-3 py-2 text-xs font-semibold text-aura transition hover:bg-accent/20 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/[0.03] disabled:text-slate-600"
       >
-        Enviar arquivo Â· 3 crÃ©ditos
+        Enviar arquivo · 3 créditos
       </button>
     </Card>
   );
@@ -696,10 +706,10 @@ function VoicePanel({
     <Card>
       <div className="flex items-center gap-2 text-aura">
         <Mic className="h-4 w-4" />
-        <p className="text-xs font-medium uppercase tracking-[0.18em]">Ãudio</p>
+        <p className="text-xs font-medium uppercase tracking-[0.18em]">Áudio</p>
       </div>
       <p className="mt-3 text-sm leading-6 text-muted">
-        Use o microfone do navegador. NÃ£o salvamos gravaÃ§Ã£o.
+        Use o microfone do navegador. Não salvamos gravação.
       </p>
       <div className="mt-3 grid gap-2">
         <button
@@ -708,7 +718,7 @@ function VoicePanel({
           onClick={onTranscribe}
           className="min-h-10 rounded-lg border border-white/10 bg-white/[0.045] px-3 py-2 text-xs font-semibold text-slate-200 transition hover:border-accent/35 disabled:opacity-40"
         >
-          {listening ? "Ouvindo..." : "Transcrever Ã¡udio Â· 2 crÃ©ditos"}
+          {listening ? "Ouvindo..." : "Transcrever áudio · 2 créditos"}
         </button>
         <button
           type="button"
@@ -716,7 +726,7 @@ function VoicePanel({
           onClick={onSummary}
           className="min-h-10 rounded-lg border border-white/10 bg-white/[0.045] px-3 py-2 text-xs font-semibold text-slate-200 transition hover:border-accent/35 disabled:opacity-40"
         >
-          Criar resumo de Ã¡udio Â· 2 crÃ©ditos
+          Criar resumo de áudio · 2 créditos
         </button>
       </div>
     </Card>
@@ -744,44 +754,44 @@ function ToolsPanel({
         <Sparkles className="h-4 w-4" />
         <p className="text-xs font-medium uppercase tracking-[0.18em]">Ferramentas IA</p>
       </div>
-      <p className="mt-3 text-sm leading-6 text-muted">Atalhos de texto. Cada ferramenta usa 2 crÃ©ditos.</p>
+      <p className="mt-3 text-sm leading-6 text-muted">Atalhos de texto. Cada ferramenta usa 2 créditos.</p>
       <div className="mt-4 space-y-4">
         <ToolBox
           icon={<CalendarDays className="h-4 w-4" />}
           title="Plano de Estudo"
           disabled={disabled}
-          onRun={() => onRun("Plano de Estudo", `Monte um plano de estudo prÃ¡tico para ${values.subject}, com prazo de ${values.deadline} e ${values.hoursPerDay} por dia. Entregue por dias, prioridades e revisÃµes.`)}
+          onRun={() => onRun("Plano de Estudo", `Monte um plano de estudo prático para ${values.subject}, com prazo de ${values.deadline} e ${values.hoursPerDay} por dia. Entregue por dias, prioridades e revisões.`)}
         >
-          <ToolInput label="MatÃ©ria" value={values.subject} onChange={(value) => update("subject", value)} />
+          <ToolInput label="Matéria" value={values.subject} onChange={(value) => update("subject", value)} />
           <ToolInput label="Prazo" value={values.deadline} onChange={(value) => update("deadline", value)} />
           <ToolInput label="Horas/dia" value={values.hoursPerDay} onChange={(value) => update("hoursPerDay", value)} />
         </ToolBox>
 
         <ToolBox
           icon={<BookOpen className="h-4 w-4" />}
-          title="RepertÃ³rio ENEM"
+          title="Repertório ENEM"
           disabled={disabled}
-          onRun={() => onRun("RepertÃ³rio ENEM", `Indique repertÃ³rios Ãºteis para o tema "${values.theme}". Explique como usar na redaÃ§Ã£o e dÃª exemplos de frases.`)}
+          onRun={() => onRun("Repertório ENEM", `Indique repertórios úteis para o tema "${values.theme}". Explique como usar na redação e dê exemplos de frases.`)}
         >
           <ToolInput label="Tema" value={values.theme} onChange={(value) => update("theme", value)} />
         </ToolBox>
 
         <ToolBox
           icon={<Target className="h-4 w-4" />}
-          title="Melhorar CompetÃªncia"
+          title="Melhorar Competência"
           disabled={disabled}
-          onRun={() => onRun("Melhorar CompetÃªncia", `FaÃ§a um diagnÃ³stico prÃ¡tico para melhorar a ${values.competency} da redaÃ§Ã£o ENEM. Entregue exercÃ­cio prÃ¡tico e missÃ£o curta para hoje.`)}
+          onRun={() => onRun("Melhorar Competência", `Faça um diagnóstico prático para melhorar a ${values.competency} da redação ENEM. Entregue exercício prático e missão curta para hoje.`)}
         >
-          <ToolInput label="CompetÃªncia" value={values.competency} onChange={(value) => update("competency", value)} />
+          <ToolInput label="Competência" value={values.competency} onChange={(value) => update("competency", value)} />
         </ToolBox>
 
         <ToolBox
           icon={<SendHorizonal className="h-4 w-4" />}
           title="Simular Tema"
           disabled={disabled}
-          onRun={() => onRun("Simular Tema", `Crie um tema modelo ENEM sobre "${values.socialProblem}". Traga ideias de argumentos e repertÃ³rios possÃ­veis.`)}
+          onRun={() => onRun("Simular Tema", `Crie um tema modelo ENEM sobre "${values.socialProblem}". Traga ideias de argumentos e repertórios possíveis.`)}
         >
-          <ToolInput label="Ãrea/problema" value={values.socialProblem} onChange={(value) => update("socialProblem", value)} />
+          <ToolInput label="Área/problema" value={values.socialProblem} onChange={(value) => update("socialProblem", value)} />
         </ToolBox>
       </div>
     </Card>
@@ -814,7 +824,7 @@ function ToolBox({
         onClick={onRun}
         className="mt-3 min-h-9 w-full rounded-lg border border-accent/30 bg-accent/15 px-3 py-2 text-xs font-semibold text-aura transition hover:bg-accent/20 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/[0.03] disabled:text-slate-600"
       >
-        Executar Â· 2 crÃ©ditos
+        Executar · 2 créditos
       </button>
     </div>
   );
@@ -843,42 +853,48 @@ function ToolInput({
 
 function MessageBubble({ message, onSpeak }: { message: AiMessage; onSpeak: (text: string) => void }) {
   const isUser = message.role === "user";
-  const essayLabel = message.content.startsWith("[REDAÃ‡ÃƒO PARA CORREÃ‡ÃƒO]");
-  const fileLabel = message.content.startsWith("[ARQUIVO:");
-  const presentationLabel = message.content.startsWith("[APRESENTACAO SOLICITADA]");
-  const presentation = !isUser ? parsePresentation(message.content) : null;
+  const normalizedContent = repairMojibake(message.content);
+  const essayLabel = normalizedContent.startsWith("[REDAÇÃO PARA CORREÇÃO]");
+  const fileLabel = normalizedContent.startsWith("[ARQUIVO:");
+  const presentationLabel = normalizedContent.startsWith("[APRESENTAÇÃO SOLICITADA]") || normalizedContent.startsWith("[APRESENTACAO SOLICITADA]");
+  const presentation = !isUser ? parsePresentation(normalizedContent) : null;
   const content = essayLabel
-    ? "RedaÃ§Ã£o enviada para correÃ§Ã£o."
+    ? "Redação enviada para correção."
     : presentationLabel
-      ? message.content.split("\n").slice(0, 3).join("\n")
+      ? normalizedContent.split("\n").slice(0, 3).join("\n")
       : fileLabel
-      ? message.content.split("\n").slice(0, 3).join("\n")
-      : formatAssistantContent(message.content);
+      ? normalizedContent.split("\n").slice(0, 3).join("\n")
+      : formatAssistantContent(normalizedContent);
 
   return (
     <div className={`flex gap-3 ${isUser ? "justify-end" : "justify-start"}`}>
       {!isUser && (
-        <div className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-accent/30 bg-accent/10 text-aura">
+        <div className="mt-1 grid h-9 w-9 shrink-0 place-items-center rounded-2xl border border-accent/30 bg-accent/10 text-aura shadow-[0_0_28px_rgba(124,58,237,0.18)]">
           <Bot className="h-4 w-4" />
         </div>
       )}
       <div
-        className={`max-w-[88%] rounded-lg border px-4 py-3 text-sm leading-6 sm:max-w-[76%] ${
+        className={`group max-w-[90%] rounded-[24px] border px-4 py-3 text-sm leading-7 shadow-[0_18px_50px_rgba(0,0,0,0.22)] sm:max-w-[78%] lg:max-w-[70%] ${
           isUser
-            ? "border-accent/25 bg-accent/15 text-slate-100"
-            : "border-white/10 bg-white/[0.045] text-slate-200"
+            ? "rounded-br-lg border-accent/35 bg-gradient-to-br from-accent/85 via-violet/70 to-cosmic/70 text-white shadow-[0_0_36px_rgba(124,58,237,0.18)]"
+            : "rounded-bl-lg border-white/10 bg-white/[0.055] text-slate-200 backdrop-blur-xl"
         }`}
       >
+        <div className={`mb-2 flex items-center gap-2 text-[0.65rem] font-semibold uppercase tracking-[0.16em] ${isUser ? "text-violet-100/80" : "text-aura"}`}>
+          <span>{isUser ? "Você" : "Comandante"}</span>
+          <span className={isUser ? "text-white/35" : "text-slate-600"}>·</span>
+          <span className={isUser ? "text-white/55" : "text-slate-500"}>{formatMessageTime(message.created_at)}</span>
+        </div>
         {presentation ? (
           <PresentationDeckView deck={presentation} />
         ) : (
-          <div className="whitespace-pre-wrap">{content}</div>
+          <FormattedMessage content={content} isUser={isUser} />
         )}
         {!isUser && !presentation && (
           <button
             type="button"
             onClick={() => onSpeak(content)}
-            className="mt-3 inline-flex items-center gap-2 rounded-md border border-white/10 px-2 py-1 text-[0.68rem] font-semibold text-muted transition hover:text-white"
+            className="mt-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/20 px-3 py-1.5 text-[0.68rem] font-semibold text-muted transition hover:border-accent/30 hover:text-white"
           >
             <Volume2 className="h-3.5 w-3.5" />
             Ouvir resposta
@@ -886,12 +902,63 @@ function MessageBubble({ message, onSpeak }: { message: AiMessage; onSpeak: (tex
         )}
       </div>
       {isUser && (
-        <div className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-white/10 bg-white/[0.04] text-slate-400">
+        <div className="mt-1 grid h-9 w-9 shrink-0 place-items-center rounded-2xl border border-white/10 bg-white/[0.04] text-slate-300">
           <UserRound className="h-4 w-4" />
         </div>
       )}
     </div>
   );
+}
+
+function FormattedMessage({ content, isUser }: { content: string; isUser: boolean }) {
+  const blocks = content.replace(/\r\n/g, "\n").split(/\n{2,}/).filter(Boolean);
+
+  return (
+    <div className={isUser ? "space-y-3 text-white" : "space-y-4 text-slate-200"}>
+      {blocks.map((block, blockIndex) => {
+        const lines = block.split("\n").filter((line) => line.trim().length > 0);
+        if (lines.length > 1) {
+          return (
+            <div key={`${block}-${blockIndex}`} className="space-y-2">
+              {lines.map((line, lineIndex) => (
+                <MessageLine key={`${line}-${lineIndex}`} line={line} isUser={isUser} />
+              ))}
+            </div>
+          );
+        }
+        return <MessageLine key={`${block}-${blockIndex}`} line={block} isUser={isUser} />;
+      })}
+    </div>
+  );
+}
+
+function MessageLine({ line, isUser }: { line: string; isUser: boolean }) {
+  const cleanLine = line.trim();
+  const bulletMatch = cleanLine.match(/^[-*•]\s+(.+)/);
+  const numberMatch = cleanLine.match(/^(\d+)[\).]\s+(.+)/);
+  const heading = cleanLine
+    .replace(/^#{1,4}\s*/, "")
+    .replace(/^\*\*(.+)\*\*$/, "$1");
+  const looksLikeHeading = !isUser && !bulletMatch && !numberMatch && heading.length <= 80 && (/[:：]$/.test(heading) || /^competência\s+\d/i.test(heading));
+
+  if (bulletMatch || numberMatch) {
+    const marker = numberMatch?.[1] ?? "";
+    const text = bulletMatch?.[1] ?? numberMatch?.[2] ?? cleanLine;
+    return (
+      <div className="flex gap-2">
+        <span className={`mt-2.5 h-1.5 shrink-0 rounded-full ${isUser ? "w-1.5 bg-white/80" : "w-1.5 bg-aura shadow-[0_0_10px_rgba(168,85,247,0.7)]"}`}>
+          {marker ? <span className="sr-only">{marker}</span> : null}
+        </span>
+        <p className="min-w-0 break-words">{text}</p>
+      </div>
+    );
+  }
+
+  if (looksLikeHeading) {
+    return <p className="pt-1 text-sm font-semibold uppercase tracking-[0.08em] text-aura">{heading.replace(/:$/, "")}</p>;
+  }
+
+  return <p className="break-words">{cleanLine}</p>;
 }
 
 function PresentationDeckView({ deck }: { deck: PresentationDeck }) {
@@ -931,7 +998,7 @@ function PresentationDeckView({ deck }: { deck: PresentationDeck }) {
             </ul>
             {slide.mission && (
               <div className="mt-3 rounded-lg border border-accent/20 bg-accent/[0.07] p-3 text-xs font-semibold leading-5 text-aura">
-                Missao: {slide.mission}
+                Missão: {slide.mission}
               </div>
             )}
           </article>
@@ -939,7 +1006,7 @@ function PresentationDeckView({ deck }: { deck: PresentationDeck }) {
       </div>
 
       <div className="rounded-xl border border-white/10 bg-white/[0.04] p-4">
-        <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-muted">Proxima acao</p>
+        <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-muted">Próxima ação</p>
         <p className="mt-2 text-sm font-semibold leading-6 text-white">{deck.nextAction}</p>
       </div>
     </div>
@@ -959,11 +1026,61 @@ function formatAssistantContent(content: string) {
   try {
     const parsed = JSON.parse(content) as { type?: string; estimatedScore?: number; summary?: string };
     if (parsed.type === "essay_review") {
-      return `CorreÃ§Ã£o de redaÃ§Ã£o concluÃ­da. Nota estimada: ${parsed.estimatedScore ?? 0}/1000. ${parsed.summary ?? ""}`;
+      return `Correção de redação concluída. Nota estimada: ${parsed.estimatedScore ?? 0}/1000. ${parsed.summary ?? ""}`;
     }
   } catch {
     return content;
   }
   return content;
 }
+
+function normalizePlanTag(value: unknown): PlanTag {
+  return value === "premium" || value === "ADM" ? value : "free";
+}
+
+function formatPlanTag(planTag: PlanTag) {
+  if (planTag === "ADM") return "ADM";
+  return planTag === "premium" ? "Premium" : "Free";
+}
+
+function formatMessageTime(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+}
+
+function repairMojibake(value: string) {
+  if (!/[ÃÂâ]/.test(value)) return value;
+
+  try {
+    const bytes = Uint8Array.from(value, (char) => char.charCodeAt(0) & 0xff);
+    const decoded = new TextDecoder("utf-8", { fatal: false }).decode(bytes);
+    if (decoded && !decoded.includes("�")) return decoded;
+  } catch {
+    // Fallback below keeps old saved history readable without touching storage.
+  }
+
+  const replacements: Array<[RegExp, string]> = [
+    [/Ã¡/g, "á"],
+    [/Ã /g, "à"],
+    [/Ã¢/g, "â"],
+    [/Ã£/g, "ã"],
+    [/Ã©/g, "é"],
+    [/Ãª/g, "ê"],
+    [/Ã­/g, "í"],
+    [/Ã³/g, "ó"],
+    [/Ã´/g, "ô"],
+    [/Ãµ/g, "õ"],
+    [/Ãº/g, "ú"],
+    [/Ã§/g, "ç"],
+    [/Ã/g, "Á"],
+    [/Ã‡/g, "Ç"],
+    [/Â·/g, "·"],
+    [/â€¦/g, "..."],
+    [/â€”|â€“/g, "-"]
+  ];
+
+  return replacements.reduce((current, [pattern, replacement]) => current.replace(pattern, replacement), value);
+}
+
 
