@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { Eye, EyeOff, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, ShieldCheck, Sparkles } from "lucide-react";
 
 import { Loader } from "@/components/ui/loader-15";
 
@@ -15,6 +15,7 @@ type SignInPageProps = {
   onModeChange: (mode: AuthMode) => void;
   onSubmit: (data: { email: string; password: string; name?: string }) => void;
   onResetPassword: (email: string) => void;
+  onBackToLanding?: () => void;
 };
 
 export function SignInPage({
@@ -23,7 +24,8 @@ export function SignInPage({
   submitting = false,
   onModeChange,
   onSubmit,
-  onResetPassword
+  onResetPassword,
+  onBackToLanding
 }: SignInPageProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
@@ -56,6 +58,16 @@ export function SignInPage({
           <p className="text-xs font-medium uppercase tracking-[0.22em] text-aura">
             Central de controle
           </p>
+          {mode === "login" && onBackToLanding && (
+            <button
+              type="button"
+              onClick={onBackToLanding}
+              className="mt-4 inline-flex min-h-10 items-center gap-2 rounded-lg border border-white/10 bg-white/[0.045] px-3 text-xs font-semibold uppercase tracking-[0.14em] text-slate-300 transition hover:border-accent/40 hover:bg-accent/[0.08] hover:text-white"
+            >
+              <ArrowLeft className="h-3.5 w-3.5 text-aura" />
+              Ver landing page
+            </button>
+          )}
           <h1 className="energy-text mt-4 text-4xl font-semibold leading-[1.04] text-white sm:text-5xl">
             {mode === "login" ? "Retome sua rota." : "Comece sua missão."}
           </h1>
