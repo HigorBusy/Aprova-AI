@@ -164,8 +164,8 @@ export async function callGroq(messages: GroqMessage[], options: GroqOptions = {
   });
 
   if (!response.ok) {
-    const body = await response.text();
-    console.error("Groq request failed", response.status, body.slice(0, 500));
+    await response.arrayBuffer();
+    console.error("Groq request failed", { status: response.status });
     throw new Error(`GROQ_REQUEST_FAILED_${response.status}`);
   }
 

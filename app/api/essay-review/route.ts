@@ -3,6 +3,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { normalizeEssayReview, type RawEssayReview } from "@/lib/ai/essay-review";
 import { callGroq, ESSAY_REVIEW_SYSTEM_PROMPT, parseJsonResponse } from "@/lib/ai/groq";
 import { formatRepertoryContext, formatStudentContext } from "@/lib/ai/student-context";
+import { sanitizeTextInput } from "@/lib/security/input";
+import { checkRateLimit, rateLimitResponse } from "@/lib/security/rate-limit";
+import { rejectLargeRequest } from "@/lib/security/request";
 import { authenticateRequest } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
@@ -12,6 +15,16 @@ const ESSAY_COST = 5;
 export async function POST(request: NextRequest) {
   const auth = await authenticateRequest(request);
   if (!auth) return NextResponse.json({ error: "Nao autorizado." }, { status: 401 });
+  const { supabase, user } = auth;
+
+  const rateLimit = checkRateLimit(`essay-review:${user.id}`, 4, 60_000);
+  if (!rateLimit.allowed) {
+    const response = rateLimitResponse(rateLimit.resetAt);
+    return NextResponse.json(response.body, response.init);
+  }
+
+  const oversized = rejectLargeRequest(request, 160 * 1024);
+  if (oversized) return oversized;
 
   let body: { essay?: unknown };
   try {
@@ -20,7 +33,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Requisicao invalida." }, { status: 400 });
   }
 
-  const essay = typeof body.essay === "string" ? body.essay.trim() : "";
+  const essay = typeof body.essay === "string" ? sanitizeTextInput(body.essay, 30_000) : "";
   if (essay.length < 50 || essay.length > 30_000) {
     return NextResponse.json(
       { error: "Cole uma redacao entre 50 e 30.000 caracteres." },
@@ -28,7 +41,6 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { supabase, user } = auth;
   const { data: creditRow, error: creditError } = await supabase
     .from("user_credits")
     .select("balance")
@@ -106,7 +118,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ review, balance: result.balance });
   } catch (error) {
-    console.error("Essay review failed", error);
+    console.error("Essay review failed", {
+      userId: user.id,
+      reason: error instanceof Error ? error.message : "unknown"
+    });
     const missingKey = error instanceof Error && error.message === "GROQ_API_KEY_NOT_CONFIGURED";
     return NextResponse.json(
       { error: missingKey ? "A correcao por IA ainda nao foi ativada no servidor." : "Nao foi possivel corrigir a redacao agora. Nenhum credito foi consumido." },

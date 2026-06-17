@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { callGroq, COMMANDER_SYSTEM_PROMPT } from "@/lib/ai/groq";
 import { formatRepertoryContext, formatStudentContext } from "@/lib/ai/student-context";
+import { sanitizeSingleLine, sanitizeTextInput } from "@/lib/security/input";
+import { checkRateLimit, rateLimitResponse } from "@/lib/security/rate-limit";
+import { rejectLargeRequest } from "@/lib/security/request";
 import { authenticateRequest } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
@@ -12,6 +15,16 @@ const TOOL_COST = 2;
 export async function POST(request: NextRequest) {
   const auth = await authenticateRequest(request);
   if (!auth) return NextResponse.json({ error: "Nao autorizado." }, { status: 401 });
+  const { supabase, user } = auth;
+
+  const rateLimit = checkRateLimit(`ai-chat:${user.id}`, 12, 60_000);
+  if (!rateLimit.allowed) {
+    const response = rateLimitResponse(rateLimit.resetAt);
+    return NextResponse.json(response.body, response.init);
+  }
+
+  const oversized = rejectLargeRequest(request, 64 * 1024);
+  if (oversized) return oversized;
 
   let body: { message?: unknown; mode?: unknown; toolName?: unknown };
   try {
@@ -20,10 +33,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Requisicao invalida." }, { status: 400 });
   }
 
-  const message = typeof body.message === "string" ? body.message.trim() : "";
+  const message = typeof body.message === "string" ? sanitizeTextInput(body.message, 8_000) : "";
   const isTool = body.mode === "tool";
   const cost = isTool ? TOOL_COST : CHAT_COST;
-  const toolName = typeof body.toolName === "string" ? body.toolName.trim().slice(0, 80) : "Ferramenta IA";
+  const toolName = typeof body.toolName === "string" ? sanitizeSingleLine(body.toolName, 80) : "Ferramenta IA";
   if (!message || message.length > 8_000) {
     return NextResponse.json(
       { error: "Envie uma mensagem entre 1 e 8.000 caracteres." },
@@ -31,7 +44,6 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { supabase, user } = auth;
   const { data: creditRow, error: creditError } = await supabase
     .from("user_credits")
     .select("balance")
@@ -110,7 +122,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ reply, balance: result.balance });
   } catch (error) {
-    console.error("Commander chat failed", error);
+    console.error("Commander chat failed", {
+      userId: user.id,
+      reason: error instanceof Error ? error.message : "unknown"
+    });
     const missingKey = error instanceof Error && error.message === "GROQ_API_KEY_NOT_CONFIGURED";
     return NextResponse.json(
       { error: missingKey ? "O Comandante ainda nao foi ativado no servidor." : "O Comandante nao conseguiu responder agora. Nenhum credito foi consumido." },
