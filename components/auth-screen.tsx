@@ -8,9 +8,10 @@ import { getSupabaseClient } from "@/lib/supabase/client";
 
 type AuthScreenProps = {
   onAuthenticated: (user: User) => void;
+  onBackToLanding?: () => void;
 };
 
-export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
+export function AuthScreen({ onAuthenticated, onBackToLanding }: AuthScreenProps) {
   const [mode, setMode] = useState<AuthMode>("login");
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -102,6 +103,7 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
       }}
       onSubmit={(data) => void submit(data)}
       onResetPassword={(email) => void resetPassword(email)}
+      onBackToLanding={onBackToLanding}
     />
   );
 }
