@@ -11,16 +11,17 @@ export const runtime = "nodejs";
 
 const CHAT_COST = 1;
 const TOOL_COST = 2;
+const JSON_UTF8_HEADERS = { "Content-Type": "application/json; charset=utf-8" };
 
 export async function POST(request: NextRequest) {
   const auth = await authenticateRequest(request);
-  if (!auth) return NextResponse.json({ error: "Nao autorizado." }, { status: 401 });
+  if (!auth) return jsonUtf8({ error: "Não autorizado." }, { status: 401 });
   const { supabase, user } = auth;
 
   const rateLimit = checkRateLimit(`ai-chat:${user.id}`, 12, 60_000);
   if (!rateLimit.allowed) {
     const response = rateLimitResponse(rateLimit.resetAt);
-    return NextResponse.json(response.body, response.init);
+    return jsonUtf8(response.body, response.init);
   }
 
   const oversized = rejectLargeRequest(request, 64 * 1024);
@@ -30,7 +31,7 @@ export async function POST(request: NextRequest) {
   try {
     body = (await request.json()) as { message?: unknown; mode?: unknown; toolName?: unknown };
   } catch {
-    return NextResponse.json({ error: "Requisicao invalida." }, { status: 400 });
+    return jsonUtf8({ error: "Requisição inválida." }, { status: 400 });
   }
 
   const message = typeof body.message === "string" ? sanitizeTextInput(body.message, 8_000) : "";
@@ -38,7 +39,7 @@ export async function POST(request: NextRequest) {
   const cost = isTool ? TOOL_COST : CHAT_COST;
   const toolName = typeof body.toolName === "string" ? sanitizeSingleLine(body.toolName, 80) : "Ferramenta IA";
   if (!message || message.length > 8_000) {
-    return NextResponse.json(
+    return jsonUtf8(
       { error: "Envie uma mensagem entre 1 e 8.000 caracteres." },
       { status: 400 }
     );
@@ -50,9 +51,9 @@ export async function POST(request: NextRequest) {
     .eq("user_id", user.id)
     .maybeSingle();
 
-  if (creditError) return NextResponse.json({ error: "Nao foi possivel verificar seus creditos." }, { status: 500 });
+  if (creditError) return jsonUtf8({ error: "Não foi possível verificar seus créditos." }, { status: 500 });
   if (!creditRow || creditRow.balance < cost) {
-    return NextResponse.json({ error: "Voce ficou sem creditos.", balance: creditRow?.balance ?? 0 }, { status: 402 });
+    return jsonUtf8({ error: "Você ficou sem créditos.", balance: creditRow?.balance ?? 0 }, { status: 402 });
   }
 
   const { data: recentMessages, error: historyError } = await supabase
@@ -62,7 +63,7 @@ export async function POST(request: NextRequest) {
     .order("created_at", { ascending: false })
     .limit(12);
 
-  if (historyError) return NextResponse.json({ error: "Nao foi possivel carregar o historico." }, { status: 500 });
+  if (historyError) return jsonUtf8({ error: "Não foi possível carregar o histórico." }, { status: 500 });
 
   const [{ data: repertorios }, { data: profile }, { data: essays }] = await Promise.all([
     supabase
@@ -114,22 +115,32 @@ export async function POST(request: NextRequest) {
 
     if (completionError) throw completionError;
     if (!result?.success) {
-      return NextResponse.json(
-        { error: "Voce ficou sem creditos.", balance: result?.balance ?? 0 },
+      return jsonUtf8(
+        { error: "Você ficou sem créditos.", balance: result?.balance ?? 0 },
         { status: 402 }
       );
     }
 
-    return NextResponse.json({ reply, balance: result.balance });
+    return jsonUtf8({ reply, balance: result.balance });
   } catch (error) {
     console.error("Commander chat failed", {
       userId: user.id,
       reason: error instanceof Error ? error.message : "unknown"
     });
     const missingKey = error instanceof Error && error.message === "GROQ_API_KEY_NOT_CONFIGURED";
-    return NextResponse.json(
-      { error: missingKey ? "O Comandante ainda nao foi ativado no servidor." : "O Comandante nao conseguiu responder agora. Nenhum credito foi consumido." },
+    return jsonUtf8(
+      { error: missingKey ? "O Comandante ainda não foi ativado no servidor." : "O Comandante não conseguiu responder agora. Nenhum crédito foi consumido." },
       { status: missingKey ? 503 : 502 }
     );
   }
+}
+
+function jsonUtf8(body: unknown, init?: ResponseInit) {
+  const headers = new Headers(init?.headers);
+  headers.set("Content-Type", JSON_UTF8_HEADERS["Content-Type"]);
+
+  return NextResponse.json(body, {
+    ...init,
+    headers
+  });
 }
