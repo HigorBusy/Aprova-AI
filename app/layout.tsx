@@ -9,8 +9,8 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "Aprova.AI",
-  description: "Central de controle premium para aprovação no ENEM."
+  title: "AprovaAI | Correção de redação ENEM com IA",
+  description: "Corrija sua redação do ENEM em segundos com IA, nota estimada, competências e plano de melhoria."
 };
 
 export const viewport: Viewport = {
