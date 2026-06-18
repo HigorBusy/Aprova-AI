@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { User } from "@supabase/supabase-js";
-import { CreditCard, Home, LogOut, MessageCircle, ShieldCheck } from "lucide-react";
+import { CreditCard, Database, Home, LogOut, MessageCircle, ShieldCheck } from "lucide-react";
 
 import { AuthScreen } from "@/components/auth-screen";
 import { BrandTransition } from "@/components/brand-transition";
@@ -29,6 +29,8 @@ const tabs = [
   { id: "home", label: "Central de controle", icon: Home, href: "/" },
   { id: "commander", label: "Comandante IA", icon: MessageCircle, href: "/comandante" }
 ] as const;
+
+const adminTab = { id: "admin", label: "Painel ADM", icon: Database, href: "/admin" } as const;
 
 type ProfileRow = {
   full_name: string | null;
@@ -212,6 +214,7 @@ export function AprovaApp() {
 
   const phrase = dailyPhrases[0];
   const daysToEnem = getDaysToEnem();
+  const visibleTabs = planTag === "ADM" ? [...tabs, adminTab] : tabs;
 
   function updateState(updater: (current: StudyState) => StudyState) {
     setState((current) => updater(current));
@@ -331,7 +334,7 @@ export function AprovaApp() {
         </p>
 
         <nav className="mt-8 grid gap-2">
-          {tabs.map((tab) => {
+          {visibleTabs.map((tab) => {
             const Icon = tab.icon;
             const active = tab.id === "home";
             return (
@@ -411,8 +414,8 @@ export function AprovaApp() {
       </section>
 
       <nav className="safe-bottom fixed inset-x-0 bottom-0 z-20 border-t border-white/10 bg-black/80 px-3 py-2 backdrop-blur-xl lg:hidden">
-        <div className="mx-auto grid max-w-md grid-cols-2 gap-2">
-          {tabs.map((tab) => {
+        <div className={`mx-auto grid max-w-md gap-2 ${planTag === "ADM" ? "grid-cols-3" : "grid-cols-2"}`}>
+          {visibleTabs.map((tab) => {
             const Icon = tab.icon;
             const active = tab.id === "home";
             return (
