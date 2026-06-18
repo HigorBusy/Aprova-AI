@@ -29,5 +29,12 @@ export async function authenticateRequest(
   const { data, error } = await supabase.auth.getUser(accessToken);
 
   if (error || !data.user) return null;
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("is_blocked")
+    .eq("id", data.user.id)
+    .maybeSingle<{ is_blocked: boolean }>();
+
+  if (profile?.is_blocked) return null;
   return { supabase, user: data.user };
 }
