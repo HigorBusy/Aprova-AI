@@ -1,3 +1,6 @@
+Exit code: 0
+Wall time: 0.4 seconds
+Output:
 "use client";
 
 import Image from "next/image";
@@ -63,7 +66,8 @@ const plans = [
     featured: true,
     daily: "Menos de R$1 por dia",
     badge: "Melhor custo-beneficio",
-    cta: "Garantir plano mensal"
+    cta: "Garantir plano mensal",
+    checkoutUrl: "https://pay.cakto.com.br/nfm74up_933187"
   },
   {
     name: "Plano Anual",
@@ -71,9 +75,35 @@ const plans = [
     detail: "10 crÃ©ditos por dia",
     hook: "Menos de R$0,55 por dia para estudar com direÃ§Ã£o o ano inteiro.",
     featured: false,
-    extra: "3650 crÃ©ditos no ano"
+    extra: "3650 crÃ©ditos no ano",
+    cta: "Garantir plano anual",
+    checkoutUrl: "https://pay.cakto.com.br/34gj4d4_933192"
   }
 ];
+
+const TRACKING_PARAMS = [
+  "utm_source",
+  "utm_medium",
+  "utm_campaign",
+  "utm_content",
+  "utm_term",
+  "fbclid",
+  "gclid"
+] as const;
+
+function openCheckout(checkoutUrl: string) {
+  const url = new URL(checkoutUrl);
+
+  if (typeof window !== "undefined") {
+    const currentParams = new URLSearchParams(window.location.search);
+    TRACKING_PARAMS.forEach((param) => {
+      const value = currentParams.get(param);
+      if (value) url.searchParams.set(param, value);
+    });
+  }
+
+  window.location.assign(url.toString());
+}
 
 export function LandingPage({ onStart }: LandingPageProps) {
   return (
@@ -122,7 +152,7 @@ export function LandingPage({ onStart }: LandingPageProps) {
           <div className="flex flex-col gap-3 sm:flex-row">
             <button
               type="button"
-              onClick={onStart}
+              onClick={() => document.querySelector("#planos")?.scrollIntoView({ behavior: "smooth" })}
               className="inline-flex min-h-14 items-center justify-center gap-2 rounded-full bg-white px-6 text-base font-semibold text-slate-950 shadow-[0_0_46px_rgba(168,85,247,0.30),0_24px_70px_rgba(0,0,0,0.42)] transition hover:-translate-y-0.5 hover:bg-aura"
             >
               ComeÃ§ar agora
@@ -227,7 +257,7 @@ export function LandingPage({ onStart }: LandingPageProps) {
               <p className="mt-6 min-h-16 text-base leading-7 text-slate-300">{plan.hook}</p>
               <button
                 type="button"
-                onClick={onStart}
+                onClick={() => plan.checkoutUrl ? openCheckout(plan.checkoutUrl) : onStart()}
                 className={`mt-6 inline-flex min-h-12 w-full items-center justify-center rounded-full text-sm font-semibold transition hover:-translate-y-0.5 ${
                   plan.featured
                     ? "bg-white text-slate-950 shadow-[0_0_42px_rgba(255,255,255,0.18),0_0_70px_rgba(168,85,247,0.28)] hover:bg-aura"
@@ -276,7 +306,7 @@ export function LandingPage({ onStart }: LandingPageProps) {
           </p>
           <button
             type="button"
-            onClick={onStart}
+            onClick={() => openCheckout("https://pay.cakto.com.br/nfm74up_933187")}
             className="mt-8 inline-flex min-h-14 items-center justify-center gap-2 rounded-full bg-white px-7 text-base font-semibold text-slate-950 shadow-[0_0_46px_rgba(168,85,247,0.30),0_24px_70px_rgba(0,0,0,0.42)] transition hover:-translate-y-0.5 hover:bg-aura"
           >
             Entrar no AprovaAI
@@ -370,3 +400,4 @@ function HeroMockup() {
     </div>
   );
 }
+
