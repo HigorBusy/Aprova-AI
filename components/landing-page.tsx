@@ -64,7 +64,7 @@ const plans = [
     daily: "Menos de R$1 por dia",
     badge: "Melhor custo-beneficio",
     cta: "Garantir plano mensal",
-    checkoutUrl: "https://pay.cakto.com.br/nfm74up_933187"
+    checkoutUrl: "https://pay.cakto.com.br/69r8mre_934933"
   },
   {
     name: "Plano Anual",
@@ -74,7 +74,7 @@ const plans = [
     featured: false,
     extra: "3650 crÃ©ditos no ano",
     cta: "Garantir plano anual",
-    checkoutUrl: "https://pay.cakto.com.br/34gj4d4_933192"
+    checkoutUrl: "https://pay.cakto.com.br/ioyjy9r_934949"
   }
 ];
 
@@ -303,7 +303,7 @@ export function LandingPage({ onStart }: LandingPageProps) {
           </p>
           <button
             type="button"
-            onClick={() => openCheckout("https://pay.cakto.com.br/nfm74up_933187")}
+            onClick={() => openCheckout("https://pay.cakto.com.br/69r8mre_934933")}
             className="mt-8 inline-flex min-h-14 items-center justify-center gap-2 rounded-full bg-white px-7 text-base font-semibold text-slate-950 shadow-[0_0_46px_rgba(168,85,247,0.30),0_24px_70px_rgba(0,0,0,0.42)] transition hover:-translate-y-0.5 hover:bg-aura"
           >
             Entrar no AprovaAI
