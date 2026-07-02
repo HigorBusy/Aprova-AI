@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 
 import { normalizeEssayReview, type RawEssayReview } from "@/lib/ai/essay-review";
 import { callGroq, ESSAY_REVIEW_SYSTEM_PROMPT, parseJsonResponse } from "@/lib/ai/groq";
 import { formatRepertoryContext, formatStudentContext } from "@/lib/ai/student-context";
 import { sanitizeTextInput } from "@/lib/security/input";
 import { checkRateLimit, rateLimitResponse } from "@/lib/security/rate-limit";
-import { rejectLargeRequest } from "@/lib/security/request";
+import { jsonUtf8, rejectLargeRequest } from "@/lib/security/request";
 import { authenticateRequest } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
@@ -14,13 +14,13 @@ const ESSAY_COST = 5;
 
 export async function POST(request: NextRequest) {
   const auth = await authenticateRequest(request);
-  if (!auth) return NextResponse.json({ error: "Nao autorizado." }, { status: 401 });
+  if (!auth) return jsonUtf8({ error: "Não autorizado." }, { status: 401 });
   const { supabase, user } = auth;
 
   const rateLimit = checkRateLimit(`essay-review:${user.id}`, 4, 60_000);
   if (!rateLimit.allowed) {
     const response = rateLimitResponse(rateLimit.resetAt);
-    return NextResponse.json(response.body, response.init);
+    return jsonUtf8(response.body, response.init);
   }
 
   const oversized = rejectLargeRequest(request, 160 * 1024);
@@ -30,13 +30,13 @@ export async function POST(request: NextRequest) {
   try {
     body = (await request.json()) as { essay?: unknown };
   } catch {
-    return NextResponse.json({ error: "Requisicao invalida." }, { status: 400 });
+    return jsonUtf8({ error: "Requisição inválida." }, { status: 400 });
   }
 
   const essay = typeof body.essay === "string" ? sanitizeTextInput(body.essay, 30_000) : "";
   if (essay.length < 50 || essay.length > 30_000) {
-    return NextResponse.json(
-      { error: "Cole uma redacao entre 50 e 30.000 caracteres." },
+    return jsonUtf8(
+      { error: "Cole uma redação entre 50 e 30.000 caracteres." },
       { status: 400 }
     );
   }
@@ -47,9 +47,9 @@ export async function POST(request: NextRequest) {
     .eq("user_id", user.id)
     .maybeSingle();
 
-  if (creditError) return NextResponse.json({ error: "Nao foi possivel verificar seus creditos." }, { status: 500 });
+  if (creditError) return jsonUtf8({ error: "Não foi possível verificar seus créditos." }, { status: 500 });
   if (!creditRow || creditRow.balance < ESSAY_COST) {
-    return NextResponse.json({ error: "Voce precisa de 5 creditos para corrigir uma redacao.", balance: creditRow?.balance ?? 0 }, { status: 402 });
+    return jsonUtf8({ error: "Você precisa de 5 créditos para corrigir uma redação.", balance: creditRow?.balance ?? 0 }, { status: 402 });
   }
 
   try {
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
         { role: "system", content: runtimeContext },
         {
           role: "user",
-          content: `Corrija esta redacao com rigor de banca ENEM. Se for curta, generica, sem repertorio ou sem proposta completa, penalize de verdade. Se for excelente, reconheca excelencia com base em evidencias objetivas e nao invente penalizacoes genericas.\n\n${essay}`
+          content: `Corrija esta redação com rigor de banca ENEM. Se for curta, genérica, sem repertorio ou sem proposta completa, penalize de verdade. Se for excelente, reconheça excelência com base em evidências objetivas e não invente penalizações genéricas.\n\n${essay}`
         }
       ],
       { temperature: 0.2, maxTokens: 2_400, json: true }
@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
         p_user_content: storedUserContent,
         p_assistant_content: storedAssistantContent,
         p_cost: ESSAY_COST,
-        p_description: "Correcao de redacao pelo Comandante IA",
+        p_description: "Correção de redação pelo Comandante IA",
         p_theme: inferEssayTheme(essay),
         p_score: review.estimatedScore,
         p_c1: review.competencies.c1.score,
@@ -110,21 +110,21 @@ export async function POST(request: NextRequest) {
 
     if (completionError) throw completionError;
     if (!result?.success) {
-      return NextResponse.json(
-        { error: "Voce precisa de 5 creditos para corrigir uma redacao.", balance: result?.balance ?? 0 },
+      return jsonUtf8(
+        { error: "Você precisa de 5 créditos para corrigir uma redação.", balance: result?.balance ?? 0 },
         { status: 402 }
       );
     }
 
-    return NextResponse.json({ review, balance: result.balance });
+    return jsonUtf8({ review, balance: result.balance });
   } catch (error) {
     console.error("Essay review failed", {
       userId: user.id,
       reason: error instanceof Error ? error.message : "unknown"
     });
     const missingKey = error instanceof Error && error.message === "GROQ_API_KEY_NOT_CONFIGURED";
-    return NextResponse.json(
-      { error: missingKey ? "A correcao por IA ainda nao foi ativada no servidor." : "Nao foi possivel corrigir a redacao agora. Nenhum credito foi consumido." },
+    return jsonUtf8(
+      { error: missingKey ? "A correção por IA ainda não foi ativada no servidor." : "Não foi possível corrigir a redação agora. Nenhum crédito foi consumido." },
       { status: missingKey ? 503 : 502 }
     );
   }

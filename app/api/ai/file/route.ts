@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { callGroq, COMMANDER_SYSTEM_PROMPT } from "@/lib/ai/groq";
 import { formatRepertoryContext, formatStudentContext } from "@/lib/ai/student-context";
 import { sanitizeSingleLine, sanitizeTextInput } from "@/lib/security/input";
 import { checkRateLimit, rateLimitResponse } from "@/lib/security/rate-limit";
-import { rejectLargeRequest } from "@/lib/security/request";
+import { jsonUtf8, rejectLargeRequest } from "@/lib/security/request";
 import { authenticateRequest } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
@@ -20,13 +20,13 @@ const imageTypes = new Set(["image/png", "image/jpeg", "image/webp"]);
 
 export async function POST(request: NextRequest) {
   const auth = await authenticateRequest(request);
-  if (!auth) return NextResponse.json({ error: "Nao autorizado." }, { status: 401 });
+  if (!auth) return jsonUtf8({ error: "Não autorizado." }, { status: 401 });
   const { supabase, user } = auth;
 
   const rateLimit = checkRateLimit(`ai-file:${user.id}`, 5, 60_000);
   if (!rateLimit.allowed) {
     const response = rateLimitResponse(rateLimit.resetAt);
-    return NextResponse.json(response.body, response.init);
+    return jsonUtf8(response.body, response.init);
   }
 
   const oversized = rejectLargeRequest(request, 11 * 1024 * 1024);
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
   try {
     formData = await request.formData();
   } catch {
-    return NextResponse.json({ error: "Envie um arquivo valido." }, { status: 400 });
+    return jsonUtf8({ error: "Envie um arquivo válido." }, { status: 400 });
   }
 
   const file = formData.get("file");
@@ -44,12 +44,12 @@ export async function POST(request: NextRequest) {
   const prompt = sanitizeTextInput(String(formData.get("prompt") || ""), 1_500);
 
   if (!(file instanceof File)) {
-    return NextResponse.json({ error: "Arquivo nao encontrado." }, { status: 400 });
+    return jsonUtf8({ error: "Arquivo não encontrado." }, { status: 400 });
   }
 
   const validation = validateFile(file);
   if (!validation.ok) {
-    return NextResponse.json({ error: validation.error }, { status: 400 });
+    return jsonUtf8({ error: validation.error }, { status: 400 });
   }
 
   const { data: creditRow, error: creditError } = await supabase
@@ -58,9 +58,9 @@ export async function POST(request: NextRequest) {
     .eq("user_id", user.id)
     .maybeSingle();
 
-  if (creditError) return NextResponse.json({ error: "Nao foi possivel verificar seus creditos." }, { status: 500 });
+  if (creditError) return jsonUtf8({ error: "Não foi possível verificar seus créditos." }, { status: 500 });
   if (!creditRow || creditRow.balance < FILE_COST) {
-    return NextResponse.json({ error: "Voce precisa de 3 creditos para analisar arquivo.", balance: creditRow?.balance ?? 0 }, { status: 402 });
+    return jsonUtf8({ error: "Você precisa de 3 créditos para analisar arquivo.", balance: creditRow?.balance ?? 0 }, { status: 402 });
   }
 
   const bytes = Buffer.from(await file.arrayBuffer());
@@ -76,12 +76,12 @@ export async function POST(request: NextRequest) {
       fileSize: file.size,
       reason: error instanceof Error ? error.message : "unknown"
     });
-    return NextResponse.json({ error: "Nao foi possivel extrair texto utilizavel do arquivo. Nenhum credito foi consumido." }, { status: 422 });
+    return jsonUtf8({ error: "Não foi possível extrair texto utilizável do arquivo. Nenhum crédito foi consumido." }, { status: 422 });
   }
 
   const cleanText = extractedText.replace(/\s+/g, " ").trim().slice(0, TEXT_LIMIT);
   if (cleanText.length < 12) {
-    return NextResponse.json({ error: "O arquivo nao gerou texto suficiente para analise. Nenhum credito foi consumido." }, { status: 422 });
+    return jsonUtf8({ error: "O arquivo não gerou texto suficiente para análise. Nenhum crédito foi consumido." }, { status: 422 });
   }
 
   const storagePath = `${user.id}/${Date.now()}-${crypto.randomUUID()}-${sanitizeFileName(file.name)}`;
@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
 
   if (uploadError) {
     console.error("Upload failed", { userId: user.id, fileType: file.type, fileSize: file.size });
-    return NextResponse.json({ error: "Nao foi possivel salvar o arquivo." }, { status: 500 });
+    return jsonUtf8({ error: "Não foi possível salvar o arquivo." }, { status: 500 });
   }
 
   const [{ data: repertorios }, { data: profile }, { data: essays }] = await Promise.all([
@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
   const userContent = [
     `[ARQUIVO: ${file.name}]`,
     `Tipo: ${file.type}. Ferramenta: ${toolName}.`,
-    prompt ? `Pedido do aluno: ${prompt}` : "Pedido do aluno: explique o arquivo e transforme em acao de estudo.",
+    prompt ? `Pedido do aluno: ${prompt}` : "Pedido do aluno: explique o arquivo e transforme em ação de estudo.",
     "",
     "Texto extraido:",
     cleanText
@@ -136,7 +136,7 @@ export async function POST(request: NextRequest) {
         { role: "system", content: runtimeContext },
         {
           role: "user",
-          content: `${userContent}\n\nResponda como Comandante IA. Seja pratico: resumo, explicacao, pontos importantes e proxima tarefa.`
+          content: `${userContent}\n\nResponda como Comandante IA. Seja prático: resumo, explicação, pontos importantes e próxima tarefa.`
         }
       ],
       { temperature: 0.45, maxTokens: 1_300 }
@@ -157,13 +157,13 @@ export async function POST(request: NextRequest) {
     if (completionError) throw completionError;
     if (!result?.success) {
       await deleteUploadedFile(supabase, storagePath);
-      return NextResponse.json(
-        { error: "Voce precisa de 3 creditos para analisar arquivo.", balance: result?.balance ?? 0 },
+      return jsonUtf8(
+        { error: "Você precisa de 3 créditos para analisar arquivo.", balance: result?.balance ?? 0 },
         { status: 402 }
       );
     }
 
-    return NextResponse.json({
+    return jsonUtf8({
       reply,
       balance: result.balance
     });
@@ -176,8 +176,8 @@ export async function POST(request: NextRequest) {
       reason: error instanceof Error ? error.message : "unknown"
     });
     const missingKey = error instanceof Error && error.message === "GROQ_API_KEY_NOT_CONFIGURED";
-    return NextResponse.json(
-      { error: missingKey ? "O Comandante ainda nao foi ativado no servidor." : "Nao foi possivel analisar o arquivo agora. Nenhum credito foi consumido." },
+    return jsonUtf8(
+      { error: missingKey ? "O Comandante ainda não foi ativado no servidor." : "Não foi possível analisar o arquivo agora. Nenhum crédito foi consumido." },
       { status: missingKey ? 503 : 502 }
     );
   }
@@ -193,16 +193,16 @@ async function deleteUploadedFile(supabase: SupabaseClient, storagePath: string)
 
 function validateFile(file: File): { ok: true } | { ok: false; error: string } {
   if (file.type === "application/pdf") {
-    if (file.size > PDF_MAX_BYTES) return { ok: false, error: "PDF deve ter no maximo 10MB." };
+    if (file.size > PDF_MAX_BYTES) return { ok: false, error: "PDF deve ter no máximo 10MB." };
     return { ok: true };
   }
 
   if (imageTypes.has(file.type)) {
-    if (file.size > IMAGE_MAX_BYTES) return { ok: false, error: "Imagem deve ter no maximo 5MB." };
+    if (file.size > IMAGE_MAX_BYTES) return { ok: false, error: "Imagem deve ter no máximo 5MB." };
     return { ok: true };
   }
 
-  return { ok: false, error: "Formato nao aceito. Envie PDF, PNG, JPG, JPEG ou WEBP." };
+  return { ok: false, error: "Formato não aceito. Envie PDF, PNG, JPG, JPEG ou WEBP." };
 }
 
 async function extractPdfText(buffer: Buffer) {

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import {
@@ -23,43 +23,43 @@ type LandingPageProps = {
 
 const howItWorks = [
   {
-    title: "Envie sua redaÃ§Ã£o",
-    text: "Cole o texto ou envie sua redaÃ§Ã£o.",
+    title: "Envie sua redação",
+    text: "Cole o texto ou envie sua redação.",
     icon: FileText
   },
   {
-    title: "Receba a correÃ§Ã£o",
-    text: "Veja nota, competÃªncias, erros e pontos fortes.",
+    title: "Receba a correção",
+    text: "Veja nota, competências, erros e pontos fortes.",
     icon: ClipboardCheck
   },
   {
-    title: "Evolua com direÃ§Ã£o",
-    text: "Receba uma missÃ£o prÃ¡tica para melhorar.",
+    title: "Evolua com direção",
+    text: "Receba uma missão prática para melhorar.",
     icon: Target
   }
 ];
 
 const valueCards = [
-  { title: "Nota estimada", text: "Uma leitura rÃ¡pida do seu nÃ­vel atual.", icon: LineChart },
-  { title: "CorreÃ§Ã£o por competÃªncia", text: "C1 a C5 com foco no ENEM.", icon: ClipboardCheck },
-  { title: "Plano de melhoria", text: "O prÃ³ximo ajuste que mais importa.", icon: Target },
-  { title: "MissÃ£o de hoje", text: "Uma aÃ§Ã£o curta para sair do lugar.", icon: Rocket },
-  { title: "HistÃ³rico de evoluÃ§Ã£o", text: "Veja sua rota ficando mais clara.", icon: BrainCircuit }
+  { title: "Nota estimada", text: "Uma leitura rápida do seu nível atual.", icon: LineChart },
+  { title: "Correção por competência", text: "C1 a C5 com foco no ENEM.", icon: ClipboardCheck },
+  { title: "Plano de melhoria", text: "O próximo ajuste que mais importa.", icon: Target },
+  { title: "Missão de hoje", text: "Uma ação curta para sair do lugar.", icon: Rocket },
+  { title: "Histórico de evolução", text: "Veja sua rota ficando mais clara.", icon: BrainCircuit }
 ];
 
 const plans = [
   {
     name: "Plano Avulso",
     price: "R$9,90",
-    detail: "30 crÃ©ditos",
+    detail: "30 créditos",
     hook: "Ideal para testar sem compromisso.",
     featured: false
   },
   {
     name: "Plano Mensal",
-    price: "R$29,90/mÃªs",
-    detail: "150 crÃ©ditos por mÃªs",
-    hook: "150 creditos por mes para transformar correcao, duvidas e revisao em rotina.",
+    price: "R$29,90/mês",
+    detail: "150 créditos por mês",
+    hook: "150 créditos por mes para transformar correcao, duvidas e revisao em rotina.",
     featured: true,
     daily: "Menos de R$1 por dia",
     badge: "Melhor custo-beneficio",
@@ -69,10 +69,10 @@ const plans = [
   {
     name: "Plano Anual",
     price: "R$197/ano",
-    detail: "10 crÃ©ditos por dia",
-    hook: "Menos de R$0,55 por dia para estudar com direÃ§Ã£o o ano inteiro.",
+    detail: "10 créditos por dia",
+    hook: "Menos de R$0,55 por dia para estudar com direção o ano inteiro.",
     featured: false,
-    extra: "3650 crÃ©ditos no ano",
+    extra: "3650 créditos no ano",
     cta: "Garantir plano anual",
     checkoutUrl: "https://pay.cakto.com.br/ioyjy9r_934949"
   }
@@ -134,15 +134,15 @@ export function LandingPage({ onStart }: LandingPageProps) {
         <div className="space-y-7">
           <div className="inline-flex items-center gap-2 rounded-full border border-accent/25 bg-accent/[0.08] px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-aura shadow-glow">
             <Sparkles className="h-3.5 w-3.5" />
-            CorreÃ§Ã£o ENEM com IA
+            Correção ENEM com IA
           </div>
 
           <div className="space-y-5">
             <h1 className="max-w-4xl text-balance text-5xl font-semibold leading-[0.96] tracking-[-0.03em] text-white sm:text-6xl lg:text-7xl">
-              Corrija sua redaÃ§Ã£o do ENEM em segundos com IA.
+              Corrija sua redação do ENEM em segundos com IA.
             </h1>
             <p className="max-w-2xl text-lg leading-8 text-slate-300 sm:text-xl">
-              Receba nota estimada, anÃ¡lise por competÃªncia e um plano claro para melhorar sua prÃ³xima redaÃ§Ã£o.
+              Receba nota estimada, análise por competência e um plano claro para melhorar sua próxima redação.
             </p>
           </div>
 
@@ -152,7 +152,7 @@ export function LandingPage({ onStart }: LandingPageProps) {
               onClick={() => document.querySelector("#planos")?.scrollIntoView({ behavior: "smooth" })}
               className="inline-flex min-h-14 items-center justify-center gap-2 rounded-full bg-white px-6 text-base font-semibold text-slate-950 shadow-[0_0_46px_rgba(168,85,247,0.30),0_24px_70px_rgba(0,0,0,0.42)] transition hover:-translate-y-0.5 hover:bg-aura"
             >
-              ComeÃ§ar agora
+              Começar agora
               <ArrowRight className="h-4 w-4" />
             </button>
             <a
@@ -165,7 +165,7 @@ export function LandingPage({ onStart }: LandingPageProps) {
           </div>
 
           <div className="grid max-w-2xl grid-cols-3 gap-3 pt-2">
-            {["Nota", "CompetÃªncias", "MissÃ£o"].map((item) => (
+            {["Nota", "Competências", "Missão"].map((item) => (
               <div key={item} className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-center backdrop-blur-xl">
                 <p className="text-xs uppercase tracking-[0.16em] text-muted">{item}</p>
                 <CheckCircle2 className="mx-auto mt-2 h-5 w-5 text-aura" />
@@ -180,7 +180,7 @@ export function LandingPage({ onStart }: LandingPageProps) {
       <section className="mx-auto w-full max-w-6xl px-5 py-14 sm:px-6 lg:px-8">
         <div className="glass premium-glow rounded-[2rem] border border-accent/20 bg-accent/[0.055] px-6 py-12 text-center sm:px-10">
           <p className="mx-auto max-w-4xl text-balance text-3xl font-semibold leading-tight tracking-[-0.02em] text-white sm:text-5xl">
-            NinguÃ©m estÃ¡ vindo te salvar, entÃ£o faÃ§a acontecer.
+            Ninguém está vindo te salvar, então faça acontecer.
           </p>
         </div>
       </section>
@@ -188,8 +188,8 @@ export function LandingPage({ onStart }: LandingPageProps) {
       <section id="como-funciona" className="mx-auto w-full max-w-7xl px-5 py-16 sm:px-6 lg:px-8">
         <SectionHeader
           eyebrow="Como funciona"
-          title="TrÃªs passos. Uma direÃ§Ã£o."
-          text="RedaÃ§Ã£o nÃ£o melhora no chute. Melhora com correÃ§Ã£o."
+          title="Três passos. Uma direção."
+          text="Redação não melhora no chute. Melhora com correção."
         />
         <div className="mt-10 grid gap-4 md:grid-cols-3">
           {howItWorks.map((card, index) => {
@@ -212,9 +212,9 @@ export function LandingPage({ onStart }: LandingPageProps) {
 
       <section id="planos" className="mx-auto w-full max-w-7xl px-5 py-16 sm:px-6 lg:px-8">
         <SectionHeader
-          eyebrow="Planos e crÃ©ditos"
-          title="Compre direÃ§Ã£o, nÃ£o promessa."
-          text="CrÃ©ditos sÃ£o usados para correÃ§Ãµes, ferramentas de IA e anÃ¡lises avanÃ§adas."
+          eyebrow="Planos e créditos"
+          title="Compre direção, não promessa."
+          text="Créditos são usados para correções, ferramentas de IA e análises avançadas."
         />
 
         <div className="mt-10 grid gap-4 lg:grid-cols-3 lg:items-stretch">
@@ -261,23 +261,23 @@ export function LandingPage({ onStart }: LandingPageProps) {
                     : "border border-white/10 bg-white/[0.055] text-white hover:border-accent/40 hover:bg-white/[0.08]"
                 }`}
               >
-                {plan.cta ?? "Comecar agora"}
+                {plan.cta ?? "Começar agora"}
               </button>
             </article>
           ))}
         </div>
         <div className="mt-5 grid gap-3 rounded-[1.5rem] border border-white/10 bg-white/[0.035] p-4 text-sm text-slate-300 backdrop-blur-xl sm:grid-cols-3">
-          <span>Chat com IA: <strong className="text-white">1 crÃ©dito</strong></span>
-          <span>Ferramenta rÃ¡pida: <strong className="text-white">2 crÃ©ditos</strong></span>
-          <span>CorreÃ§Ã£o de redaÃ§Ã£o: <strong className="text-white">5 crÃ©ditos</strong></span>
+          <span>Chat com IA: <strong className="text-white">1 crédito</strong></span>
+          <span>Ferramenta rápida: <strong className="text-white">2 créditos</strong></span>
+          <span>Correção de redação: <strong className="text-white">5 créditos</strong></span>
         </div>
       </section>
 
       <section id="valor" className="mx-auto w-full max-w-7xl px-5 py-16 sm:px-6 lg:px-8">
         <SectionHeader
           eyebrow="Prova de valor"
-          title="Tudo aponta para a prÃ³xima redaÃ§Ã£o."
-          text="VocÃª nÃ£o precisa estudar mais. Precisa estudar com direÃ§Ã£o."
+          title="Tudo aponta para a próxima redação."
+          text="Você não precisa estudar mais. Precisa estudar com direção."
         />
         <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           {valueCards.map((item) => {
@@ -296,10 +296,10 @@ export function LandingPage({ onStart }: LandingPageProps) {
       <section className="mx-auto w-full max-w-6xl px-5 pb-24 pt-14 sm:px-6 lg:px-8">
         <div className="glass premium-glow rounded-[2rem] px-6 py-14 text-center sm:px-10">
           <p className="mx-auto max-w-3xl text-balance text-3xl font-semibold leading-tight tracking-[-0.02em] text-white sm:text-5xl">
-            Cada redaÃ§Ã£o corrigida Ã© um erro a menos no dia da prova.
+            Cada redação corrigida é um erro a menos no dia da prova.
           </p>
           <p className="mx-auto mt-5 max-w-xl text-base leading-7 text-slate-300">
-            O tempo atÃ© o ENEM estÃ¡ passando.
+            O tempo até o ENEM está passando.
           </p>
           <button
             type="button"
@@ -332,8 +332,8 @@ function HeroMockup() {
         <div className="rounded-[1.7rem] border border-white/10 bg-slate-950/70 p-4 shadow-2xl">
           <div className="flex items-center justify-between border-b border-white/10 pb-4">
             <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-aura">Centro de RedaÃ§Ã£o</p>
-              <h3 className="mt-1 text-xl font-semibold text-white">AnÃ¡lise da redaÃ§Ã£o</h3>
+              <p className="text-xs uppercase tracking-[0.2em] text-aura">Centro de Redação</p>
+              <h3 className="mt-1 text-xl font-semibold text-white">Análise da redação</h3>
             </div>
             <div className="rounded-full border border-emerald-300/20 bg-emerald-300/10 px-3 py-1 text-sm font-semibold text-emerald-200">
               Pronta
@@ -347,16 +347,16 @@ function HeroMockup() {
                 <span className="text-6xl font-semibold tracking-[-0.06em] text-white">840</span>
                 <span className="pb-2 text-sm text-slate-400">/1000</span>
               </div>
-              <p className="mt-4 text-sm leading-6 text-slate-300">Cada erro corrigido hoje Ã© ponto salvo na prova.</p>
+              <p className="mt-4 text-sm leading-6 text-slate-300">Cada erro corrigido hoje é ponto salvo na prova.</p>
             </div>
 
             <div className="space-y-3">
               {[
-                ["C1", "160", "Norma padrÃ£o"],
-                ["C2", "180", "Tema e repertÃ³rio"],
-                ["C3", "160", "ArgumentaÃ§Ã£o"],
-                ["C4", "180", "CoesÃ£o"],
-                ["C5", "160", "IntervenÃ§Ã£o"]
+                ["C1", "160", "Norma padrão"],
+                ["C2", "180", "Tema e repertório"],
+                ["C3", "160", "Argumentação"],
+                ["C4", "180", "Coesão"],
+                ["C5", "160", "Intervenção"]
               ].map(([label, score, title]) => (
                 <div key={label} className="rounded-2xl border border-white/10 bg-white/[0.04] p-3">
                   <div className="flex items-center justify-between gap-3 text-sm">
@@ -376,25 +376,24 @@ function HeroMockup() {
             <div className="rounded-[1.3rem] border border-white/10 bg-white/[0.04] p-4">
               <MessageCircle className="h-5 w-5 text-aura" />
               <p className="mt-4 text-sm font-semibold text-white">Comandante IA</p>
-              <p className="mt-1 text-sm text-slate-400">Orienta sua prÃ³xima aÃ§Ã£o.</p>
+              <p className="mt-1 text-sm text-slate-400">Orienta sua próxima ação.</p>
             </div>
             <div className="rounded-[1.3rem] border border-white/10 bg-white/[0.04] p-4">
               <ShieldCheck className="h-5 w-5 text-aura" />
-              <p className="mt-4 text-sm font-semibold text-white">MissÃ£o de hoje</p>
-              <p className="mt-1 text-sm text-slate-400">Reescrever a conclusÃ£o.</p>
+              <p className="mt-4 text-sm font-semibold text-white">Missão de hoje</p>
+              <p className="mt-1 text-sm text-slate-400">Reescrever a conclusão.</p>
             </div>
           </div>
         </div>
       </div>
       <div className="glass absolute left-0 top-10 z-10 hidden items-center gap-2 rounded-full px-4 py-3 text-sm font-bold text-white shadow-glow sm:inline-flex">
         <CreditCard className="h-4 w-4 text-aura" />
-        <span>5 crÃ©ditos</span>
+        <span>5 créditos</span>
       </div>
       <div className="glass absolute bottom-10 right-0 z-10 hidden items-center gap-2 rounded-full px-4 py-3 text-sm font-bold text-white shadow-glow sm:inline-flex">
         <Rocket className="h-4 w-4 text-aura" />
-        <span>PrÃ³xima missÃ£o</span>
+        <span>Próxima missão</span>
       </div>
     </div>
   );
 }
-

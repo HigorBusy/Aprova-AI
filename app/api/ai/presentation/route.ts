@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 
 import { COMMANDER_SYSTEM_PROMPT, callGroq, parseJsonResponse } from "@/lib/ai/groq";
 import {
@@ -12,20 +12,20 @@ import {
 import { formatRepertoryContext, formatStudentContext } from "@/lib/ai/student-context";
 import { sanitizeSingleLine, sanitizeTextInput } from "@/lib/security/input";
 import { checkRateLimit, rateLimitResponse } from "@/lib/security/rate-limit";
-import { rejectLargeRequest } from "@/lib/security/request";
+import { jsonUtf8, rejectLargeRequest } from "@/lib/security/request";
 import { authenticateRequest } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
 
 export async function POST(request: NextRequest) {
   const auth = await authenticateRequest(request);
-  if (!auth) return NextResponse.json({ error: "Nao autorizado." }, { status: 401 });
+  if (!auth) return jsonUtf8({ error: "Não autorizado." }, { status: 401 });
   const { supabase, user } = auth;
 
   const rateLimit = checkRateLimit(`ai-presentation:${user.id}`, 3, 60_000);
   if (!rateLimit.allowed) {
     const response = rateLimitResponse(rateLimit.resetAt);
-    return NextResponse.json(response.body, response.init);
+    return jsonUtf8(response.body, response.init);
   }
 
   const oversized = rejectLargeRequest(request, 96 * 1024);
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json({ error: "Requisicao invalida." }, { status: 400 });
+    return jsonUtf8({ error: "Requisição inválida." }, { status: 400 });
   }
 
   const userRequest = typeof body.request === "string" ? sanitizeTextInput(body.request, 4_000) : "";
@@ -56,8 +56,8 @@ export async function POST(request: NextRequest) {
     : "";
 
   if (userRequest.length < 12) {
-    return NextResponse.json(
-      { error: "Descreva o que voce quer transformar em apresentacao." },
+    return jsonUtf8(
+      { error: "Descreva o que você quer transformar em apresentação." },
       { status: 400 }
     );
   }
@@ -68,10 +68,10 @@ export async function POST(request: NextRequest) {
     .eq("user_id", user.id)
     .maybeSingle();
 
-  if (creditError) return NextResponse.json({ error: "Nao foi possivel verificar seus creditos." }, { status: 500 });
+  if (creditError) return jsonUtf8({ error: "Não foi possível verificar seus créditos." }, { status: 500 });
   if (!creditRow || creditRow.balance < PRESENTATION_COST) {
-    return NextResponse.json(
-      { error: "Voce precisa de 10 creditos para gerar uma apresentacao.", balance: creditRow?.balance ?? 0 },
+    return jsonUtf8(
+      { error: "Você precisa de 10 créditos para gerar uma apresentação.", balance: creditRow?.balance ?? 0 },
       { status: 402 }
     );
   }
@@ -129,31 +129,31 @@ export async function POST(request: NextRequest) {
         p_assistant_content: storedAssistantContent,
         p_cost: PRESENTATION_COST,
         p_transaction_type: "ai_chat",
-        p_description: `Apresentacao IA: ${template}`
+        p_description: `Apresentação IA: ${template}`
       }
     );
     const result = Array.isArray(completion) ? completion[0] : completion;
 
     if (completionError) throw completionError;
     if (!result?.success) {
-      return NextResponse.json(
-        { error: "Voce precisa de 10 creditos para gerar uma apresentacao.", balance: result?.balance ?? 0 },
+      return jsonUtf8(
+        { error: "Você precisa de 10 créditos para gerar uma apresentação.", balance: result?.balance ?? 0 },
         { status: 402 }
       );
     }
 
-    return NextResponse.json({ presentation, balance: result.balance });
+    return jsonUtf8({ presentation, balance: result.balance });
   } catch (error) {
     console.error("Presentation generation failed", {
       userId: user.id,
       reason: error instanceof Error ? error.message : "unknown"
     });
     const missingKey = error instanceof Error && error.message === "GROQ_API_KEY_NOT_CONFIGURED";
-    return NextResponse.json(
+    return jsonUtf8(
       {
         error: missingKey
-          ? "O Comandante ainda nao foi ativado no servidor."
-          : "Nao foi possivel gerar a apresentacao agora. Nenhum credito foi consumido."
+          ? "O Comandante ainda não foi ativado no servidor."
+          : "Não foi possível gerar a apresentação agora. Nenhum crédito foi consumido."
       },
       { status: missingKey ? 503 : 502 }
     );
