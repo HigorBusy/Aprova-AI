@@ -125,7 +125,7 @@ export async function POST(request: NextRequest) {
     `Tipo: ${file.type}. Ferramenta: ${toolName}.`,
     prompt ? `Pedido do aluno: ${prompt}` : "Pedido do aluno: explique o arquivo e transforme em ação de estudo.",
     "",
-    "Texto extraido:",
+    "Texto extraído:",
     cleanText
   ].join("\n");
 

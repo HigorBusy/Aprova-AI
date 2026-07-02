@@ -59,10 +59,10 @@ const plans = [
     name: "Plano Mensal",
     price: "R$29,90/mês",
     detail: "150 créditos por mês",
-    hook: "150 créditos por mes para transformar correcao, duvidas e revisao em rotina.",
+    hook: "150 créditos por mês para transformar correção, dúvidas e revisão em rotina.",
     featured: true,
     daily: "Menos de R$1 por dia",
-    badge: "Melhor custo-beneficio",
+    badge: "Melhor custo-benefício",
     cta: "Garantir plano mensal",
     checkoutUrl: "https://pay.cakto.com.br/69r8mre_934933"
   },

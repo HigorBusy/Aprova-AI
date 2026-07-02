@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
         { role: "system", content: runtimeContext },
         {
           role: "user",
-          content: `Corrija esta redação com rigor de banca ENEM. Se for curta, genérica, sem repertorio ou sem proposta completa, penalize de verdade. Se for excelente, reconheça excelência com base em evidências objetivas e não invente penalizações genéricas.\n\n${essay}`
+          content: `Corrija esta redação com rigor de banca ENEM. Se for curta, genérica, sem repertório ou sem proposta completa, penalize de verdade. Se for excelente, reconheça excelência com base em evidências objetivas e não invente penalizações genéricas.\n\n${essay}`
         }
       ],
       { temperature: 0.2, maxTokens: 2_400, json: true }
