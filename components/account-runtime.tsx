@@ -32,44 +32,55 @@ export function AccountRuntime() {
     let active = true;
     let channel: ReturnType<typeof supabase.channel> | null = null;
     let heartbeat: number | null = null;
+    let connecting = false;
+    let connectedUserId: string | null = null;
 
     const connect = async () => {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const user = sessionData.session?.user;
-      if (!active || !user) return;
+      if (!active || connecting) return;
+      connecting = true;
 
-      const updatePresence = async () => {
-        const { data, error } = await supabase.rpc("touch_user_presence");
-        if (!active || error) return;
-        setBlocked(data === false);
-      };
+      try {
+        const { data: sessionData } = await supabase.auth.getSession();
+        const user = sessionData.session?.user;
+        if (!active || !user || connectedUserId === user.id) return;
+        connectedUserId = user.id;
 
-      const { data: unread } = await supabase
-        .from("admin_messages")
-        .select("id,message,created_at")
-        .eq("user_id", user.id)
-        .is("read_at", null)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle<AdminMessage>();
+        const updatePresence = async () => {
+          const { data, error } = await supabase.rpc("touch_user_presence");
+          if (!active || error) return;
+          setBlocked(data === false);
+        };
 
-      if (active && unread) setMessage(unread);
-      await updatePresence();
-      heartbeat = window.setInterval(() => void updatePresence(), 45_000);
+        const { data: unread } = await supabase
+          .from("admin_messages")
+          .select("id,message,created_at")
+          .eq("user_id", user.id)
+          .is("read_at", null)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle<AdminMessage>();
 
-      channel = supabase
-        .channel(`admin-messages:${user.id}`)
-        .on(
-          "postgres_changes",
-          {
-            event: "INSERT",
-            schema: "public",
-            table: "admin_messages",
-            filter: `user_id=eq.${user.id}`
-          },
-          (payload) => setMessage(payload.new as AdminMessage)
-        )
-        .subscribe();
+        if (active && unread) setMessage(unread);
+        await updatePresence();
+        if (heartbeat) window.clearInterval(heartbeat);
+        heartbeat = window.setInterval(() => void updatePresence(), 45_000);
+
+        channel = supabase
+          .channel(`admin-messages:${user.id}`)
+          .on(
+            "postgres_changes",
+            {
+              event: "INSERT",
+              schema: "public",
+              table: "admin_messages",
+              filter: `user_id=eq.${user.id}`
+            },
+            (payload) => setMessage(payload.new as AdminMessage)
+          )
+          .subscribe();
+      } finally {
+        connecting = false;
+      }
     };
 
     void connect();
@@ -77,6 +88,7 @@ export function AccountRuntime() {
     const { data: authListener } = supabase.auth.onAuthStateChange((event) => {
       if (event === "SIGNED_IN") void connect();
       if (event === "SIGNED_OUT") {
+        connectedUserId = null;
         setBlocked(false);
         setMessage(null);
       }
