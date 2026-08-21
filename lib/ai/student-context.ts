@@ -13,6 +13,11 @@ type StudentProfile = {
   best_competency: string | null;
   total_essays: number | null;
   last_essay_date: string | null;
+  target_exam_year?: number | null;
+  main_difficulty?: string | null;
+  priority_area?: string | null;
+  essay_level?: string | null;
+  study_frequency?: string | null;
 };
 
 type EssaySnapshot = {
@@ -24,6 +29,19 @@ type EssaySnapshot = {
   c5: number | null;
   theme: string | null;
   created_at: string | null;
+};
+
+type QuestionTopicSnapshot = {
+  name?: string | null;
+  discipline?: string | null;
+  attempts?: number | null;
+  correct?: number | null;
+  wrong?: number | null;
+  accuracy?: number | null;
+};
+
+type QuestionCatalogSnapshot = {
+  topics?: QuestionTopicSnapshot[] | null;
 };
 
 export function formatRepertoryContext(repertorios: Repertorio[] | null | undefined) {
@@ -56,6 +74,12 @@ export function formatStudentContext(profile: StudentProfile | null | undefined,
     `- Competencia mais fraca: ${profile?.worst_competency ?? "indefinida"}.`
   ];
 
+  if (profile?.target_exam_year) lines.push(`- ENEM alvo: ${profile.target_exam_year}.`);
+  if (profile?.priority_area) lines.push(`- Área declarada como prioridade: ${profile.priority_area}.`);
+  if (profile?.essay_level) lines.push(`- Nível percebido em redação: ${profile.essay_level}.`);
+  if (profile?.study_frequency) lines.push(`- Frequência de estudo declarada: ${profile.study_frequency} dias por semana.`);
+  if (profile?.main_difficulty) lines.push(`- Principal dificuldade declarada: ${profile.main_difficulty}.`);
+
   if (recent.length > 0) {
     lines.push("- Ultimas redacoes:");
     for (const essay of recent.slice(0, 3)) {
@@ -65,6 +89,31 @@ export function formatStudentContext(profile: StudentProfile | null | undefined,
 
   lines.push("Se houver padrao de queda ou repeticao de erro, mencione isso de forma especifica.");
   return lines.join("\n");
+}
+
+export function formatQuestionContext(catalog: QuestionCatalogSnapshot | null | undefined) {
+  const topics = catalog?.topics ?? [];
+  const attempted = topics.filter((topic) => (topic.attempts ?? 0) > 0);
+  if (attempted.length === 0) {
+    return "Desempenho em questoes: ainda sem tentativas registradas.";
+  }
+
+  const attempts = attempted.reduce((sum, topic) => sum + (topic.attempts ?? 0), 0);
+  const correct = attempted.reduce((sum, topic) => sum + (topic.correct ?? 0), 0);
+  const priorities = [...attempted]
+    .filter((topic) => (topic.attempts ?? 0) >= 2)
+    .sort((a, b) => (a.accuracy ?? 100) - (b.accuracy ?? 100))
+    .slice(0, 3);
+
+  return [
+    "Desempenho em questoes:",
+    `- Total respondido: ${attempts}.`,
+    `- Aproveitamento geral: ${attempts ? Math.round((correct / attempts) * 100) : 0}%.`,
+    ...(priorities.length
+      ? ["- Assuntos prioritarios:", ...priorities.map((topic) => `  - ${topic.discipline ?? "Area"} / ${topic.name ?? "Assunto"}: ${topic.accuracy ?? 0}% em ${topic.attempts ?? 0} tentativas.`)]
+      : ["- Ainda nao ha repeticao suficiente para definir um assunto prioritario."]),
+    "Use esses dados apenas quando ajudarem a responder a solicitacao atual."
+  ].join("\n");
 }
 
 function formatScore(value: number | null | undefined) {

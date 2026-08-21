@@ -1,12 +1,21 @@
-import type { EssayCompetency, EssayReview } from "@/lib/ai/types";
+import type { CriticalExcerpt, EssayCompetency, EssayReview } from "@/lib/ai/types";
 
 export type RawEssayCompetency = {
   score?: unknown;
   analysis?: unknown;
   justificativa?: unknown;
   problemas_encontrados?: unknown;
+  evidencias?: unknown;
   como_melhorar?: unknown;
   exemplo_pratico?: unknown;
+  exercicio_recomendado?: unknown;
+};
+
+type RawCriticalExcerpt = {
+  trecho?: unknown;
+  problema?: unknown;
+  impacto?: unknown;
+  melhoria_sugerida?: unknown;
 };
 
 export type RawEssayReview = {
@@ -22,6 +31,8 @@ export type RawEssayReview = {
   pontos_fortes?: unknown;
   plano_de_melhoria?: unknown;
   missao_de_hoje?: unknown;
+  erros_recorrentes?: unknown;
+  trechos_criticos?: unknown;
   versao_melhorada_de_um_paragrafo?: unknown;
   proxima_tarefa_recomendada?: unknown;
   estimatedScore?: unknown;
@@ -36,11 +47,18 @@ export type RawEssayReview = {
     c4?: RawEssayCompetency;
     c5?: RawEssayCompetency;
   };
+  competencias?: {
+    c1?: RawEssayCompetency;
+    c2?: RawEssayCompetency;
+    c3?: RawEssayCompetency;
+    c4?: RawEssayCompetency;
+    c5?: RawEssayCompetency;
+  };
 };
 
 export function normalizeEssayReview(raw: RawEssayReview, essay: string): EssayReview {
   const heuristics = inspectEssay(essay);
-  const rawCompetencies = raw.competencies ?? {};
+  const rawCompetencies = raw.competencies ?? raw.competencias ?? {};
 
   let c1 = normalizeCompetency(rawCompetencies.c1, raw.nota_competencia_1, "C1");
   let c2 = normalizeCompetency(rawCompetencies.c2, raw.nota_competencia_2, "C2");
@@ -49,32 +67,32 @@ export function normalizeEssayReview(raw: RawEssayReview, essay: string): EssayR
   let c5 = normalizeCompetency(rawCompetencies.c5, raw.nota_competencia_5, "C5");
 
   if (heuristics.shortOrSuperficial) {
-    c2 = capCompetency(c2, 120, "Texto curto ou superficial nao sustenta nota alta em compreensao, repertorio e desenvolvimento.");
-    c3 = capCompetency(c3, 120, "Argumentacao curta ou generica nao comprova a tese.");
+    c2 = capCompetency(c2, 120, "Texto curto ou superficial não sustenta nota alta em compreensão, repertório e desenvolvimento.");
+    c3 = capCompetency(c3, 120, "Argumentação curta ou genérica não comprova a tese.");
   }
 
   if (!heuristics.hasRepertoire) {
-    c2 = capCompetency(c2, 120, "Nao ha repertorio sociocultural real e produtivo no texto.");
+    c2 = capCompetency(c2, 120, "Não há repertório sociocultural real e produtivo no texto.");
   }
 
   if (!heuristics.hasIntervention) {
-    c5 = capCompetency(c5, 120, "A proposta de intervencao nao aparece de forma completa.");
+    c5 = capCompetency(c5, 120, "A proposta de intervenção não aparece de forma completa.");
   }
 
   if (!heuristics.hasConnectiveVariety) {
-    c4 = capCompetency(c4, 140, "A coesao esta limitada por poucos conectivos ou encadeamento fraco.");
+    c4 = capCompetency(c4, 140, "A coesão está limitada por poucos conectivos ou encadeamento fraco.");
   }
 
   if (heuristics.hasProductiveRepertoire) {
-    c2 = floorCompetency(c2, 180, "Repertorio legitimado e conectado ao argumento foi identificado; C2 nao deve ser penalizada por estilo ou formalidade.");
+    c2 = floorCompetency(c2, 180, "Repertório legitimado e conectado ao argumento foi identificado; C2 não deve ser penalizada por estilo ou formalidade.");
   }
 
   if (heuristics.hasStrongCohesion) {
-    c4 = floorCompetency(c4, 180, "O texto apresenta conectivos variados, progressao textual e encadeamento funcional.");
+    c4 = floorCompetency(c4, 180, "O texto apresenta conectivos variados, progressão textual e encadeamento funcional.");
   }
 
   if (heuristics.hasCompleteIntervention) {
-    c5 = floorCompetency(c5, 180, "A proposta apresenta agente, acao, meio, finalidade e detalhamento.");
+    c5 = floorCompetency(c5, 180, "A proposta apresenta agente, ação, meio, finalidade e detalhamento.");
   }
 
   let competencies = { c1, c2, c3, c4, c5 };
@@ -92,22 +110,22 @@ export function normalizeEssayReview(raw: RawEssayReview, essay: string): EssayR
 
   const principaisErros = filterGenericCriticism(asStringArray(raw.principais_erros ?? raw.weaknesses, [
     "Argumentos pouco desenvolvidos.",
-    "Falta de repertorio produtivo.",
-    "Proposta de intervencao incompleta."
+    "Falta de repertório produtivo.",
+    "Proposta de intervenção incompleta."
   ]));
-  const pontosFortes = asStringArray(raw.pontos_fortes ?? raw.strengths, ["Ha uma tentativa de organizar uma tese."]);
+  const pontosFortes = asStringArray(raw.pontos_fortes ?? raw.strengths, ["Há uma tentativa de organizar uma tese."]);
   const plano = asStringArray(raw.plano_de_melhoria ?? raw.improvements, [
     "Escreva uma tese mais precisa.",
-    "Inclua um repertorio conectado ao tema.",
-    "Monte uma proposta com agente, acao, meio, finalidade e detalhamento."
+    "Inclua um repertório conectado ao tema.",
+    "Monte uma proposta com agente, ação, meio, finalidade e detalhamento."
   ]);
   const missaoDeHoje = asStringArray(raw.missao_de_hoje, [
-    "Reescrever a introducao com tese explicita.",
-    "Adicionar um repertorio legitimo e conectado ao tema.",
-    "Reescrever a proposta de intervencao com agente, acao, meio, finalidade e detalhamento."
+    "Reescrever a introdução com tese explícita.",
+    "Adicionar um repertório legítimo e conectado ao tema.",
+    "Reescrever a proposta de intervenção com agente, ação, meio, finalidade e detalhamento."
   ]);
   const diagnostico = asString(raw.diagnostico_geral ?? raw.summary) ||
-    "Sua redacao ainda esta em nivel basico: apresenta uma ideia geral, mas perde nota por falta de desenvolvimento, repertorio e intervencao completa.";
+    "Sua redação ainda está em nível básico: apresenta uma ideia geral, mas perde nota por falta de desenvolvimento, repertório e intervenção completa.";
 
   return {
     type: "essay_review",
@@ -123,10 +141,12 @@ export function normalizeEssayReview(raw: RawEssayReview, essay: string): EssayR
     pontos_fortes: pontosFortes,
     plano_de_melhoria: plano,
     missao_de_hoje: missaoDeHoje,
+    erros_recorrentes: asStringArray(raw.erros_recorrentes, principaisErros.slice(0, 3)),
+    trechos_criticos: normalizeCriticalExcerpts(raw.trechos_criticos),
     versao_melhorada_de_um_paragrafo: asString(raw.versao_melhorada_de_um_paragrafo) ||
-      "Uma versao mais forte precisa apresentar a tese com clareza, conectar um repertorio real ao problema e explicar a consequencia social do tema antes de propor uma solucao.",
+      "Uma versão mais forte precisa apresentar a tese com clareza, conectar um repertório real ao problema e explicar a consequência social do tema antes de propor uma solução.",
     proxima_tarefa_recomendada: asString(raw.proxima_tarefa_recomendada) ||
-      "Reescreva um paragrafo de desenvolvimento com tese, repertorio, explicacao e fechamento.",
+      "Reescreva um parágrafo de desenvolvimento com tese, repertório, explicação e fechamento.",
     competencies,
     strengths: pontosFortes,
     weaknesses: principaisErros,
@@ -137,19 +157,40 @@ export function normalizeEssayReview(raw: RawEssayReview, essay: string): EssayR
 
 function normalizeCompetency(raw: RawEssayCompetency | undefined, fallback: unknown, label: string): EssayCompetency {
   const score = clampScore(asNumber(raw?.score ?? fallback));
-  const justificativa = asString(raw?.justificativa ?? raw?.analysis) || `${label}: analise nao detalhada pelo modelo.`;
-  const problemas = asStringArray(raw?.problemas_encontrados, ["Problema especifico nao detalhado."]);
+  const justificativa = asString(raw?.justificativa ?? raw?.analysis) || `${label}: análise não detalhada pelo modelo.`;
+  const problemas = asStringArray(raw?.problemas_encontrados, ["Problema específico não detalhado."]);
+  const evidencias = asStringArray(raw?.evidencias, problemas);
   const comoMelhorar = asString(raw?.como_melhorar) || "Reescreva o trecho deixando a ideia mais precisa e comprovada.";
-  const exemplo = asString(raw?.exemplo_pratico) || "Exemplo: acrescente causa, consequencia e relacao direta com a tese.";
+  const exemplo = asString(raw?.exemplo_pratico) || "Exemplo: acrescente causa, consequência e relação direta com a tese.";
+  const exercicio = asString(raw?.exercicio_recomendado) || "Reescreva um trecho aplicando a orientação acima.";
 
   return {
     score,
     justificativa,
+    evidencias,
     problemas_encontrados: problemas,
     como_melhorar: comoMelhorar,
     exemplo_pratico: exemplo,
-    analysis: `${justificativa} Problemas: ${problemas.join(" ")} Como melhorar: ${comoMelhorar} Exemplo: ${exemplo}`
+    exercicio_recomendado: exercicio,
+    analysis: `${justificativa}\n\nEvidências: ${evidencias.join(" ")}\n\nComo melhorar: ${comoMelhorar}\n\nExercício: ${exercicio}\n\nExemplo: ${exemplo}`
   };
+}
+
+function normalizeCriticalExcerpts(value: unknown): CriticalExcerpt[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((item) => {
+    if (!item || typeof item !== "object") return [];
+    const raw = item as RawCriticalExcerpt;
+    const trecho = asString(raw.trecho);
+    const problema = asString(raw.problema);
+    if (!trecho || !problema) return [];
+    return [{
+      trecho,
+      problema,
+      impacto: asString(raw.impacto) || "Este ponto reduz a clareza ou a força do argumento.",
+      melhoria_sugerida: asString(raw.melhoria_sugerida) || "Reescreva o trecho com uma relação mais explícita com a tese."
+    }];
+  }).slice(0, 8);
 }
 
 function capCompetency(competency: EssayCompetency, cap: number, reason: string): EssayCompetency {
@@ -157,7 +198,7 @@ function capCompetency(competency: EssayCompetency, cap: number, reason: string)
   return {
     ...competency,
     score: cap,
-    analysis: `${competency.analysis} Penalizacao aplicada: ${reason}`
+    analysis: `${competency.analysis} Penalização aplicada: ${reason}`
   };
 }
 
@@ -172,11 +213,11 @@ function floorCompetency(competency: EssayCompetency, floor: number, reason: str
 
 function calibrateExcellentEssay(competencies: EssayReview["competencies"]) {
   return {
-    c1: floorCompetency(competencies.c1, 190, "Modo excelencia ativado: texto com projeto argumentativo completo nao deve receber C1 baixa sem desvios graves apontados."),
-    c2: floorCompetency(competencies.c2, 190, "Modo excelencia ativado: tema e repertorio produtivo sustentam faixa alta em C2."),
-    c3: floorCompetency(competencies.c3, 190, "Modo excelencia ativado: tese e progressao argumentativa sustentam faixa alta em C3."),
-    c4: floorCompetency(competencies.c4, 190, "Modo excelencia ativado: coesao funcional sustenta faixa alta em C4."),
-    c5: floorCompetency(competencies.c5, 190, "Modo excelencia ativado: intervencao completa sustenta faixa alta em C5.")
+    c1: floorCompetency(competencies.c1, 190, "Modo excelência ativado: texto com projeto argumentativo completo não deve receber C1 baixa sem desvios graves apontados."),
+    c2: floorCompetency(competencies.c2, 190, "Modo excelência ativado: tema e repertório produtivo sustentam faixa alta em C2."),
+    c3: floorCompetency(competencies.c3, 190, "Modo excelência ativado: tese e progressão argumentativa sustentam faixa alta em C3."),
+    c4: floorCompetency(competencies.c4, 190, "Modo excelência ativado: coesão funcional sustenta faixa alta em C4."),
+    c5: floorCompetency(competencies.c5, 190, "Modo excelência ativado: intervenção completa sustenta faixa alta em C5.")
   };
 }
 
@@ -209,7 +250,7 @@ function scaleCompetenciesToCap(competencies: EssayReview["competencies"], cap: 
 }
 
 function inspectEssay(essay: string) {
-  const lower = essay.toLowerCase();
+  const lower = normalizeForHeuristics(essay);
   const words = essay.split(/\s+/).filter(Boolean);
   const paragraphCount = essay.split(/\n+/).map((p) => p.trim()).filter(Boolean).length;
   const repertoireTerms = ["constituicao", "paulo freire", "bourdieu", "bauman", "milton santos", "hannah arendt", "achille mbembe", "foucault", "george orwell", "aldous huxley", "o cortico", "ibge", "inep", "onu", "oms", "filosof", "sociolog"];
@@ -247,6 +288,13 @@ function inspectEssay(essay: string) {
   };
 }
 
+function normalizeForHeuristics(text: string) {
+  return text
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
+
 function countAny(text: string, terms: string[]) {
   return terms.filter((term) => text.includes(term)).length;
 }
@@ -266,7 +314,7 @@ function filterGenericCriticism(items: string[]) {
   });
 
   return filtered.length > 0 ? filtered : [
-    "Nao ha critica especifica suficiente para reduzir a nota sem apontar trecho, problema e impacto."
+    "Não há crítica específica suficiente para reduzir a nota sem apontar trecho, problema e impacto."
   ];
 }
 

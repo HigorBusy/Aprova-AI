@@ -34,18 +34,18 @@ function migrateLocalState(state: StudyState): StudyState {
 }
 
 function normalizeTopicStatus(status: string): TopicStatus {
-  if (status === "Não iniciado" || status === "NÃ£o iniciado") return "Não iniciado";
-  if (status === "Concluído" || status === "ConcluÃ­do") return "Concluído";
+  if (status === "N\u00e3o iniciado" || status === "N\u00c3\u00a3o iniciado") return "N\u00e3o iniciado";
+  if (status === "Conclu\u00eddo" || status === "Conclu\u00c3\u00addo") return "Conclu\u00eddo";
   if (status === "Estudando") return "Estudando";
-  return "Não iniciado";
+  return "N\u00e3o iniciado";
 }
 
 function normalizeProfileKind(profileKind: ProfileKind | string | null): ProfileKind | null {
-  if (profileKind === "Evolução Acelerada" || profileKind === "EvoluÃ§Ã£o Acelerada") {
-    return "Evolução Acelerada";
+  if (profileKind === "Evolu\u00e7\u00e3o Acelerada" || profileKind === "Evolu\u00c3\u00a7\u00c3\u00a3o Acelerada") {
+    return "Evolu\u00e7\u00e3o Acelerada";
   }
-  if (profileKind === "Última Hora" || profileKind === "Ãšltima Hora") {
-    return "Última Hora";
+  if (profileKind === "\u00daltima Hora" || profileKind === "\u00c3\u0161ltima Hora") {
+    return "\u00daltima Hora";
   }
   if (profileKind === "Iniciante Perdido" || profileKind === "Sem Rotina") {
     return profileKind;

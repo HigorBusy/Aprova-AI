@@ -1,4 +1,6 @@
-export const ENEM_FIRST_DAY = new Date("2026-11-08T13:30:00-03:00");
+import { PRODUCT_CONFIG } from "@/lib/product-config";
+
+export const ENEM_FIRST_DAY = new Date(PRODUCT_CONFIG.enem.firstDayIso);
 
 export function getDaysToEnem(now = new Date()) {
   const difference = ENEM_FIRST_DAY.getTime() - now.getTime();

@@ -2,7 +2,7 @@
 
 import { ChevronRight } from "lucide-react";
 import { Button, GhostButton, ProgressBar } from "@/components/ui";
-import { areas, difficulties, levels, studyTimes } from "@/lib/study-data";
+import { areas, difficulties, levels, studyFrequencies, targetExams } from "@/lib/study-data";
 import type { QuizAnswers } from "@/lib/types";
 
 type QuizProps = {
@@ -24,28 +24,34 @@ export function Quiz({ answers, daysToEnem, step, onAnswer, onNext, onBack }: Qu
     select: (id: string) => void;
   }> = [
     {
-      title: "Qual inimigo mais rouba sua aprovação?",
+      title: "Qual edição do ENEM é o seu foco?",
+      options: targetExams,
+      selected: answers.targetExam,
+      select: (id) => onAnswer({ targetExam: id as QuizAnswers["targetExam"] })
+    },
+    {
+      title: "Qual é sua maior dificuldade hoje?",
       options: difficulties,
       selected: answers.difficulty,
       select: (id) => onAnswer({ difficulty: id as QuizAnswers["difficulty"] })
     },
     {
-      title: "Quanto tempo você vai transformar em avanço diário?",
-      options: studyTimes,
-      selected: answers.studyTime,
-      select: (id) => onAnswer({ studyTime: id as QuizAnswers["studyTime"] })
-    },
-    {
-      title: "Qual território precisa ser conquistado primeiro?",
+      title: "Qual área mais precisa de atenção?",
       options: areas,
       selected: answers.area,
       select: (id) => onAnswer({ area: id as QuizAnswers["area"] })
     },
     {
-      title: "Qual é seu ponto de partida?",
+      title: "Como você avalia sua redação hoje?",
       options: levels,
       selected: answers.level,
       select: (id) => onAnswer({ level: id as QuizAnswers["level"] })
+    },
+    {
+      title: "Com que frequência você consegue estudar?",
+      options: studyFrequencies,
+      selected: answers.studyFrequency,
+      select: (id) => onAnswer({ studyFrequency: id as QuizAnswers["studyFrequency"] })
     }
   ];
 
@@ -54,24 +60,24 @@ export function Quiz({ answers, daysToEnem, step, onAnswer, onNext, onBack }: Qu
   return (
     <main className="mission-grid mx-auto flex min-h-screen w-full max-w-md flex-col px-5 py-6">
       <div className="flex items-center justify-between">
-        <p className="text-xs font-medium uppercase tracking-[0.20em] text-aura">Aprova.AI</p>
-        <p className="text-sm font-medium text-muted">{step + 1}/4</p>
+        <p className="text-xs font-medium uppercase tracking-[0.20em] text-aura">Seu diagnóstico inicial</p>
+        <p className="text-sm font-medium text-muted">{step + 1}/{screens.length}</p>
       </div>
 
       <section className="command-surface premium-glow mt-7 rounded-lg border border-accent/25 p-4">
-        <p className="text-sm font-medium text-white">Sua aprovação começa hoje.</p>
+        <p className="text-sm font-medium text-white">O ENEM está se aproximando.</p>
         <div className="mt-3 flex items-end gap-3">
           <span className="energy-text text-6xl font-semibold leading-none text-white">{daysToEnem}</span>
           <span className="pb-2 text-sm font-medium uppercase tracking-[0.12em] text-aura">
             dias até o ENEM
           </span>
         </div>
-        <ProgressBar value={((step + 1) / 4) * 100} className="mt-5" />
+        <ProgressBar value={((step + 1) / screens.length) * 100} className="mt-5" />
       </section>
 
       <section className="mt-8 flex flex-1 flex-col">
         <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted">
-          diagnóstico de rota
+          Leva menos de um minuto
         </p>
         <h1 className="mt-3 text-3xl font-semibold leading-tight text-white">
           {screen.title}
@@ -84,7 +90,7 @@ export function Quiz({ answers, daysToEnem, step, onAnswer, onNext, onBack }: Qu
               onClick={() => screen.select(option.id)}
               className={`rounded-lg border p-4 text-left font-medium transition duration-300 active:scale-[0.98] ${
                 screen.selected === option.id
-                  ? "border-accent/70 bg-accent/20 text-white shadow-[0_0_30px_rgba(124,58,237,0.22)]"
+                  ? "border-accent/70 bg-accent/20 text-white shadow-[0_0_30px_rgba(58,167,216,0.22)]"
                   : "border-white/10 bg-white/[0.045] text-slate-200 hover:border-accent/50 hover:bg-white/[0.06]"
               }`}
             >
@@ -104,7 +110,7 @@ export function Quiz({ answers, daysToEnem, step, onAnswer, onNext, onBack }: Qu
           Voltar
         </GhostButton>
         <Button onClick={onNext} disabled={!screen.selected}>
-          {step === 3 ? "Ativar sistema" : "Continuar"}
+          {step === screens.length - 1 ? "Ver meu próximo passo" : "Continuar"}
           <ChevronRight className="h-4 w-4" />
         </Button>
       </div>

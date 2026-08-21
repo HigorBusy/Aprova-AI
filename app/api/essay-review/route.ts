@@ -7,10 +7,11 @@ import { sanitizeTextInput } from "@/lib/security/input";
 import { checkRateLimit, rateLimitResponse } from "@/lib/security/rate-limit";
 import { jsonUtf8, rejectLargeRequest } from "@/lib/security/request";
 import { authenticateRequest } from "@/lib/supabase/server";
+import { PRODUCT_CONFIG } from "@/lib/product-config";
 
 export const runtime = "nodejs";
 
-const ESSAY_COST = 5;
+const ESSAY_COST = PRODUCT_CONFIG.credits.essayReview;
 
 export async function POST(request: NextRequest) {
   const auth = await authenticateRequest(request);
@@ -60,7 +61,7 @@ export async function POST(request: NextRequest) {
         .limit(12),
       supabase
         .from("student_profile")
-        .select("average_score,best_score,worst_competency,best_competency,total_essays,last_essay_date")
+        .select("average_score,best_score,worst_competency,best_competency,total_essays,last_essay_date,target_exam_year,main_difficulty,priority_area,essay_level,study_frequency")
         .eq("user_id", user.id)
         .maybeSingle(),
       supabase

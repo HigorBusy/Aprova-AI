@@ -1,16 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { callGroq, COMMANDER_SYSTEM_PROMPT } from "@/lib/ai/groq";
-import { formatRepertoryContext, formatStudentContext } from "@/lib/ai/student-context";
+import { formatQuestionContext, formatRepertoryContext, formatStudentContext } from "@/lib/ai/student-context";
 import { sanitizeSingleLine, sanitizeTextInput } from "@/lib/security/input";
 import { checkRateLimit, rateLimitResponse } from "@/lib/security/rate-limit";
 import { rejectLargeRequest } from "@/lib/security/request";
 import { authenticateRequest } from "@/lib/supabase/server";
+import { PRODUCT_CONFIG } from "@/lib/product-config";
 
 export const runtime = "nodejs";
 
-const CHAT_COST = 1;
-const TOOL_COST = 2;
+const CHAT_COST = PRODUCT_CONFIG.credits.tutorMessage;
+const TOOL_COST = PRODUCT_CONFIG.credits.tutorTool;
 const JSON_UTF8_HEADERS = { "Content-Type": "application/json; charset=utf-8" };
 
 export async function POST(request: NextRequest) {
@@ -65,14 +66,14 @@ export async function POST(request: NextRequest) {
 
   if (historyError) return jsonUtf8({ error: "Não foi possível carregar o histórico." }, { status: 500 });
 
-  const [{ data: repertorios }, { data: profile }, { data: essays }] = await Promise.all([
+  const [{ data: repertorios }, { data: profile }, { data: essays }, { data: questionCatalog }] = await Promise.all([
     supabase
       .from("repertorios")
       .select("autor,obra,tema,explicacao,categoria")
       .limit(12),
     supabase
       .from("student_profile")
-      .select("average_score,best_score,worst_competency,best_competency,total_essays,last_essay_date")
+      .select("average_score,best_score,worst_competency,best_competency,total_essays,last_essay_date,target_exam_year,main_difficulty,priority_area,essay_level,study_frequency")
       .eq("user_id", user.id)
       .maybeSingle(),
     supabase
@@ -80,11 +81,13 @@ export async function POST(request: NextRequest) {
       .select("score,c1,c2,c3,c4,c5,theme,created_at")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
-      .limit(3)
+      .limit(3),
+    supabase.rpc("get_question_catalog")
   ]);
 
   const runtimeContext = [
     formatStudentContext(profile, essays),
+    formatQuestionContext(questionCatalog),
     formatRepertoryContext(repertorios)
   ].join("\n\n");
 

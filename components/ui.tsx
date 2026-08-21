@@ -27,7 +27,7 @@ export function Button({
     <button
       className={clsx(
         "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition duration-300 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50",
-        "border border-accent/30 bg-accent text-white shadow-[0_0_34px_rgba(124,58,237,0.30)] hover:bg-violet hover:shadow-[0_0_44px_rgba(168,85,247,0.34)]",
+        "border border-accent/30 bg-gradient-to-br from-[#eef6ef] via-accent to-cosmic text-[#041014] shadow-[0_0_34px_rgba(58,167,216,0.20)] hover:shadow-[0_0_44px_rgba(159,207,139,0.22)]",
         className
       )}
       {...props}
@@ -62,13 +62,13 @@ export function Stat({
 }: {
   label: string;
   value: string;
-  tone?: "blue" | "green" | "orange" | "purple";
+  tone?: "blue" | "green" | "orange" | "aqua";
 }) {
   const toneClass = {
     blue: "text-aura",
-    green: "text-emerald-200",
-    orange: "text-amber-200",
-    purple: "text-aura"
+    green: "text-accent",
+    orange: "text-amber",
+    aqua: "text-aura"
   }[tone];
 
   return (
@@ -95,7 +95,7 @@ export function ProgressBar({
   return (
     <div className={clsx("h-2 overflow-hidden rounded-full border border-white/10 bg-black/40", className)}>
       <div
-        className="h-full rounded-full bg-gradient-to-r from-cosmic via-violet to-accent shadow-[0_0_24px_rgba(168,85,247,0.36)] transition-all duration-700 ease-out"
+        className="h-full rounded-full bg-gradient-to-r from-cosmic via-aura to-accent shadow-[0_0_24px_rgba(58,167,216,0.26)] transition-all duration-700 ease-out"
         style={{ width: `${safeValue}%` }}
       />
     </div>

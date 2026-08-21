@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { User } from "@supabase/supabase-js";
-import { CreditCard, Database, Home, LogOut, MessageCircle, ShieldCheck } from "lucide-react";
+import { ChartNoAxesCombined, CircleHelp, CreditCard, Database, FileText, LogOut, MessageCircle, ShieldCheck } from "lucide-react";
 
 import { AuthScreen } from "@/components/auth-screen";
 import { BrandTransition } from "@/components/brand-transition";
@@ -17,7 +17,7 @@ import { loadLocalState, saveLocalState } from "@/lib/local-store";
 import {
   dailyPhrases,
   initialState,
-  minutesFromStudyTime,
+  minutesFromStudyFrequency,
   prioritySubject,
   profileFromAnswers,
   todayKey
@@ -26,11 +26,15 @@ import { getSupabaseClient } from "@/lib/supabase/client";
 import type { PlanTag, ProfileKind, QuizAnswers, StudyState } from "@/lib/types";
 
 const tabs = [
-  { id: "home", label: "Central de controle", icon: Home, href: "/" },
-  { id: "commander", label: "Comandante IA", icon: MessageCircle, href: "/comandante" }
+  { id: "home", label: "Hoje", icon: FileText, href: "/" },
+  { id: "questions", label: "Questões", icon: CircleHelp, href: "/questoes" },
+  { id: "diagnostic", label: "Evolução", icon: ChartNoAxesCombined, href: "/diagnostico" },
+  { id: "commander", label: "Tutor IA", icon: MessageCircle, href: "/comandante" }
 ] as const;
 
 const adminTab = { id: "admin", label: "Painel ADM", icon: Database, href: "/admin" } as const;
+const SESSION_TIMEOUT_MS = 8_000;
+const ACCOUNT_TIMEOUT_MS = 12_000;
 
 type ProfileRow = {
   full_name: string | null;
@@ -56,7 +60,7 @@ export function AprovaApp() {
   const transitionTimerRef = useRef<number | null>(null);
   const transitioningUserRef = useRef<string | null>(null);
 
-  const beginSession = useCallback((nextUser: User, label = "Preparando sua Central") => {
+  const beginSession = useCallback((nextUser: User, label = "Preparando seu painel") => {
     if (transitioningUserRef.current === nextUser.id || user?.id === nextUser.id) return;
     if (transitionTimerRef.current) window.clearTimeout(transitionTimerRef.current);
 
@@ -87,11 +91,21 @@ export function AprovaApp() {
     }
 
     let mounted = true;
-    void supabase.auth.getSession().then(({ data }) => {
-      if (!mounted) return;
-      if (data.session?.user) beginSession(data.session.user, "Restaurando sua missão");
-      else setAuthLoading(false);
-    });
+    void withTimeout(
+      supabase.auth.getSession(),
+      SESSION_TIMEOUT_MS,
+      "Tempo limite ao restaurar sessão."
+    )
+      .then(({ data }) => {
+        if (!mounted) return;
+        if (data.session?.user) beginSession(data.session.user, "Restaurando sua sessão");
+        else setAuthLoading(false);
+      })
+      .catch(() => {
+        if (!mounted) return;
+        setAuthLoading(false);
+        setUser(null);
+      });
 
     const { data } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_OUT") {
@@ -124,14 +138,18 @@ export function AprovaApp() {
     setAccountError("");
     void (async () => {
       try {
-        const [profileResult, creditsResult] = await Promise.all([
-          supabase
-            .from("profiles")
-            .select("full_name,name,quiz_profile,daily_goal_minutes,plan_tag")
-            .eq("id", user.id)
-            .maybeSingle<ProfileRow>(),
-          supabase.from("user_credits").select("balance").eq("user_id", user.id).maybeSingle()
-        ]);
+        const [profileResult, creditsResult] = await withTimeout(
+          Promise.all([
+            supabase
+              .from("profiles")
+              .select("full_name,name,quiz_profile,daily_goal_minutes,plan_tag")
+              .eq("id", user.id)
+              .maybeSingle<ProfileRow>(),
+            supabase.from("user_credits").select("balance").eq("user_id", user.id).maybeSingle()
+          ]),
+          ACCOUNT_TIMEOUT_MS,
+          "Tempo limite ao carregar conta."
+        );
 
         if (profileResult.error || creditsResult.error) {
           throw profileResult.error ?? creditsResult.error;
@@ -222,22 +240,22 @@ export function AprovaApp() {
 
   async function finishQuiz() {
     const profileKind = profileFromAnswers(answers);
-    const dailyGoalMinutes = minutesFromStudyTime(answers.studyTime);
+    const dailyGoalMinutes = minutesFromStudyFrequency(answers.studyFrequency);
     const priority = prioritySubject(answers.area);
     const supabase = getSupabaseClient();
 
     if (!supabase || !user) return;
 
     setAccountLoading(true);
-    const { error } = await supabase
-      .from("profiles")
-      .update({
-        name: state.name,
-        full_name: state.name,
-        quiz_profile: profileKind,
-        daily_goal_minutes: dailyGoalMinutes
-      })
-      .eq("id", user.id);
+    const { error } = await supabase.rpc("complete_student_onboarding", {
+      p_quiz_profile: profileKind,
+      p_daily_goal_minutes: dailyGoalMinutes,
+      p_target_exam_year: Number(answers.targetExam ?? "2026"),
+      p_main_difficulty: answers.difficulty,
+      p_priority_area: answers.area,
+      p_essay_level: answers.level,
+      p_study_frequency: answers.studyFrequency
+    });
 
     if (error) {
       setAccountError("Não foi possível salvar seu diagnóstico. Tente novamente.");
@@ -250,7 +268,7 @@ export function AprovaApp() {
       profileKind,
       dailyGoalMinutes,
       notifications: [
-        `${priority} virou seu primeiro setor de navegação. A rota começa hoje.`,
+        `${priority} foi definida como sua primeira prioridade.`,
         ...current.notifications.slice(0, 2)
       ],
       topics: current.topics.map((topic) =>
@@ -265,7 +283,7 @@ export function AprovaApp() {
   async function handleSignOut() {
     const supabase = getSupabaseClient();
     if (!supabase) return;
-    setTransitionLabel("Encerrando sua missão");
+    setTransitionLabel("Encerrando sua sessão");
     await new Promise((resolve) => window.setTimeout(resolve, 1200));
     const { error } = await supabase.auth.signOut();
     if (error) setTransitionLabel(null);
@@ -308,7 +326,7 @@ export function AprovaApp() {
         step={quizStep}
         onAnswer={(next) => setAnswers((current) => ({ ...current, ...next }))}
         onNext={() =>
-          quizStep >= 3 ? void finishQuiz() : setQuizStep((step) => step + 1)
+          quizStep >= 4 ? void finishQuiz() : setQuizStep((step) => step + 1)
         }
         onBack={() => setQuizStep((step) => Math.max(0, step - 1))}
       />
@@ -320,10 +338,10 @@ export function AprovaApp() {
       <aside className="sticky top-0 hidden h-screen flex-col border-r border-white/10 bg-black/40 px-5 py-6 backdrop-blur-2xl lg:flex">
         <div className="flex h-12 w-44 items-center justify-center">
           <Image
-            src="/aprova-ai-logo-hd.png"
+            src="/aprova-ai-logo-lockup.svg"
             alt="AprovaAI"
-            width={1449}
-            height={676}
+            width={640}
+            height={220}
             priority
             className="h-10 w-auto max-w-full object-contain"
           />
@@ -343,7 +361,7 @@ export function AprovaApp() {
                 href={tab.href}
                 className={`flex min-h-12 items-center gap-3 rounded-lg px-3 text-left text-sm transition duration-300 ${
                   active
-                    ? "border border-accent/25 bg-accent/10 text-aura shadow-[0_0_28px_rgba(124,58,237,0.14)]"
+                    ? "border border-accent/25 bg-accent/10 text-aura shadow-[0_0_28px_rgba(58,167,216,0.14)]"
                     : "text-slate-500 hover:bg-white/[0.05] hover:text-slate-200"
                 }`}
               >
@@ -384,10 +402,10 @@ export function AprovaApp() {
           <div className="flex items-center justify-between gap-3">
             <div className="flex h-12 w-40 items-center justify-center">
               <Image
-                src="/aprova-ai-logo-hd.png"
+                src="/aprova-ai-logo-lockup.svg"
                 alt="AprovaAI"
-                width={1449}
-                height={676}
+                width={640}
+                height={220}
                 priority
                 className="h-10 w-auto max-w-full object-contain"
               />
@@ -403,7 +421,6 @@ export function AprovaApp() {
 
         <div className="mx-auto mt-5 w-full max-w-7xl lg:mt-0">
           <Dashboard
-            state={state}
             user={user}
             planTag={planTag}
             creditBalance={creditBalance}
@@ -414,7 +431,10 @@ export function AprovaApp() {
       </section>
 
       <nav className="safe-bottom fixed inset-x-0 bottom-0 z-20 border-t border-white/10 bg-black/80 px-3 py-2 backdrop-blur-xl lg:hidden">
-        <div className={`mx-auto grid max-w-md gap-2 ${planTag === "ADM" ? "grid-cols-3" : "grid-cols-2"}`}>
+        <div
+          className="mx-auto grid max-w-lg gap-1"
+          style={{ gridTemplateColumns: `repeat(${visibleTabs.length}, minmax(0, 1fr))` }}
+        >
           {visibleTabs.map((tab) => {
             const Icon = tab.icon;
             const active = tab.id === "home";
@@ -448,4 +468,13 @@ function LoadingScreen() {
 function formatPlanTag(planTag: PlanTag) {
   if (planTag === "ADM") return "ADM";
   return planTag === "premium" ? "Premium" : "Free";
+}
+
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number, message: string) {
+  return Promise.race<T>([
+    promise,
+    new Promise<T>((_, reject) => {
+      window.setTimeout(() => reject(new Error(message)), timeoutMs);
+    })
+  ]);
 }

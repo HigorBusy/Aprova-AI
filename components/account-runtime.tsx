@@ -118,13 +118,13 @@ export function AccountRuntime() {
 
   return (
     <div className="fixed inset-x-4 top-4 z-[90] mx-auto max-w-lg animate-float-in sm:inset-x-auto sm:right-6 sm:top-6 sm:w-[26rem]">
-      <div className="rounded-2xl border border-violet-300/20 bg-[#090b18]/95 p-5 text-white shadow-[0_24px_80px_rgba(124,58,237,0.28)] backdrop-blur-2xl">
+      <div className="rounded-2xl border border-[#3aa7d8]/25 bg-[#071014]/95 p-5 text-white shadow-[0_24px_80px_rgba(58,167,216,0.28)] backdrop-blur-2xl">
         <div className="flex items-start gap-4">
-          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-violet-300/25 bg-violet-400/10 text-violet-200">
+          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-[#3aa7d8]/25 bg-[#3aa7d8]/10 text-[#8bd8f8]">
             <Radio className="h-4 w-4" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-violet-300">Mensagem da equipe</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#8bd8f8]">Mensagem da equipe</p>
             <p className="mt-2 whitespace-pre-wrap break-words text-sm leading-6 text-slate-200">{message.message}</p>
           </div>
           <button

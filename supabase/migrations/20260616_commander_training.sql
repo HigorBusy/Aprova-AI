@@ -240,3 +240,4 @@ revoke all on function public.complete_essay_review(text, text, integer, text, t
   from public, anon;
 grant execute on function public.complete_essay_review(text, text, integer, text, text, integer, integer, integer, integer, integer, integer)
   to authenticated;
+

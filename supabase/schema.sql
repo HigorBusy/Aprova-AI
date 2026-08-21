@@ -22,11 +22,14 @@ create table if not exists public.daily_progress (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   progress_date date not null default current_date,
+  date_key text not null,
   studied_minutes integer not null default 0 check (studied_minutes >= 0),
   tasks_completed integer not null default 0 check (tasks_completed >= 0),
   questions_answered integer not null default 0 check (questions_answered >= 0),
   created_at timestamptz not null default now(),
-  unique (user_id, progress_date)
+  unique (user_id, progress_date),
+  unique (user_id, date_key),
+  constraint daily_progress_date_key_format check (date_key ~ '^\d{4}-\d{2}-\d{2}$')
 );
 
 create table if not exists public.subjects (
@@ -106,6 +109,7 @@ create table if not exists public.streaks (
   current_streak integer not null default 0 check (current_streak >= 0),
   best_streak integer not null default 0 check (best_streak >= 0),
   last_study_date date,
+  last_study_date_key text check (last_study_date_key is null or last_study_date_key ~ '^\d{4}-\d{2}-\d{2}$'),
   created_at timestamptz not null default now()
 );
 

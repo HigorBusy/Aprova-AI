@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Send } from "lucide-react";
 
 import { Loader } from "@/components/ui/loader-15";
@@ -10,6 +10,7 @@ type AiInputProps = {
   disabled?: boolean;
   loading?: boolean;
   placeholder?: string;
+  initialValue?: string;
   onSubmit: (message: string) => void;
 };
 
@@ -19,10 +20,11 @@ const MAX_HEIGHT = 180;
 export function AiInput({
   disabled = false,
   loading = false,
-  placeholder = "Pergunte ao Comandante sobre redação, estudos ou estratégia...",
+  placeholder = "Pergunte ao Tutor IA sobre redação, estudos ou estratégia...",
+  initialValue = "",
   onSubmit
 }: AiInputProps) {
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState(initialValue);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const adjustHeight = useCallback((reset = false) => {
@@ -31,6 +33,12 @@ export function AiInput({
     textarea.style.height = `${MIN_HEIGHT}px`;
     if (!reset) textarea.style.height = `${Math.min(textarea.scrollHeight, MAX_HEIGHT)}px`;
   }, []);
+
+  useEffect(() => {
+    if (!initialValue) return;
+    setValue(initialValue);
+    window.requestAnimationFrame(() => adjustHeight());
+  }, [adjustHeight, initialValue]);
 
   function handleSubmit() {
     const message = value.trim();
@@ -41,13 +49,13 @@ export function AiInput({
   }
 
   return (
-    <div className="relative w-full rounded-[24px] border border-white/10 bg-black/60 p-2 shadow-[0_0_46px_rgba(124,58,237,0.18)] backdrop-blur-xl transition focus-within:border-accent/45 focus-within:bg-black/70">
+    <div className="relative w-full rounded-[24px] border border-white/10 bg-black/60 p-2 shadow-[0_0_46px_rgba(58,167,216,0.14)] backdrop-blur-xl transition-[background-color,border-color] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] focus-within:border-cosmic/45 focus-within:bg-black/70">
       <Textarea
         ref={textareaRef}
         value={value}
         disabled={disabled || loading}
         maxLength={8_000}
-        aria-label="Mensagem para o Comandante IA"
+        aria-label="Mensagem para o Tutor IA"
         placeholder={placeholder}
         className="min-h-14 max-h-[180px] resize-none border-0 bg-transparent px-4 py-3 pr-16 text-sm leading-6 text-slate-100 placeholder:text-slate-500 focus-visible:ring-0 focus-visible:ring-offset-0"
         onChange={(event) => {
@@ -65,7 +73,7 @@ export function AiInput({
         type="button"
         disabled={disabled || loading || !value.trim()}
         onClick={handleSubmit}
-        className="absolute bottom-4 right-4 grid h-10 w-10 place-items-center rounded-2xl border border-accent/35 bg-accent text-white shadow-[0_0_28px_rgba(168,85,247,0.34)] transition hover:bg-violet hover:shadow-[0_0_34px_rgba(168,85,247,0.42)] disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/[0.05] disabled:text-slate-600 disabled:shadow-none"
+        className="absolute bottom-4 right-4 grid h-10 w-10 place-items-center rounded-2xl border border-accent/35 bg-gradient-to-br from-accent to-cosmic text-[#041014] shadow-[0_0_28px_rgba(58,167,216,0.28)] transition-[box-shadow,transform,border-color] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] hover:shadow-[0_0_34px_rgba(159,207,139,0.26)] active:scale-[0.96] disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/[0.05] disabled:text-slate-600 disabled:shadow-none disabled:active:scale-100"
         aria-label="Enviar mensagem"
       >
         {loading ? <Loader size="sm" /> : <Send className="h-4 w-4" />}

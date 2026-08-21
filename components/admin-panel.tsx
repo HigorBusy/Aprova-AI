@@ -207,7 +207,7 @@ export function AdminPanel() {
               <ArrowLeft className="h-4 w-4" /> Central de controle
             </Link>
             <div className="mt-4 flex items-center gap-3">
-              <div className="grid h-11 w-11 place-items-center rounded-xl border border-violet-300/20 bg-violet-400/10 text-violet-200">
+              <div className="grid h-11 w-11 place-items-center rounded-xl border border-[#3aa7d8]/25 bg-[#3aa7d8]/10 text-[#8bd8f8]">
                 <Database className="h-5 w-5" />
               </div>
               <div>
@@ -229,7 +229,7 @@ export function AdminPanel() {
           <Stat icon={Users} label="Usuários" value={stats.total} />
           <Stat icon={UserCheck} label="Online agora" value={stats.online} accent="text-emerald-300" />
           <Stat icon={Ban} label="Bloqueados" value={stats.blocked} accent="text-red-300" />
-          <Stat icon={Coins} label="Créditos em contas" value={stats.credits} accent="text-violet-300" />
+          <Stat icon={Coins} label="Créditos em contas" value={stats.credits} accent="text-[#8bd8f8]" />
         </section>
 
         {feedback && (
@@ -250,7 +250,7 @@ export function AdminPanel() {
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Buscar usuário ou e-mail"
-                className="h-11 w-full rounded-lg border border-white/10 bg-black/25 pl-10 pr-3 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-violet-400/40"
+                className="h-11 w-full rounded-lg border border-white/10 bg-black/25 pl-10 pr-3 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-[#3aa7d8]/45"
               />
             </label>
           </div>
@@ -268,7 +268,7 @@ export function AdminPanel() {
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
                       <p className="truncate font-medium text-slate-100">{user.full_name}</p>
-                      {user.email.toLowerCase() === ADMIN_EMAIL && <span className="rounded-full border border-violet-300/20 bg-violet-400/10 px-2 py-0.5 text-[0.62rem] font-semibold text-violet-200">ADM</span>}
+                      {user.email.toLowerCase() === ADMIN_EMAIL && <span className="rounded-full border border-[#3aa7d8]/25 bg-[#3aa7d8]/10 px-2 py-0.5 text-[0.62rem] font-semibold text-[#8bd8f8]">ADM</span>}
                     </div>
                     <p className="mt-1 truncate text-xs text-slate-500">{user.email}</p>
                     <p className="mt-1 text-[0.68rem] text-slate-600">Criado em {formatDate(user.created_at)}</p>
@@ -278,7 +278,7 @@ export function AdminPanel() {
                     <span className={user.is_blocked ? "text-red-300" : online ? "text-emerald-300" : "text-slate-500"}>{user.is_blocked ? "Bloqueado" : online ? "Online" : "Offline"}</span>
                   </div>
                   <p className="text-sm text-slate-300">{user.plan_tag}</p>
-                  <p className="flex items-center gap-2 text-sm font-semibold text-violet-200"><Coins className="h-4 w-4" /> {user.balance}</p>
+                  <p className="flex items-center gap-2 text-sm font-semibold text-[#8bd8f8]"><Coins className="h-4 w-4" /> {user.balance}</p>
                   <div className="grid grid-cols-3 gap-2">
                     <ActionButton label="+5 créditos" icon={Coins} disabled={busy} onClick={() => void addCredits(user)} />
                     <ActionButton label="Mensagem" icon={MessageSquare} disabled={busy} onClick={() => { setMessageUser(user); setMessageText(""); }} />
@@ -307,10 +307,10 @@ export function AdminPanel() {
               value={messageText}
               onChange={(event) => setMessageText(event.target.value.slice(0, 500))}
               placeholder="Escreva um recado claro para o usuário..."
-              className="mt-5 min-h-36 w-full resize-none rounded-xl border border-white/10 bg-black/30 p-4 text-sm leading-6 text-white outline-none placeholder:text-slate-600 focus:border-violet-400/40"
+              className="mt-5 min-h-36 w-full resize-none rounded-xl border border-white/10 bg-black/30 p-4 text-sm leading-6 text-white outline-none placeholder:text-slate-600 focus:border-[#3aa7d8]/45"
             />
             <div className="mt-2 flex items-center justify-between text-xs text-slate-600"><span>Texto simples e seguro</span><span>{messageText.length}/500</span></div>
-            <button type="button" disabled={!messageText.trim() || busyUserId === messageUser.user_id} onClick={() => void sendMessage()} className="mt-5 inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-violet-600 px-5 text-sm font-semibold text-white shadow-[0_0_30px_rgba(124,58,237,0.28)] transition hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-50">
+            <button type="button" disabled={!messageText.trim() || busyUserId === messageUser.user_id} onClick={() => void sendMessage()} className="mt-5 inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-br from-[#9fcf8b] to-[#3aa7d8] px-5 text-sm font-semibold text-white shadow-[0_0_30px_rgba(58,167,216,0.28)] transition hover:bg-[#b8dca8]-500 disabled:cursor-not-allowed disabled:opacity-50">
               {busyUserId === messageUser.user_id ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <MessageSquare className="h-4 w-4" />} Enviar recado
             </button>
           </div>
@@ -329,7 +329,7 @@ function ActionButton({ label, icon: Icon, onClick, disabled, danger = false }: 
 }
 
 function AdminLoading() {
-  return <main className="mission-grid grid min-h-[100dvh] place-items-center bg-canvas text-violet-300"><LoaderCircle className="h-7 w-7 animate-spin" /></main>;
+  return <main className="mission-grid grid min-h-[100dvh] place-items-center bg-canvas text-[#8bd8f8]"><LoaderCircle className="h-7 w-7 animate-spin" /></main>;
 }
 
 function formatDate(value: string) {

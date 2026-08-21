@@ -1,6 +1,7 @@
 "use client";
 
 import { Activity, CalendarDays } from "lucide-react";
+
 import { Card, Stat } from "@/components/ui";
 import type { StudyState } from "@/lib/types";
 
@@ -29,7 +30,7 @@ export function Progress({ state }: ProgressProps) {
         <div className="mt-5 grid grid-cols-2 gap-3">
           <Stat label="horas de voo" value={formatHours(state.totalMinutes)} tone="blue" />
           <Stat label="setores" value={`${concluded}/${totalTopics}`} tone="green" />
-          <Stat label="semana" value={`+${growth}%`} tone="purple" />
+          <Stat label="semana" value={`+${growth}%`} tone="aqua" />
           <Stat label="sequência" value={`${state.currentStreak}d`} tone="orange" />
         </div>
       </Card>
@@ -43,7 +44,7 @@ export function Progress({ state }: ProgressProps) {
           {state.weeklyMinutes.map((minutes, index) => (
             <div key={`${index}-${minutes}`} className="flex flex-1 flex-col items-center gap-2">
               <div
-                className="w-full rounded-t bg-gradient-to-t from-cosmic via-violet to-aura opacity-80 shadow-[0_0_18px_rgba(168,85,247,0.18)] transition-all duration-700"
+                className="w-full rounded-t bg-gradient-to-t from-cosmic via-accent to-aura opacity-80 shadow-[0_0_18px_rgba(159,207,139,0.18)] transition-all duration-700"
                 style={{ height: `${Math.max(8, (minutes / max) * 100)}%` }}
               />
               <span className="text-xs text-slate-500">{dayLabels[index]}</span>

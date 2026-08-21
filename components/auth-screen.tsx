@@ -55,7 +55,7 @@ export function AuthScreen({ onAuthenticated, onBackToLanding }: AuthScreenProps
           onAuthenticated(data.user);
           return;
         }
-        setMessage("Conta criada. Confirme o e-mail para entrar na Central de Controle.");
+        setMessage("Conta criada. Confirme o e-mail para começar seu diagnóstico.");
         setMode("login");
         return;
       }
@@ -66,8 +66,8 @@ export function AuthScreen({ onAuthenticated, onBackToLanding }: AuthScreenProps
         return;
       }
       if (data.user) onAuthenticated(data.user);
-    } catch {
-      setMessage("Não foi possível concluir a conexão. Verifique sua internet e tente novamente.");
+    } catch (error) {
+      setMessage(getAuthConnectionMessage(error));
     } finally {
       setSubmitting(false);
     }
@@ -85,8 +85,8 @@ export function AuthScreen({ onAuthenticated, onBackToLanding }: AuthScreenProps
         redirectTo: window.location.origin
       });
       setMessage(error ? error.message : "Enviamos as instruções de redefinição para seu e-mail.");
-    } catch {
-      setMessage("Não foi possível solicitar a redefinição. Tente novamente.");
+    } catch (error) {
+      setMessage(getAuthConnectionMessage(error));
     } finally {
       setSubmitting(false);
     }
@@ -106,4 +106,20 @@ export function AuthScreen({ onAuthenticated, onBackToLanding }: AuthScreenProps
       onBackToLanding={onBackToLanding}
     />
   );
+}
+
+function getAuthConnectionMessage(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error ?? "");
+  const normalized = message.toLowerCase();
+
+  if (
+    normalized.includes("failed to fetch") ||
+    normalized.includes("fetch failed") ||
+    normalized.includes("bad gateway") ||
+    normalized.includes("networkerror")
+  ) {
+    return "Não foi possível conectar ao servidor de login agora. O backend do AprovaAI pode estar iniciando; aguarde alguns minutos e tente novamente.";
+  }
+
+  return "Não foi possível concluir a conexão. Verifique sua internet e tente novamente.";
 }

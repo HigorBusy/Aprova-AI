@@ -1,20 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
-import { Bot, CheckCircle2, ChevronDown, CreditCard, FileText, Radar, Target } from "lucide-react";
+import { ArrowRight, Bot, CheckCircle2, ChevronDown, CircleHelp, CreditCard, FileText, Target } from "lucide-react";
 
 import { AuthCard } from "@/components/auth-card";
-import { Button, Card, Stat } from "@/components/ui";
+import { Button, Card } from "@/components/ui";
 import { Loader } from "@/components/ui/loader-15";
 import type { EssayReview } from "@/lib/ai/types";
-import { getDaysToEnem, getEnemCountdown } from "@/lib/constants";
+import { getDaysToEnem } from "@/lib/constants";
+import { PRODUCT_CONFIG } from "@/lib/product-config";
 import { getSupabaseClient } from "@/lib/supabase/client";
-import type { PlanTag, StudyState } from "@/lib/types";
+import type { PlanTag } from "@/lib/types";
 
 type DashboardProps = {
-  state: StudyState;
   user: User;
   planTag: PlanTag;
   creditBalance: number | null;
@@ -35,59 +35,31 @@ type EssayReviewRow = {
   created_at: string;
 };
 
-const flightBars = [18, 22, 28, 34, 42, 56, 68, 76, 72, 84, 66, 58, 49, 40, 31, 24];
-
 export function Dashboard({
-  state,
   user,
   planTag,
   creditBalance,
   onCreditBalanceChange,
   onSignOut
 }: DashboardProps) {
-  const studiedHours = formatHours(state.studiedMinutesToday);
-  const totalHours = formatHours(state.totalMinutes);
-  const activeDays = state.weeklyMinutes.filter((minutes) => minutes > 0).length;
-  const consistency = Math.round((activeDays / 7) * 100);
-
   return (
     <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-4 animate-float-in lg:grid-cols-12 lg:gap-5">
       <CountdownPanel className="lg:col-span-12" />
 
+      <NextStepCard className="lg:col-span-12" />
+
       <WritingCenterCard
-        className="lg:col-span-8 lg:row-span-2"
+        className="lg:col-span-12"
         balance={creditBalance}
         onBalanceChange={onCreditBalanceChange}
       />
 
-      <div className="grid content-start gap-4 lg:col-span-4">
+      <QuestionsCard className="lg:col-span-12" />
+
+      <div className="grid gap-4 md:grid-cols-2 lg:col-span-12">
         <CommanderCard />
         <CreditsCard balance={creditBalance} planTag={planTag} />
       </div>
-
-      <Card className="lg:col-span-12">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.18em] text-aura">
-              <Radar className="h-4 w-4" />
-              Telemetria real
-            </p>
-            <h2 className="mt-2 text-2xl font-semibold text-white">
-              {state.studiedMinutesToday > 0
-                ? "Seu ritmo de hoje foi registrado."
-                : "Ainda não há sinal de estudo hoje."}
-            </h2>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">
-              O painel acompanha apenas dados registrados. Sem atividade, não inventamos progresso.
-            </p>
-          </div>
-          <div className="grid grid-cols-3 gap-2 sm:min-w-[390px]">
-            <Stat label="hoje" value={studiedHours} tone="green" />
-            <Stat label="acumulado" value={totalHours} tone="blue" />
-            <Stat label="consistência" value={`${consistency}%`} tone="purple" />
-          </div>
-        </div>
-      </Card>
 
       <div className="lg:col-span-12">
         <AuthCard
@@ -102,72 +74,54 @@ export function Dashboard({
 }
 
 function CountdownPanel({ className }: { className?: string }) {
-  const [now, setNow] = useState(() => new Date());
-
-  useEffect(() => {
-    const timer = window.setInterval(() => setNow(new Date()), 1000);
-    return () => window.clearInterval(timer);
-  }, []);
-
-  const countdown = useMemo(() => getEnemCountdown(now), [now]);
-  const daysToEnem = getDaysToEnem(now);
+  const daysToEnem = getDaysToEnem();
 
   return (
     <Card className={`command-surface premium-glow p-5 sm:p-7 lg:p-8 ${className ?? ""}`}>
-      <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+      <div className="grid gap-7 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
         <div className="min-w-0">
-          <p className="text-xs font-medium uppercase tracking-[0.22em] text-aura">
+          <p className="text-sm font-semibold uppercase tracking-[0.20em] text-aura">
             Contagem regressiva para o ENEM
           </p>
-          <h2 className="mt-4 max-w-3xl text-3xl font-semibold leading-tight text-white sm:text-5xl lg:text-6xl">
-            O tempo vai passar de qualquer jeito.
+          <h2 className="mt-4 max-w-3xl text-3xl font-semibold leading-tight text-white sm:text-4xl">
+            A prova está chegando. Seu próximo passo precisa acontecer hoje.
           </h2>
-          <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-300">
-            Provas confirmadas para 8 e 15 de novembro de 2026. O painel conta até o primeiro dia.
+          <p className="mt-4 max-w-2xl text-sm leading-6 text-muted">
+            Primeiro dia em 8 de novembro de {PRODUCT_CONFIG.enem.year}.
           </p>
         </div>
-        <div className="rounded-lg border border-accent/25 bg-black/25 px-4 py-3 text-right shadow-[0_0_34px_rgba(124,58,237,0.20)]">
-          <p className="energy-text text-5xl font-semibold text-white sm:text-6xl">{daysToEnem}</p>
-          <p className="text-[0.68rem] uppercase tracking-[0.18em] text-muted">dias totais</p>
-        </div>
-      </div>
-
-      <div className="mt-7 grid grid-cols-3 gap-2 rounded-lg border border-white/10 bg-black/25 p-2 sm:grid-cols-5 sm:gap-3 sm:p-3">
-        <CountdownUnit label="meses" value={countdown.months} />
-        <CountdownUnit label="dias" value={countdown.days} />
-        <CountdownUnit label="horas" value={countdown.hours} />
-        <CountdownUnit label="min" value={countdown.minutes} />
-        <CountdownUnit label="seg" value={countdown.seconds} pulse />
-      </div>
-
-      <div className="mt-6 h-20 overflow-hidden rounded-lg border border-white/10 bg-black/25 px-3 pt-4 sm:h-24">
-        <div className="flex h-full items-end gap-1 scanline">
-          {flightBars.map((height, index) => (
-            <span
-              key={`${height}-${index}`}
-              className="block flex-1 rounded-t bg-gradient-to-t from-cosmic via-violet to-aura opacity-80 shadow-[0_0_18px_rgba(168,85,247,0.24)]"
-              style={{ height: `${height}%` }}
-            />
-          ))}
+        <div className="min-w-56 rounded-lg border border-accent/30 bg-accent/[0.08] px-6 py-5 text-left shadow-[0_0_34px_rgba(58,167,216,0.16)] lg:text-right">
+          <p className="countdown-value energy-text text-7xl font-semibold leading-none text-white sm:text-8xl">{daysToEnem}</p>
+          <p className="mt-2 text-xs font-semibold uppercase tracking-[0.18em] text-aura">dias restantes</p>
         </div>
       </div>
     </Card>
   );
 }
 
-function CountdownUnit({ label, value, pulse }: { label: string; value: number; pulse?: boolean }) {
+function QuestionsCard({ className }: { className?: string }) {
   return (
-    <div className="rounded-lg border border-white/10 bg-white/[0.035] px-1 py-3 text-center sm:px-2">
-      <p
-        key={value}
-        className={`countdown-value energy-text text-2xl font-semibold text-white sm:text-5xl lg:text-6xl ${pulse ? "signal-pulse" : ""}`}
-      >
-        {String(value).padStart(2, "0")}
-      </p>
-      <p className="mt-1 text-[0.58rem] font-medium uppercase tracking-[0.08em] text-muted sm:text-[0.62rem]">
-        {label}
-      </p>
-    </div>
+    <Card className={`border-sky-300/20 bg-gradient-to-br from-sky-300/[0.08] via-white/[0.035] to-transparent ${className ?? ""}`}>
+      <div className="grid gap-5 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center">
+        <div className="grid h-12 w-12 place-items-center rounded-lg border border-sky-300/25 bg-sky-300/[0.08] text-sky-100">
+          <CircleHelp className="h-5 w-5" />
+        </div>
+        <div>
+          <p className="text-xs font-medium uppercase tracking-[0.18em] text-aura">Questões</p>
+          <h2 className="mt-2 text-2xl font-semibold text-white">Treine e descubra suas lacunas.</h2>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-300">
+            Responda questões autorais, receba a explicação na hora e transforme cada erro em uma prioridade real de estudo.
+          </p>
+        </div>
+        <Link
+          href="/questoes"
+          className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-accent/30 bg-accent px-5 text-sm font-semibold text-[#041014] shadow-[0_0_30px_rgba(159,207,139,0.16)] transition-transform duration-150 active:scale-[0.97]"
+        >
+          Iniciar treino
+          <ArrowRight className="h-4 w-4" />
+        </Link>
+      </div>
+    </Card>
   );
 }
 
@@ -186,7 +140,7 @@ function WritingCenterCard({
   const [review, setReview] = useState<EssayReview | null>(null);
   const [history, setHistory] = useState<EssayReviewRow[]>([]);
   const [historyLoading, setHistoryLoading] = useState(true);
-  const hasCredits = (balance ?? 0) >= 5;
+  const hasCredits = (balance ?? 0) >= PRODUCT_CONFIG.credits.essayReview;
   const wordCount = essayText.trim().split(/\s+/).filter(Boolean).length;
 
   useEffect(() => {
@@ -224,7 +178,7 @@ function WritingCenterCard({
 
   async function handleCorrection() {
     if (!hasCredits) {
-      setMessage("Você precisa de 5 créditos para corrigir uma redação.");
+      setMessage(`Você precisa de ${PRODUCT_CONFIG.credits.essayReview} créditos para corrigir uma redação.`);
       return;
     }
     if (essayText.trim().length < 50) {
@@ -280,7 +234,7 @@ function WritingCenterCard({
         ...current
       ].slice(0, 6));
       if (typeof result.balance === "number") onBalanceChange(result.balance);
-      setMessage("Correção concluída. Cinco créditos foram consumidos.");
+      setMessage(`Correção concluída. ${PRODUCT_CONFIG.credits.essayReview} créditos foram consumidos.`);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Não foi possível corrigir a redação.");
     } finally {
@@ -308,7 +262,7 @@ function WritingCenterCard({
         onChange={(event) => setEssayText(event.target.value)}
         placeholder="Cole sua redação aqui..."
         maxLength={30_000}
-        className="mt-6 min-h-64 w-full resize-y rounded-lg border border-white/10 bg-black/40 px-4 py-4 text-sm leading-6 text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-accent/50 focus:shadow-[0_0_28px_rgba(124,58,237,0.16)]"
+        className="mt-6 min-h-64 w-full resize-y rounded-lg border border-white/10 bg-black/40 px-4 py-4 text-sm leading-6 text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-accent/50 focus:shadow-[0_0_28px_rgba(58,167,216,0.16)]"
       />
 
       <Button
@@ -316,7 +270,7 @@ function WritingCenterCard({
         onClick={() => void handleCorrection()}
         className="mt-3 min-h-12 w-full"
       >
-        {submitting ? <Loader size="sm" /> : hasCredits ? "Iniciar correção · 5 créditos" : "Créditos insuficientes"}
+        {submitting ? <Loader size="sm" /> : hasCredits ? `Iniciar correção · ${PRODUCT_CONFIG.credits.essayReview} créditos` : "Créditos insuficientes"}
       </Button>
 
       <div className="mt-4 flex items-center justify-between gap-3 text-xs text-muted">
@@ -338,7 +292,7 @@ function WritingCenterCard({
           }}
           onRewrite={() => {
             setReview(null);
-            setMessage("Reescreva abaixo usando a correção como guia. Esta nova correção usará 5 créditos.");
+            setMessage(`Reescreva abaixo usando a correção como guia. Esta nova correção usará ${PRODUCT_CONFIG.credits.essayReview} créditos.`);
           }}
         />
       )}
@@ -352,7 +306,7 @@ function WritingCenterCard({
       />
       {!hasCredits && !message && (
         <p className="mt-3 rounded-lg border border-white/10 bg-black/30 p-3 text-sm leading-6 text-slate-300">
-          São necessários 5 créditos. A ferramenta não inicia cobranças nem permite saldo negativo.
+          São necessários {PRODUCT_CONFIG.credits.essayReview} créditos. A ferramenta não inicia cobranças nem permite saldo negativo.
         </p>
       )}
     </Card>
@@ -364,7 +318,7 @@ function CommanderCard() {
     <Card className="premium-glow">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-medium uppercase tracking-[0.18em] text-aura">Comandante IA</p>
+          <p className="text-xs font-medium uppercase tracking-[0.18em] text-aura">Tutor IA</p>
           <h2 className="mt-2 text-2xl font-semibold leading-tight text-white">
             Orientação para avançar com direção.
           </h2>
@@ -376,10 +330,138 @@ function CommanderCard() {
       </p>
       <Link
         href="/comandante"
-        className="mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-lg border border-accent/30 bg-accent px-4 py-2 text-sm font-semibold text-white shadow-[0_0_34px_rgba(124,58,237,0.30)] transition hover:bg-violet"
+        className="mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-lg border border-accent/30 bg-accent px-4 py-2 text-sm font-semibold text-white shadow-[0_0_34px_rgba(58,167,216,0.30)] transition-[background-color,transform,border-color] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] hover:bg-[#b8dca8] active:scale-[0.98]"
       >
-        Abrir Comandante
+        Abrir Tutor IA
       </Link>
+    </Card>
+  );
+}
+
+type WeaknessRow = {
+  competency: string;
+  weakness_type: string;
+  frequency: number;
+  severity: number;
+  latest_score: number;
+  status: "active" | "improving" | "resolved";
+};
+
+type QuestionWeaknessRow = {
+  topic_id: string;
+  total_attempts: number;
+  correct_attempts: number;
+  wrong_attempts: number;
+  question_topics: {
+    name: string;
+    area_key: "math" | "languages" | "humanities" | "nature";
+  } | null;
+};
+
+function NextStepCard({ className }: { className?: string }) {
+  const [weakness, setWeakness] = useState<WeaknessRow | null>(null);
+  const [questionWeakness, setQuestionWeakness] = useState<QuestionWeaknessRow | null>(null);
+  const [hasEssay, setHasEssay] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const supabase = getSupabaseClient();
+    if (!supabase) return;
+    let active = true;
+
+    void (async () => {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const userId = sessionData.session?.user.id;
+      if (!userId) return;
+
+      const [weaknessResult, essayResult, questionResult] = await Promise.all([
+        supabase
+          .from("user_weaknesses")
+          .select("competency,weakness_type,frequency,severity,latest_score,status")
+          .eq("user_id", userId)
+          .neq("status", "resolved")
+          .order("severity", { ascending: false })
+          .order("frequency", { ascending: false })
+          .limit(1)
+          .maybeSingle<WeaknessRow>(),
+        supabase
+          .from("essay_reviews")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", userId),
+        supabase
+          .from("question_topic_stats")
+          .select("topic_id,total_attempts,correct_attempts,wrong_attempts,question_topics(name,area_key)")
+          .eq("user_id", userId)
+          .gte("total_attempts", 2)
+      ]);
+
+      if (!active) return;
+      setWeakness(weaknessResult.data ?? null);
+      setHasEssay((essayResult.count ?? 0) > 0);
+      const weakestTopic = ((questionResult.data ?? []) as unknown as QuestionWeaknessRow[])
+        .filter((item) => item.question_topics)
+        .sort((a, b) => (a.correct_attempts / a.total_attempts) - (b.correct_attempts / b.total_attempts))[0] ?? null;
+      setQuestionWeakness(weakestTopic);
+    })();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const questionAccuracy = questionWeakness
+    ? Math.round((questionWeakness.correct_attempts / questionWeakness.total_attempts) * 100)
+    : null;
+  const prioritizeQuestions = Boolean(questionWeakness && questionAccuracy !== null && questionAccuracy < 70);
+  const title = prioritizeQuestions
+    ? `Retome ${questionWeakness?.question_topics?.name}`
+    : weakness
+    ? `Treine ${weakness.competency}: ${weakness.weakness_type}`
+    : hasEssay === false
+      ? "Seu diagnóstico começa com a primeira redação"
+      : "Envie uma nova redação para medir sua evolução";
+  const description = prioritizeQuestions
+    ? `Seu aproveitamento neste assunto está em ${questionAccuracy}% após ${questionWeakness?.total_attempts} tentativas. Um treino curto agora vale mais do que revisar tudo de novo.`
+    : weakness
+    ? `Esse padrão apareceu ${weakness.frequency} ${weakness.frequency === 1 ? "vez" : "vezes"}. Sua última marca foi ${weakness.latest_score}/200.`
+    : "A correção identifica seu nível, registra seus padrões e define o próximo foco de estudo.";
+
+  return (
+    <Card className={`border-accent/25 bg-gradient-to-r from-accent/[0.10] via-white/[0.04] to-transparent ${className ?? ""}`}>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <p className="text-xs font-medium uppercase tracking-[0.18em] text-aura">Seu próximo passo</p>
+          <h2 className="mt-2 text-2xl font-semibold text-white sm:text-3xl">{title}</h2>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-300">{description}</p>
+        </div>
+        <div className="flex shrink-0 flex-wrap gap-2">
+          {prioritizeQuestions && questionWeakness?.question_topics ? (
+            <Link
+              href={`/questoes?area=${questionWeakness.question_topics.area_key}&topic=${questionWeakness.topic_id}`}
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-accent/30 bg-accent px-4 text-sm font-semibold text-[#041014] shadow-[0_0_30px_rgba(159,207,139,0.18)] transition-[background-color,transform] duration-150 active:scale-[0.97]"
+            >
+              Treinar assunto
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          ) : weakness ? (
+            <Link
+              href={`/comandante?context=${encodeURIComponent(`Quero treinar ${weakness.competency}: ${weakness.weakness_type}. Minha última nota nessa competência foi ${weakness.latest_score}/200. Explique meu principal problema e me passe um exercício prático.`)}`}
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-accent/30 bg-accent px-4 text-sm font-semibold text-[#041014] shadow-[0_0_30px_rgba(159,207,139,0.18)] transition-[background-color,transform] duration-150 active:scale-[0.97]"
+            >
+              Treinar com o Tutor
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          ) : null}
+          {!prioritizeQuestions ? (
+            <a
+              href="#centro-redacao"
+              className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold transition-[background-color,transform,border-color] duration-150 active:scale-[0.97] ${weakness ? "border border-white/10 bg-white/[0.05] text-slate-100 hover:border-accent/35" : "border border-accent/30 bg-accent text-[#041014] shadow-[0_0_30px_rgba(159,207,139,0.18)]"}`}
+            >
+              Enviar redação
+              <ArrowRight className="h-4 w-4" />
+            </a>
+          ) : null}
+        </div>
+      </div>
     </Card>
   );
 }
@@ -393,13 +475,14 @@ function EssayReviewResult({
   onNewEssay: () => void;
   onRewrite: () => void;
 }) {
-  const [openCompetency, setOpenCompetency] = useState<number | null>(null);
+  const [openCompetency, setOpenCompetency] = useState(1);
   const score = review.nota_total ?? review.estimatedScore;
   const classification = classifyEssay(score);
   const competencies = buildCompetencyCards(review);
+  const selectedCompetency = competencies.find((competency) => competency.numero === openCompetency) ?? competencies[0];
 
   return (
-    <div className="mt-5 space-y-4 rounded-lg border border-accent/25 bg-black/35 p-4 shadow-[0_0_42px_rgba(124,58,237,0.12)] sm:p-5">
+    <div className="mt-5 space-y-5 rounded-2xl border border-accent/25 bg-black/35 p-4 shadow-[0_0_42px_rgba(58,167,216,0.12)] sm:p-5 lg:p-6">
       <div className="grid gap-4 rounded-lg border border-white/10 bg-gradient-to-br from-accent/20 via-white/[0.04] to-black/30 p-4 sm:grid-cols-[1fr_auto] sm:p-5">
         <div>
           <p className="text-xs font-medium uppercase tracking-[0.18em] text-aura">Resultado da correção</p>
@@ -407,55 +490,85 @@ function EssayReviewResult({
             <p className="energy-text text-6xl font-semibold leading-none text-white sm:text-7xl">{score}</p>
             <p className="pb-2 text-lg font-semibold text-slate-300">/ 1000</p>
           </div>
-          <p className="mt-3 text-sm leading-6 text-slate-300">Análise estimada pelas cinco competências do ENEM.</p>
+          <p className="mt-3 text-sm leading-6 text-slate-300">
+            Avaliação orientativa por IA baseada nas cinco competências. Não é uma nota oficial do INEP.
+          </p>
         </div>
         <div className={`self-start rounded-lg border px-4 py-3 text-center ${classification.className}`}>
           <p className="text-[0.62rem] uppercase tracking-[0.16em] opacity-80">classificação</p>
           <p className="mt-1 text-lg font-semibold">{classification.label}</p>
         </div>
       </div>
-      <div className="grid gap-3 lg:grid-cols-5">
-        {competencies.map((competency) => {
-          const open = openCompetency === competency.numero;
-          return (
-            <div key={competency.numero} className="rounded-lg border border-white/10 bg-white/[0.035] p-3">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="text-[0.65rem] font-medium uppercase tracking-[0.14em] text-muted">
-                    Competência {competency.numero}
-                  </p>
-                  <h3 className="mt-1 text-sm font-semibold leading-5 text-white">{competency.nome}</h3>
-                </div>
-                <span className={`rounded-md px-2 py-1 text-xs font-semibold ${competency.statusClass}`}>
-                  {competency.status}
-                </span>
-              </div>
-              <p className="energy-text mt-4 text-3xl font-semibold text-white">{competency.nota}/200</p>
-              <p className="mt-2 min-h-10 text-xs leading-5 text-muted">{competency.descricao}</p>
-              <p className="mt-3 text-sm leading-6 text-slate-300">{competency.resumo}</p>
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(300px,0.9fr)]">
+        <div className="grid gap-3 sm:grid-cols-2">
+          {competencies.map((competency) => {
+            const active = openCompetency === competency.numero;
+            return (
               <button
+                key={competency.numero}
                 type="button"
-                onClick={() => setOpenCompetency(open ? null : competency.numero)}
-                className="mt-3 flex w-full items-center justify-between rounded-lg border border-white/10 bg-black/25 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:border-accent/30"
+                onClick={() => setOpenCompetency(competency.numero)}
+                aria-pressed={active}
+                className={`group min-h-44 rounded-xl border p-4 text-left transition-[background-color,border-color,box-shadow,transform] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] active:scale-[0.99] ${
+                  active
+                    ? "border-accent/45 bg-accent/[0.09] shadow-[0_0_34px_rgba(58,167,216,0.16)]"
+                    : "border-white/10 bg-white/[0.035] hover:border-accent/30 hover:bg-white/[0.055]"
+                }`}
               >
-                Ver detalhes
-                <ChevronDown className={`h-4 w-4 transition ${open ? "rotate-180" : ""}`} />
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-[0.65rem] font-medium uppercase tracking-[0.14em] text-muted">
+                      Competência {competency.numero}
+                    </p>
+                    <h3 className="mt-1 text-sm font-semibold leading-5 text-white">{competency.nome}</h3>
+                  </div>
+                  <span className={`rounded-md px-2 py-1 text-xs font-semibold ${competency.statusClass}`}>
+                    {competency.status}
+                  </span>
+                </div>
+                <div className="mt-4 flex items-end justify-between gap-3">
+                  <p className="energy-text text-3xl font-semibold text-white">{competency.nota}/200</p>
+                  <span className={`flex h-8 w-8 items-center justify-center rounded-full border text-aura transition ${active ? "rotate-180 border-accent/35 bg-accent/10" : "border-white/10 bg-black/20"}`}>
+                    <ChevronDown className="h-4 w-4" />
+                  </span>
+                </div>
+                <p className="mt-3 text-sm leading-6 text-slate-300">{competency.resumo}</p>
               </button>
-              {open && <p className="mt-3 text-sm leading-6 text-muted">{competency.detalhes}</p>}
+            );
+          })}
+        </div>
+
+        <section className="rounded-xl border border-white/10 bg-white/[0.04] p-4 shadow-[0_18px_50px_rgba(0,0,0,0.18)] xl:sticky xl:top-5 xl:self-start">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-xs font-medium uppercase tracking-[0.16em] text-aura">
+                Detalhe técnico
+              </p>
+              <h3 className="mt-2 text-xl font-semibold text-white">
+                Competência {selectedCompetency.numero}: {selectedCompetency.nome}
+              </h3>
             </div>
-          );
-        })}
+            <span className="energy-text shrink-0 rounded-lg border border-accent/25 bg-accent/10 px-3 py-2 text-lg font-semibold text-white">
+              {selectedCompetency.nota}
+            </span>
+          </div>
+          <p className="mt-4 text-sm leading-6 text-muted">{selectedCompetency.descricao}</p>
+          <div className="mt-4 rounded-lg border border-white/10 bg-black/25 p-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Leitura do corretor</p>
+            <p className="mt-3 whitespace-pre-line text-sm leading-7 text-slate-200">{selectedCompetency.detalhes}</p>
+          </div>
+        </section>
       </div>
       <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
         <section className="rounded-lg border border-white/10 bg-white/[0.035] p-4">
           <p className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.16em] text-aura">
             <Target className="h-4 w-4" />
-            Diagnóstico do Comandante
+            Diagnóstico geral
           </p>
           <p className="mt-3 text-sm leading-6 text-slate-300">{review.diagnostico_geral ?? review.summary}</p>
         </section>
         <section className="rounded-lg border border-accent/25 bg-accent/[0.08] p-4">
-          <p className="text-xs font-medium uppercase tracking-[0.16em] text-aura">Missão de hoje</p>
+          <p className="text-xs font-medium uppercase tracking-[0.16em] text-aura">Próximas ações</p>
           <h3 className="mt-2 text-lg font-semibold text-white">Faça isso antes de enviar sua próxima redação.</h3>
           <Checklist items={review.missao_de_hoje ?? review.improvements} />
         </section>
@@ -467,7 +580,30 @@ function EssayReviewResult({
         <ReviewPanel title="Plano de melhoria" items={review.plano_de_melhoria ?? review.improvements} tone="action" ordered />
       </div>
 
+      {review.trechos_criticos && review.trechos_criticos.length > 0 ? (
+        <section className="rounded-xl border border-white/10 bg-white/[0.035] p-4 sm:p-5">
+          <p className="text-xs font-medium uppercase tracking-[0.16em] text-aura">Trechos que custam pontos</p>
+          <div className="mt-4 grid gap-3 lg:grid-cols-2">
+            {review.trechos_criticos.map((item, index) => (
+              <article key={`${item.trecho}-${index}`} className="rounded-lg border border-white/10 bg-black/25 p-4">
+                <blockquote className="border-l-2 border-accent/50 pl-3 text-sm italic leading-6 text-slate-200">“{item.trecho}”</blockquote>
+                <p className="mt-3 text-sm font-semibold text-amber-100">{item.problema}</p>
+                <p className="mt-2 text-sm leading-6 text-muted">{item.impacto}</p>
+                <p className="mt-3 rounded-lg border border-accent/20 bg-accent/[0.06] p-3 text-sm leading-6 text-slate-200">{item.melhoria_sugerida}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
       <div className="grid gap-3 sm:grid-cols-2">
+        <Link
+          href={`/comandante?context=${encodeURIComponent(`Quero treinar minha competência mais fraca desta redação: C${selectedCompetency.numero}, ${selectedCompetency.nome}, nota ${selectedCompetency.nota}/200. Use meu histórico e me passe um exercício específico.`)}`}
+          className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-accent/30 bg-accent px-4 text-sm font-semibold text-[#041014] transition-transform duration-150 active:scale-[0.97] sm:col-span-2"
+        >
+          Treinar esta dificuldade com o Tutor
+          <ArrowRight className="h-4 w-4" />
+        </Link>
         <Button onClick={onRewrite} className="min-h-12">
           Reescrever com base na correção
         </Button>
@@ -581,9 +717,9 @@ function ReviewPanel({
 function Checklist({ items }: { items: string[] }) {
   return (
     <div className="mt-4 space-y-2">
-      {items.slice(0, 5).map((item, index) => (
+      {items.slice(0, 3).map((item, index) => (
         <label key={`${item}-${index}`} className="flex gap-3 rounded-lg border border-white/10 bg-black/20 p-3 text-sm leading-6 text-slate-200">
-          <input type="checkbox" className="mt-1 h-4 w-4 rounded border-white/20 bg-black accent-violet" />
+          <input type="checkbox" className="mt-1 h-4 w-4 rounded border-white/20 bg-black accent-[#9fcf8b]" />
           <span>{item}</span>
         </label>
       ))}

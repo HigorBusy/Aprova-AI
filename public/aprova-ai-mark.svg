@@ -1,0 +1,34 @@
+<svg width="240" height="200" viewBox="0 0 240 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="capBlue" x1="135" y1="35" x2="202" y2="96" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8BD8F8"/>
+      <stop offset="1" stop-color="#3AA7D8"/>
+    </linearGradient>
+    <linearGradient id="smileGreen" x1="72" y1="111" x2="168" y2="150" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#9FCF8B"/>
+      <stop offset="1" stop-color="#64C3ED"/>
+    </linearGradient>
+    <filter id="softGlow" x="20" y="10" width="200" height="170" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+      <feGaussianBlur stdDeviation="4" result="effect1_foregroundBlur_1_2"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#softGlow)" opacity="0.36">
+    <path d="M120 22L214 70L120 118L26 70L120 22Z" fill="#3AA7D8"/>
+    <path d="M60 98C71 133 94 153 120 153C146 153 169 133 180 98H60Z" fill="#9FCF8B"/>
+  </g>
+
+  <path d="M120 18L216 67.5L120 117L24 67.5L120 18Z" fill="#E8EEE8"/>
+  <path d="M120 18L216 67.5L120 117V18Z" fill="url(#capBlue)"/>
+  <path d="M32 68L120 112L208 68" stroke="#05090B" stroke-opacity="0.28" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <path d="M61 95H179C171 134 148 158 120 158C92 158 69 134 61 95Z" fill="#E8EEE8"/>
+  <path d="M78 112C88 134 103 145 120 145C137 145 152 134 162 112" stroke="#05090B" stroke-width="14" stroke-linecap="round"/>
+  <path d="M83 113C93 129 106 137 120 137C134 137 147 129 157 113" stroke="url(#smileGreen)" stroke-width="10" stroke-linecap="round"/>
+
+  <path d="M188 75V119" stroke="#E8EEE8" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="188" cy="126" r="12" fill="#9FCF8B"/>
+  <path d="M188 140C181 148 178 158 178 170H198C198 158 195 148 188 140Z" fill="#E8EEE8"/>
+</svg>

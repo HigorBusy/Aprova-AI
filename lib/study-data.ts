@@ -7,23 +7,28 @@ import type {
   Level,
   ProfileKind,
   QuizAnswers,
+  StudyFrequency,
   StudyState,
-  StudyTime,
+  TargetExam,
   Topic
 } from "@/lib/types";
 
-export const difficulties: Array<{ id: Difficulty; label: string; detail: string }> = [
-  { id: "start", label: "Preciso de uma rota inicial", detail: "O primeiro comando precisa ser claro." },
-  { id: "routine", label: "Eu perco consistência", detail: "A nave precisa de sequência para chegar." },
-  { id: "subjects", label: "Tenho setores fracos", detail: "Vamos revelar onde recalcular a rota." },
-  { id: "motivation", label: "Eu desligo fácil", detail: "O sistema vai transformar presença em pilotagem." }
+export const targetExams: Array<{ id: TargetExam; label: string; detail: string }> = [
+  { id: "2026", label: "ENEM 2026", detail: "Quero melhorar meu desempenho nesta edição." },
+  { id: "2027", label: "ENEM 2027", detail: "Estou construindo uma preparação de longo prazo." }
 ];
 
-export const studyTimes: Array<{ id: StudyTime; label: string; minutes: number }> = [
-  { id: "30m", label: "30 minutos de navegação real", minutes: 30 },
-  { id: "1h", label: "1 hora de rota", minutes: 60 },
-  { id: "2h", label: "2 horas de missão", minutes: 120 },
-  { id: "3h", label: "3 horas ou mais de comando", minutes: 180 }
+export const difficulties: Array<{ id: Difficulty; label: string; detail: string }> = [
+  { id: "start", label: "Não sei por onde começar", detail: "Preciso de uma primeira ação clara." },
+  { id: "routine", label: "Não consigo manter uma rotina", detail: "Começo, paro e perco consistência." },
+  { id: "subjects", label: "Tenho matérias muito fracas", detail: "Preciso descobrir o que priorizar." },
+  { id: "motivation", label: "Procrastino mais do que deveria", detail: "Sei que preciso estudar, mas não executo." }
+];
+
+export const studyFrequencies: Array<{ id: StudyFrequency; label: string; minutes: number }> = [
+  { id: "1-2", label: "1 ou 2 dias por semana", minutes: 45 },
+  { id: "3-4", label: "3 ou 4 dias por semana", minutes: 60 },
+  { id: "5-7", label: "5 dias ou mais", minutes: 90 }
 ];
 
 export const areas: Array<{ id: Area; label: string; subject: string }> = [
@@ -35,10 +40,10 @@ export const areas: Array<{ id: Area; label: string; subject: string }> = [
 ];
 
 export const levels: Array<{ id: Level; label: string }> = [
-  { id: "zero", label: "Ainda estou na base de lançamento" },
-  { id: "basic", label: "Tenho combustível, falta rota" },
-  { id: "messy", label: "Tenho esforço, falta painel" },
-  { id: "improve", label: "Quero pilotar em outro nível" }
+  { id: "zero", label: "Ainda não consigo estruturar uma redação" },
+  { id: "basic", label: "Escrevo, mas geralmente fico abaixo de 600" },
+  { id: "messy", label: "Fico entre 600 e 800, sem consistência" },
+  { id: "improve", label: "Já passo de 800 e quero refinar" }
 ];
 
 export const dailyPhrases = ["Ninguém está vindo te salvar, então faça acontecer"];
@@ -91,12 +96,12 @@ export function initialState(): StudyState {
     questionCount: 0,
     topics: defaultTopics,
     tasks: defaultTasks,
-    notifications: ["A nave está pronta. Falta o primeiro comando do dia."],
+    notifications: ["Seu diagnóstico começa com a primeira atividade."],
     mentorMessages: [
       {
         id: "welcome",
         role: "mentor",
-        text: "Comandante IA em espera. Informe o bloqueio para recalcular a rota.",
+        text: "Tutor IA disponível. Conte sua dificuldade para receber um próximo passo claro.",
         createdAt: new Date().toISOString()
       }
     ]
@@ -105,13 +110,13 @@ export function initialState(): StudyState {
 
 export function profileFromAnswers(answers: QuizAnswers): ProfileKind {
   if (answers.difficulty === "routine" || answers.level === "messy") return "Sem Rotina";
-  if (answers.studyTime === "3h" || answers.level === "improve") return "Evolução Acelerada";
-  if (answers.studyTime === "30m" && answers.level !== "zero") return "Última Hora";
+  if (answers.studyFrequency === "5-7" || answers.level === "improve") return "Evolução Acelerada";
+  if (answers.targetExam === "2026" && answers.studyFrequency === "1-2") return "Última Hora";
   return "Iniciante Perdido";
 }
 
-export function minutesFromStudyTime(studyTime?: StudyTime) {
-  return studyTimes.find((item) => item.id === studyTime)?.minutes ?? 60;
+export function minutesFromStudyFrequency(frequency?: StudyFrequency) {
+  return studyFrequencies.find((item) => item.id === frequency)?.minutes ?? 60;
 }
 
 export function prioritySubject(area?: Area) {

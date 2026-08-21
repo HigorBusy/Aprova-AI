@@ -9,7 +9,9 @@ import {
   type PresentationDeck,
   type PresentationTemplate
 } from "@/lib/ai/presentation";
+import { renderPresentationPdf } from "@/lib/ai/presentation-pdf";
 import { formatRepertoryContext, formatStudentContext } from "@/lib/ai/student-context";
+import { presentationsDisabledResponse } from "@/lib/feature-access";
 import { sanitizeSingleLine, sanitizeTextInput } from "@/lib/security/input";
 import { checkRateLimit, rateLimitResponse } from "@/lib/security/rate-limit";
 import { jsonUtf8, rejectLargeRequest } from "@/lib/security/request";
@@ -18,6 +20,9 @@ import { authenticateRequest } from "@/lib/supabase/server";
 export const runtime = "nodejs";
 
 export async function POST(request: NextRequest) {
+  const disabled = presentationsDisabledResponse();
+  if (disabled) return disabled;
+
   const auth = await authenticateRequest(request);
   if (!auth) return jsonUtf8({ error: "Não autorizado." }, { status: 401 });
   const { supabase, user } = auth;
@@ -112,15 +117,22 @@ export async function POST(request: NextRequest) {
         { role: "system", content: runtimeContext },
         { role: "user", content: prompt }
       ],
-      { temperature: 0.35, maxTokens: 2_800, json: true }
+      { temperature: 0.32, maxTokens: 4_500, json: true }
     );
 
     const presentation = normalizePresentationDeck(
       parseJsonResponse<Partial<PresentationDeck>>(raw),
       template
     );
+    const pdf = await renderPresentationPdf(presentation);
+    const pdfBase64 = Buffer.from(pdf.bytes).toString("base64");
     const storedUserContent = `[APRESENTACAO SOLICITADA]\nTemplate: ${template}\n${userRequest}`;
-    const storedAssistantContent = JSON.stringify(presentation);
+    const storedAssistantContent = JSON.stringify({
+      type: "presentation_pdf",
+      title: presentation.title,
+      fileName: pdf.fileName,
+      deck: presentation
+    });
 
     const { data: completion, error: completionError } = await supabase.rpc(
       "complete_ai_exchange",
@@ -142,7 +154,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    return jsonUtf8({ presentation, balance: result.balance });
+    return jsonUtf8({
+      presentation,
+      pdf: {
+        fileName: pdf.fileName,
+        mimeType: "application/pdf",
+        base64: pdfBase64
+      },
+      balance: result.balance
+    });
   } catch (error) {
     console.error("Presentation generation failed", {
       userId: user.id,

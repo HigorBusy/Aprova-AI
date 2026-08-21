@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type React from "react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowLeft,
   BookOpen,
@@ -12,10 +12,12 @@ import {
   CalendarDays,
   ChevronRight,
   CreditCard,
+  Download,
   Layers3,
   Mic,
   Paperclip,
   Presentation,
+  Search,
   SendHorizonal,
   Sparkles,
   Target,
@@ -29,7 +31,6 @@ import { AiInput } from "@/components/ui/ai-input";
 import { Loader } from "@/components/ui/loader-15";
 import {
   PRESENTATION_COST,
-  isComplexPresentationRequest,
   presentationTemplates,
   type PresentationDeck,
   type PresentationTemplate
@@ -59,6 +60,14 @@ type SpeechRecognitionEventLike = {
   results: ArrayLike<ArrayLike<{ transcript: string }>>;
 };
 
+type PresentationPdfPayload = {
+  type: "presentation_pdf";
+  title: string;
+  fileName: string;
+  pdfBase64?: string;
+  deck: PresentationDeck;
+};
+
 type SpeechRecognitionLike = {
   lang: string;
   interimResults: boolean;
@@ -72,6 +81,11 @@ type SpeechRecognitionLike = {
 type SpeechRecognitionConstructor = new () => SpeechRecognitionLike;
 
 type PlanTag = "free" | "premium" | "ADM";
+
+type ConversationSearchResult = {
+  message: AiMessage;
+  excerpt: string;
+};
 
 const quickSuggestions = [
   "Corrija minha estratégia de redação",
@@ -88,8 +102,11 @@ const fileTools = [
   "Analisar redação por foto"
 ];
 
-export function Comandante() {
+const FOCUSED_MESSAGE_COUNT = 10;
+
+export function Comandante({ initialContext = "" }: { initialContext?: string }) {
   const router = useRouter();
+  const safeInitialContext = initialContext.slice(0, 2_000);
   const [messages, setMessages] = useState<AiMessage[]>([]);
   const [balance, setBalance] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
@@ -99,6 +116,9 @@ export function Comandante() {
   const [listening, setListening] = useState(false);
   const [error, setError] = useState("");
   const [planTag, setPlanTag] = useState<PlanTag>("free");
+  const [showFullHistory, setShowFullHistory] = useState(false);
+  const [conversationSearch, setConversationSearch] = useState("");
+  const [activeSearchMessageId, setActiveSearchMessageId] = useState<string | null>(null);
   const [toolForm, setToolForm] = useState<ToolFormState>({
     subject: "Redação",
     deadline: "14 dias",
@@ -138,6 +158,7 @@ export function Comandante() {
           .from("ai_messages")
           .select("id,role,content,created_at")
           .eq("user_id", user.id)
+          .not("content", "like", "%pdfBase64%")
           .order("created_at", { ascending: false })
           .limit(60),
         supabase.from("user_credits").select("balance").eq("user_id", user.id).maybeSingle(),
@@ -146,9 +167,14 @@ export function Comandante() {
 
       if (!active) return;
       if (historyResult.error || creditsResult.error) {
-        setError("Não foi possível carregar o histórico do Comandante.");
+        setError("Não foi possível carregar o histórico do Tutor IA.");
       } else {
-        setMessages([...(historyResult.data as AiMessage[])].reverse());
+        setMessages(
+          [...(historyResult.data as AiMessage[])]
+            .reverse()
+            .map(normalizeAiMessageForClient)
+            .filter((message) => !isLegacyPresentationHistoryMessage(message))
+        );
         setBalance(creditsResult.data?.balance ?? 0);
         setPlanTag(normalizePlanTag(profileResult.data?.plan_tag));
       }
@@ -164,15 +190,22 @@ export function Comandante() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, sending, fileSending, presentationSending]);
 
+  useEffect(() => {
+    if (!activeSearchMessageId) return;
+    const timeout = window.setTimeout(() => {
+      document.getElementById(messageDomId(activeSearchMessageId))?.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+      });
+    }, 80);
+
+    return () => window.clearTimeout(timeout);
+  }, [activeSearchMessageId, showFullHistory, messages.length]);
+
   async function sendMessage(content: string, options: { cost?: number; mode?: "chat" | "tool"; toolName?: string; forceChat?: boolean } = {}) {
     const supabase = getSupabaseClient();
     const cost = options.cost ?? 1;
     if (!supabase || sending || fileSending || presentationSending) return;
-    if (!options.forceChat && isComplexPresentationRequest(content)) {
-      setPresentationForm((current) => ({ ...current, request: content }));
-      setError("Esse pedido pode virar uma apresentação completa. Confira o painel lateral: ela utilizará 10 créditos.");
-      return;
-    }
     if ((balance ?? 0) < cost) {
       setError(`Você precisa de ${cost} créditos para esta ação.`);
       return;
@@ -206,7 +239,7 @@ export function Comandante() {
         })
       });
       const result = (await response.json()) as { reply?: string; balance?: number; error?: string };
-      if (!response.ok || !result.reply) throw new Error(result.error || "Falha ao consultar o Comandante.");
+      if (!response.ok || !result.reply) throw new Error(result.error || "Falha ao consultar o Tutor IA.");
       const reply = result.reply;
 
       setMessages((current) => [
@@ -314,19 +347,33 @@ export function Comandante() {
       });
       const result = (await response.json()) as {
         presentation?: PresentationDeck;
+        pdf?: {
+          fileName: string;
+          mimeType: string;
+          base64: string;
+        };
         balance?: number;
         error?: string;
       };
-      if (!response.ok || !result.presentation) {
+      if (!response.ok || !result.presentation || !result.pdf?.base64) {
         throw new Error(result.error || "Não foi possível gerar a apresentação.");
       }
+      const presentation = result.presentation;
+      const pdf = result.pdf;
+
+      downloadBase64Pdf(pdf.base64, pdf.fileName);
 
       setMessages((current) => [
         ...current,
         {
           id: `assistant-presentation-${Date.now()}`,
           role: "assistant",
-          content: JSON.stringify(result.presentation),
+          content: JSON.stringify({
+            type: "presentation_pdf",
+            title: presentation.title,
+            fileName: pdf.fileName,
+            deck: presentation
+          } satisfies PresentationPdfPayload),
           created_at: new Date().toISOString()
         }
       ]);
@@ -387,6 +434,17 @@ export function Comandante() {
     window.speechSynthesis.speak(utterance);
   }
 
+  const hasCredits = (balance ?? 0) > 0;
+  const hasToolCredits = (balance ?? 0) >= 2;
+  const busy = sending || fileSending || presentationSending;
+  const visibleMessages = showFullHistory ? messages : messages.slice(-FOCUSED_MESSAGE_COUNT);
+  const hiddenMessagesCount = Math.max(0, messages.length - visibleMessages.length);
+  const recentHistory = messages.filter((message) => message.role === "user").slice(-6).reverse();
+  const searchResults = useMemo(
+    () => findConversationMatches(messages, conversationSearch),
+    [messages, conversationSearch]
+  );
+
   if (loading) {
     return (
       <main className="mission-grid grid min-h-[100dvh] place-items-center bg-canvas">
@@ -394,10 +452,6 @@ export function Comandante() {
       </main>
     );
   }
-
-  const hasCredits = (balance ?? 0) > 0;
-  const hasToolCredits = (balance ?? 0) >= 2;
-  const busy = sending || fileSending || presentationSending;
 
   return (
     <main className="mission-grid min-h-[100dvh] bg-canvas px-4 py-4 text-white sm:px-6 lg:px-8 lg:py-6">
@@ -407,29 +461,29 @@ export function Comandante() {
             <Link
               href="/"
               className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-white/10 bg-white/[0.04] text-slate-300 transition hover:border-accent/35 hover:text-white"
-              aria-label="Voltar para a Central de controle"
+              aria-label="Voltar para sua redação"
             >
               <ArrowLeft className="h-4 w-4" />
             </Link>
             <Image
-              src="/aprova-ai-logo-hd.png"
+              src="/aprova-ai-logo-lockup.svg"
               alt="AprovaAI"
-              width={1449}
-              height={676}
+              width={640}
+              height={220}
               priority
               className="hidden h-9 w-auto object-contain sm:block"
             />
             <div className="min-w-0">
               <p className="text-[0.65rem] font-medium uppercase tracking-[0.2em] text-aura">Canal estratégico</p>
-              <h1 className="truncate text-xl font-semibold text-white sm:text-2xl">Comandante IA</h1>
-              <p className="mt-1 text-sm text-muted">Seu mentor estratégico para o ENEM</p>
+              <h1 className="truncate text-xl font-semibold text-white sm:text-2xl">Tutor IA</h1>
+              <p className="mt-1 text-sm text-muted">Seu apoio estratégico para redação e ENEM</p>
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.045] px-3 py-2 text-xs font-semibold text-slate-200">
               Plano {formatPlanTag(planTag)}
             </div>
-            <div className="flex items-center gap-2 rounded-full border border-accent/25 bg-accent/[0.08] px-3 py-2 shadow-[0_0_24px_rgba(124,58,237,0.14)]">
+            <div className="flex items-center gap-2 rounded-full border border-accent/25 bg-accent/[0.08] px-3 py-2 shadow-[0_0_24px_rgba(58,167,216,0.14)]">
               <CreditCard className="h-4 w-4 text-aura" />
               <span className="text-sm font-semibold text-white">{balance ?? 0}</span>
               <span className="text-xs text-muted">créditos</span>
@@ -439,6 +493,28 @@ export function Comandante() {
 
         <div className="grid min-h-0 flex-1 gap-4 pt-4 xl:grid-cols-[minmax(0,1fr)_330px]">
           <Card className="flex min-h-[76dvh] min-w-0 flex-col overflow-hidden rounded-[28px] border-accent/10 bg-white/[0.035] p-0 shadow-[0_0_70px_rgba(76,29,149,0.16)] lg:min-h-0">
+            <div className="border-b border-white/10 bg-white/[0.025] px-4 py-3 sm:px-6 lg:px-8">
+              <ChatFocusHeader
+                totalMessages={messages.length}
+                hiddenMessagesCount={hiddenMessagesCount}
+                showFullHistory={showFullHistory}
+                recentHistory={recentHistory}
+                searchQuery={conversationSearch}
+                searchResults={searchResults}
+                onToggleHistory={() => setShowFullHistory((current) => !current)}
+                onSearchChange={setConversationSearch}
+                onClearSearch={() => {
+                  setConversationSearch("");
+                  setActiveSearchMessageId(null);
+                }}
+                onJumpToMessage={(messageId) => {
+                  setShowFullHistory(true);
+                  setActiveSearchMessageId(messageId);
+                }}
+                onPickSuggestion={(prompt) => void sendMessage(prompt)}
+                disabled={!hasCredits || busy}
+              />
+            </div>
             <div className="min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-6 lg:px-8">
               {messages.length === 0 ? (
                 <div className="grid h-full min-h-[400px] place-items-center text-center">
@@ -447,21 +523,26 @@ export function Comandante() {
                       <div className="ai-orb-core" />
                     </div>
                     <p className="mt-7 text-xs font-medium uppercase tracking-[0.22em] text-aura">Canal aberto</p>
-                    <h2 className="mt-3 text-3xl font-semibold text-white sm:text-4xl">Qual é sua missão de hoje?</h2>
+                    <h2 className="mt-3 text-3xl font-semibold text-white sm:text-4xl">O que você precisa entender hoje?</h2>
                     <p className="mx-auto mt-3 max-w-lg text-sm leading-6 text-muted">
-                      Envie texto, PDF, imagem ou fale com o Comandante. Ele transforma tudo em rota de estudo.
+                      Envie texto, PDF, imagem ou fale com o Tutor IA. Ele usa seu histórico para orientar o próximo passo.
                     </p>
                   </div>
                 </div>
               ) : (
                 <div className="space-y-5">
-                  {messages.map((message) => (
-                    <MessageBubble key={message.id} message={message} onSpeak={speak} />
+                  {visibleMessages.map((message) => (
+                    <MessageBubble
+                      key={message.id}
+                      message={message}
+                      highlighted={message.id === activeSearchMessageId}
+                      onSpeak={speak}
+                    />
                   ))}
                   {busy && (
-                    <div className="flex w-fit items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.045] px-4 py-3 text-sm text-muted shadow-[0_0_30px_rgba(124,58,237,0.12)]">
+                    <div className="flex w-fit items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.045] px-4 py-3 text-sm text-muted shadow-[0_0_30px_rgba(58,167,216,0.12)]">
                       <Loader size="sm" />
-                      {presentationSending ? "Comandante montando apresentação..." : "Comandante analisando..."}
+                      Tutor IA analisando...
                     </div>
                   )}
                   <div ref={bottomRef} />
@@ -479,22 +560,17 @@ export function Comandante() {
               <AiInput
                 disabled={!hasCredits}
                 loading={busy}
-                placeholder={hasCredits ? "Pergunte ao Comandante sobre redação, estudos ou estratégia..." : "Saldo esgotado"}
+                initialValue={safeInitialContext}
+                placeholder={hasCredits ? "Pergunte ao Tutor IA sobre redação, estudos ou estratégia..." : "Saldo esgotado"}
                 onSubmit={(message) => void sendMessage(message)}
               />
               <p className="mt-2 text-center text-[0.68rem] text-slate-600">
-                Texto usa 1 crédito. Ferramentas usam 2. PDF e imagem usam 3. Apresentação usa 10.
+                Texto usa 1 crédito. Ferramentas usam 2. PDF e imagem usam 3.
               </p>
             </div>
           </Card>
 
           <aside className="grid content-start gap-4">
-            <PresentationPanel
-              values={presentationForm}
-              disabled={busy || (balance ?? 0) < PRESENTATION_COST}
-              onChange={setPresentationForm}
-              onSubmit={(values) => void sendPresentation(values)}
-            />
             <FileUploadPanel
               disabled={busy || (balance ?? 0) < 3}
               onSubmit={(file, toolName, prompt) => void sendFile(file, toolName, prompt)}
@@ -551,6 +627,141 @@ function QuickSuggestions({
   );
 }
 
+function ChatFocusHeader({
+  totalMessages,
+  hiddenMessagesCount,
+  showFullHistory,
+  recentHistory,
+  searchQuery,
+  searchResults,
+  disabled,
+  onToggleHistory,
+  onSearchChange,
+  onClearSearch,
+  onJumpToMessage,
+  onPickSuggestion
+}: {
+  totalMessages: number;
+  hiddenMessagesCount: number;
+  showFullHistory: boolean;
+  recentHistory: AiMessage[];
+  searchQuery: string;
+  searchResults: ConversationSearchResult[];
+  disabled: boolean;
+  onToggleHistory: () => void;
+  onSearchChange: (query: string) => void;
+  onClearSearch: () => void;
+  onJumpToMessage: (messageId: string) => void;
+  onPickSuggestion: (prompt: string) => void;
+}) {
+  const hasSearch = searchQuery.trim().length > 0;
+
+  return (
+    <div className="space-y-3">
+      <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-aura">
+              {showFullHistory ? "Histórico completo" : "Modo foco"}
+            </p>
+            {totalMessages > 0 && (
+              <span className="rounded-full border border-white/10 bg-black/25 px-2.5 py-1 text-[0.68rem] font-semibold text-slate-400">
+                {showFullHistory
+                  ? `${totalMessages} mensagens`
+                  : hiddenMessagesCount > 0
+                    ? `últimas ${Math.min(FOCUSED_MESSAGE_COUNT, totalMessages)} mensagens`
+                    : `${totalMessages} mensagens`}
+              </span>
+            )}
+            {hasSearch && (
+              <span className="rounded-full border border-accent/25 bg-accent/[0.08] px-2.5 py-1 text-[0.68rem] font-semibold text-aura">
+                {searchResults.length} resultado{searchResults.length === 1 ? "" : "s"}
+              </span>
+            )}
+          </div>
+          {recentHistory.length > 0 ? (
+            <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
+              {recentHistory.map((message) => (
+                <button
+                  key={`history-${message.id}`}
+                  type="button"
+                  disabled={disabled}
+                  onClick={() => onPickSuggestion(repairMojibake(message.content))}
+                  className="max-w-52 shrink-0 truncate rounded-full border border-white/10 bg-black/25 px-3 py-2 text-xs font-medium text-slate-300 transition-[background-color,border-color,transform] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] hover:border-accent/35 hover:text-white active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+                  title={repairMojibake(message.content)}
+                >
+                  {summarizeHistoryLabel(message.content)}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <p className="mt-2 text-sm text-muted">A conversa começa limpa, com o input sempre acessível.</p>
+          )}
+        </div>
+
+        {hiddenMessagesCount > 0 || showFullHistory ? (
+          <button
+            type="button"
+            onClick={onToggleHistory}
+            className="min-h-11 rounded-full border border-accent/25 bg-accent/[0.08] px-4 py-2 text-xs font-semibold text-aura transition-[background-color,border-color,transform] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] hover:border-accent/45 hover:bg-accent/[0.12] active:scale-[0.98]"
+          >
+            {showFullHistory ? "Voltar ao foco" : `Ver histórico (${hiddenMessagesCount})`}
+          </button>
+        ) : null}
+      </div>
+
+      <div className="rounded-2xl border border-white/10 bg-black/25 p-2">
+        <label className="flex min-h-11 items-center gap-3 rounded-xl border border-transparent px-3 text-sm text-slate-200 transition-[background-color,border-color] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] focus-within:border-accent/35 focus-within:bg-white/[0.035]">
+          <Search className="h-4 w-4 shrink-0 text-aura" />
+          <input
+            value={searchQuery}
+            onChange={(event) => onSearchChange(event.target.value)}
+            placeholder="Buscar nesta conversa..."
+            className="min-w-0 flex-1 bg-transparent text-sm text-slate-100 outline-none placeholder:text-slate-600"
+            aria-label="Buscar nesta conversa"
+          />
+          {hasSearch && (
+            <button
+              type="button"
+              onClick={onClearSearch}
+              className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[0.68rem] font-semibold text-slate-400 transition-[background-color,border-color,color,transform] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] hover:border-accent/30 hover:text-white active:scale-[0.96]"
+            >
+              Limpar
+            </button>
+          )}
+        </label>
+
+        {hasSearch && (
+          <div className="mt-2 max-h-52 space-y-2 overflow-y-auto pr-1">
+            {searchResults.length > 0 ? (
+              searchResults.slice(0, 8).map((result) => (
+                <button
+                  key={`search-${result.message.id}`}
+                  type="button"
+                  onClick={() => onJumpToMessage(result.message.id)}
+                  className="grid w-full gap-1 rounded-xl border border-white/10 bg-white/[0.035] px-3 py-2 text-left transition-[background-color,border-color,transform] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] hover:border-accent/35 hover:bg-white/[0.055] active:scale-[0.99]"
+                >
+                  <span className="flex items-center justify-between gap-3 text-[0.66rem] font-semibold uppercase tracking-[0.14em] text-aura">
+                    {result.message.role === "user" ? "Você" : "Tutor IA"}
+                    <span className="font-normal normal-case tracking-normal text-slate-500">
+                      {formatMessageTime(result.message.created_at)}
+                    </span>
+                  </span>
+                  <span className="line-clamp-2 text-xs leading-5 text-slate-300">{result.excerpt}</span>
+                </button>
+              ))
+            ) : (
+              <p className="rounded-xl border border-white/10 bg-white/[0.025] px-3 py-3 text-sm text-muted">
+                Nenhum trecho encontrado nessa conversa.
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function PresentationPanel({
   values,
   disabled,
@@ -573,10 +784,10 @@ function PresentationPanel({
         <p className="text-xs font-medium uppercase tracking-[0.18em]">Apresentação IA</p>
       </div>
       <p className="mt-3 text-sm leading-6 text-muted">
-        Gere um mapa em 8 slides para planos, cronogramas, redação ou recuperação de nota.
+        Gere um PDF premium com 10 slides, plano de execução, checkpoints e próxima missão.
       </p>
       <div className="mt-3 rounded-lg border border-accent/25 bg-accent/[0.08] p-3 text-xs font-semibold text-aura">
-        Esta apresentação utilizará {PRESENTATION_COST} créditos.
+        Esta apresentação utilizará {PRESENTATION_COST} créditos e será baixada em PDF.
       </div>
       <div className="mt-4 grid gap-3">
         <label className="grid gap-1">
@@ -611,9 +822,9 @@ function PresentationPanel({
         type="button"
         disabled={disabled || values.request.trim().length < 12}
         onClick={() => onSubmit(values)}
-        className="mt-4 min-h-11 w-full rounded-lg border border-accent/30 bg-accent/20 px-3 py-2 text-xs font-semibold text-aura shadow-[0_0_28px_rgba(124,58,237,0.16)] transition hover:bg-accent/25 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/[0.03] disabled:text-slate-600"
+        className="mt-4 min-h-11 w-full rounded-lg border border-accent/30 bg-accent/20 px-3 py-2 text-xs font-semibold text-aura shadow-[0_0_28px_rgba(58,167,216,0.16)] transition hover:bg-accent/25 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/[0.03] disabled:text-slate-600"
       >
-        Gerar apresentação
+        Gerar PDF
       </button>
     </Card>
   );
@@ -780,7 +991,7 @@ function ToolsPanel({
           icon={<Target className="h-4 w-4" />}
           title="Melhorar Competência"
           disabled={disabled}
-          onRun={() => onRun("Melhorar Competência", `Faça um diagnóstico prático para melhorar a ${values.competency} da redação ENEM. Entregue exercício prático e missão curta para hoje.`)}
+          onRun={() => onRun("Melhorar Competência", `Faça um diagnóstico prático para melhorar a ${values.competency} da redação ENEM. Entregue um exercício prático e uma ação curta para hoje.`)}
         >
           <ToolInput label="Competência" value={values.competency} onChange={(value) => update("competency", value)} />
         </ToolBox>
@@ -851,12 +1062,21 @@ function ToolInput({
   );
 }
 
-function MessageBubble({ message, onSpeak }: { message: AiMessage; onSpeak: (text: string) => void }) {
+function MessageBubble({
+  message,
+  highlighted = false,
+  onSpeak
+}: {
+  message: AiMessage;
+  highlighted?: boolean;
+  onSpeak: (text: string) => void;
+}) {
   const isUser = message.role === "user";
   const normalizedContent = repairMojibake(message.content);
   const essayLabel = normalizedContent.startsWith("[REDAÇÃO PARA CORREÇÃO]");
   const fileLabel = normalizedContent.startsWith("[ARQUIVO:");
   const presentationLabel = normalizedContent.startsWith("[APRESENTAÇÃO SOLICITADA]") || normalizedContent.startsWith("[APRESENTACAO SOLICITADA]");
+  const presentationPdf = !isUser ? parsePresentationPdf(normalizedContent) : null;
   const presentation = !isUser ? parsePresentation(normalizedContent) : null;
   const content = essayLabel
     ? "Redação enviada para correção."
@@ -867,30 +1087,38 @@ function MessageBubble({ message, onSpeak }: { message: AiMessage; onSpeak: (tex
       : formatAssistantContent(normalizedContent);
 
   return (
-    <div className={`flex gap-3 ${isUser ? "justify-end" : "justify-start"}`}>
+    <div
+      id={messageDomId(message.id)}
+      className={`scroll-mt-32 rounded-[28px] transition-[background-color,box-shadow] duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] ${
+        highlighted ? "bg-accent/[0.08] shadow-[0_0_42px_rgba(58,167,216,0.20)]" : "bg-transparent"
+      }`}
+    >
+      <div className={`flex gap-3 p-1 ${isUser ? "justify-end" : "justify-start"}`}>
       {!isUser && (
-        <div className="mt-1 grid h-9 w-9 shrink-0 place-items-center rounded-2xl border border-accent/30 bg-accent/10 text-aura shadow-[0_0_28px_rgba(124,58,237,0.18)]">
+        <div className="mt-1 grid h-9 w-9 shrink-0 place-items-center rounded-2xl border border-accent/30 bg-accent/10 text-aura shadow-[0_0_28px_rgba(58,167,216,0.18)]">
           <Bot className="h-4 w-4" />
         </div>
       )}
       <div
         className={`group max-w-[90%] rounded-[24px] border px-4 py-3 text-sm leading-7 shadow-[0_18px_50px_rgba(0,0,0,0.22)] sm:max-w-[78%] lg:max-w-[70%] ${
           isUser
-            ? "rounded-br-lg border-accent/35 bg-gradient-to-br from-accent/85 via-violet/70 to-cosmic/70 text-white shadow-[0_0_36px_rgba(124,58,237,0.18)]"
+            ? "rounded-br-lg border-accent/35 bg-gradient-to-br from-accent/85 via-violet/70 to-cosmic/70 text-white shadow-[0_0_36px_rgba(58,167,216,0.18)]"
             : "rounded-bl-lg border-white/10 bg-white/[0.055] text-slate-200 backdrop-blur-xl"
         }`}
       >
-        <div className={`mb-2 flex items-center gap-2 text-[0.65rem] font-semibold uppercase tracking-[0.16em] ${isUser ? "text-violet-100/80" : "text-aura"}`}>
-          <span>{isUser ? "Você" : "Comandante"}</span>
+        <div className={`mb-2 flex items-center gap-2 text-[0.65rem] font-semibold uppercase tracking-[0.16em] ${isUser ? "text-[#e8eee8]/80" : "text-aura"}`}>
+          <span>{isUser ? "Você" : "Tutor IA"}</span>
           <span className={isUser ? "text-white/35" : "text-slate-600"}>·</span>
           <span className={isUser ? "text-white/55" : "text-slate-500"}>{formatMessageTime(message.created_at)}</span>
         </div>
-        {presentation ? (
-          <PresentationDeckView deck={presentation} />
+        {presentationPdf ? (
+          <PresentationPdfCard payload={presentationPdf} />
+        ) : presentation ? (
+          <PresentationLegacyCard deck={presentation} />
         ) : (
           <FormattedMessage content={content} isUser={isUser} />
         )}
-        {!isUser && !presentation && (
+        {!isUser && !presentation && !presentationPdf && (
           <button
             type="button"
             onClick={() => onSpeak(content)}
@@ -906,6 +1134,7 @@ function MessageBubble({ message, onSpeak }: { message: AiMessage; onSpeak: (tex
           <UserRound className="h-4 w-4" />
         </div>
       )}
+      </div>
     </div>
   );
 }
@@ -946,7 +1175,7 @@ function MessageLine({ line, isUser }: { line: string; isUser: boolean }) {
     const text = bulletMatch?.[1] ?? numberMatch?.[2] ?? cleanLine;
     return (
       <div className="flex gap-2">
-        <span className={`mt-2.5 h-1.5 shrink-0 rounded-full ${isUser ? "w-1.5 bg-white/80" : "w-1.5 bg-aura shadow-[0_0_10px_rgba(168,85,247,0.7)]"}`}>
+        <span className={`mt-2.5 h-1.5 shrink-0 rounded-full ${isUser ? "w-1.5 bg-white/80" : "w-1.5 bg-aura shadow-[0_0_10px_rgba(159,207,139,0.7)]"}`}>
           {marker ? <span className="sr-only">{marker}</span> : null}
         </span>
         <p className="min-w-0 break-words">{text}</p>
@@ -962,20 +1191,22 @@ function MessageLine({ line, isUser }: { line: string; isUser: boolean }) {
 }
 
 function PresentationDeckView({ deck }: { deck: PresentationDeck }) {
+  const slides = Array.isArray(deck.slides) ? deck.slides : [];
+
   return (
     <div className="space-y-4">
-      <div className="rounded-xl border border-accent/25 bg-accent/[0.08] p-4 shadow-[0_0_32px_rgba(124,58,237,0.14)]">
+      <div className="rounded-xl border border-accent/25 bg-accent/[0.08] p-4 shadow-[0_0_32px_rgba(58,167,216,0.14)]">
         <div className="flex flex-wrap items-center gap-2 text-aura">
           <Layers3 className="h-4 w-4" />
-          <span className="text-[0.68rem] font-semibold uppercase tracking-[0.18em]">{deck.template}</span>
+          <span className="text-[0.68rem] font-semibold uppercase tracking-[0.18em]">{deck.template ?? "Apresentação"}</span>
         </div>
-        <h3 className="mt-3 text-2xl font-semibold leading-tight text-white">{deck.title}</h3>
-        <p className="mt-2 text-sm leading-6 text-slate-300">{deck.objective}</p>
-        <p className="mt-3 text-xs font-semibold text-muted">Tempo estimado: {deck.estimatedExecutionTime}</p>
+        <h3 className="mt-3 text-2xl font-semibold leading-tight text-white">{deck.title ?? "Apresentação AprovaAI"}</h3>
+        <p className="mt-2 text-sm leading-6 text-slate-300">{deck.objective ?? "Plano de execução gerado para orientar seus estudos."}</p>
+        <p className="mt-3 text-xs font-semibold text-muted">Tempo estimado: {deck.estimatedExecutionTime ?? "Sob medida"}</p>
       </div>
 
       <div className="grid gap-3">
-        {deck.slides.map((slide, index) => (
+        {slides.map((slide, index) => (
           <article
             key={`${slide.title}-${index}`}
             className="rounded-xl border border-white/10 bg-black/25 p-4 transition hover:border-accent/30 hover:bg-white/[0.055]"
@@ -989,9 +1220,9 @@ function PresentationDeckView({ deck }: { deck: PresentationDeck }) {
             </div>
             {slide.objective && <p className="mt-2 text-sm leading-6 text-slate-400">{slide.objective}</p>}
             <ul className="mt-3 space-y-2">
-              {slide.bullets.map((bullet) => (
+              {(Array.isArray(slide.bullets) ? slide.bullets : []).map((bullet) => (
                 <li key={bullet} className="flex gap-2 text-sm leading-6 text-slate-200">
-                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-aura shadow-[0_0_12px_rgba(168,85,247,0.7)]" />
+                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-aura shadow-[0_0_12px_rgba(159,207,139,0.7)]" />
                   <span>{bullet}</span>
                 </li>
               ))}
@@ -1007,8 +1238,66 @@ function PresentationDeckView({ deck }: { deck: PresentationDeck }) {
 
       <div className="rounded-xl border border-white/10 bg-white/[0.04] p-4">
         <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-muted">Próxima ação</p>
-        <p className="mt-2 text-sm font-semibold leading-6 text-white">{deck.nextAction}</p>
+        <p className="mt-2 text-sm font-semibold leading-6 text-white">{deck.nextAction ?? "Escolha uma tarefa e execute ainda hoje."}</p>
       </div>
+    </div>
+  );
+}
+
+function PresentationPdfCard({ payload }: { payload: PresentationPdfPayload }) {
+  const deck = payload.deck;
+  const slides = Array.isArray(deck?.slides) ? deck.slides : [];
+  const canDownload = Boolean(payload.pdfBase64);
+
+  return (
+    <div className="space-y-4">
+      <div className="rounded-xl border border-accent/25 bg-accent/[0.08] p-4 shadow-[0_0_32px_rgba(58,167,216,0.14)]">
+        <div className="flex flex-wrap items-center gap-2 text-aura">
+          <Layers3 className="h-4 w-4" />
+          <span className="text-[0.68rem] font-semibold uppercase tracking-[0.18em]">PDF pronto</span>
+        </div>
+        <h3 className="mt-3 text-2xl font-semibold leading-tight text-white">{payload.title ?? deck?.title ?? "Apresentação AprovaAI"}</h3>
+        <p className="mt-2 text-sm leading-6 text-slate-300">{deck?.objective ?? "PDF gerado para orientar sua execução."}</p>
+        <div className="mt-4 grid gap-2 rounded-lg border border-white/10 bg-black/20 p-3 text-xs text-muted sm:grid-cols-3">
+          <span>{slides.length} slides</span>
+          <span>{deck?.estimatedExecutionTime ?? "Sob medida"}</span>
+          <span>{payload.fileName ?? "apresentacao-aprovaai.pdf"}</span>
+        </div>
+        {canDownload ? (
+          <button
+            type="button"
+            onClick={() => downloadBase64Pdf(payload.pdfBase64 as string, payload.fileName)}
+            className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-lg border border-accent/35 bg-accent px-4 py-2 text-sm font-semibold text-white shadow-[0_0_28px_rgba(58,167,216,0.22)] transition-[background-color,box-shadow,transform] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] hover:bg-[#b8dca8] hover:shadow-[0_0_36px_rgba(58,167,216,0.30)] active:scale-[0.98]"
+          >
+            <Download className="h-4 w-4" />
+            Baixar PDF
+          </button>
+        ) : (
+          <p className="mt-4 rounded-lg border border-white/10 bg-black/20 p-3 text-xs leading-5 text-muted">
+            O PDF foi baixado no momento da geração. Para baixar novamente, gere uma nova versão pelo painel lateral.
+          </p>
+        )}
+      </div>
+
+      <div className="rounded-xl border border-white/10 bg-white/[0.04] p-4">
+        <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-muted">Próxima ação</p>
+        <p className="mt-2 text-sm font-semibold leading-6 text-white">{deck?.nextAction ?? "Baixe o PDF e execute a primeira missão."}</p>
+      </div>
+    </div>
+  );
+}
+
+function PresentationLegacyCard({ deck }: { deck: PresentationDeck }) {
+  return (
+    <div className="rounded-xl border border-amber-300/20 bg-amber-400/[0.06] p-4">
+      <div className="flex flex-wrap items-center gap-2 text-amber-100">
+        <Layers3 className="h-4 w-4" />
+        <span className="text-[0.68rem] font-semibold uppercase tracking-[0.18em]">Apresentação antiga</span>
+      </div>
+      <h3 className="mt-3 text-xl font-semibold leading-tight text-white">{deck.title ?? "Apresentação AprovaAI"}</h3>
+      <p className="mt-2 text-sm leading-6 text-slate-300">
+        Esta apresentação foi gerada antes do modo PDF. Gere novamente pelo painel lateral para receber o arquivo pronto para baixar.
+      </p>
     </div>
   );
 }
@@ -1022,16 +1311,120 @@ function parsePresentation(content: string): PresentationDeck | null {
   }
 }
 
+function isLegacyPresentationHistoryMessage(message: AiMessage) {
+  const normalized = repairMojibake(message.content).trim();
+  const marker = normalized.toLocaleUpperCase("pt-BR");
+
+  return (
+    marker.startsWith("[APRESENTAÇÃO SOLICITADA]") ||
+    marker.startsWith("[APRESENTACAO SOLICITADA]") ||
+    parsePresentation(normalized) !== null ||
+    parsePresentationPdf(normalized) !== null
+  );
+}
+
+function parsePresentationPdf(content: string): PresentationPdfPayload | null {
+  try {
+    const parsed = JSON.parse(stripPdfBase64(content)) as PresentationPdfPayload;
+    return parsed.type === "presentation_pdf" && Boolean(parsed.deck) && typeof parsed.deck === "object"
+      ? parsed
+      : null;
+  } catch {
+    return null;
+  }
+}
+
 function formatAssistantContent(content: string) {
   try {
-    const parsed = JSON.parse(content) as { type?: string; estimatedScore?: number; summary?: string };
+    const parsed = JSON.parse(stripPdfBase64(content)) as { type?: string; estimatedScore?: number; summary?: string; title?: string };
     if (parsed.type === "essay_review") {
       return `Correção de redação concluída. Nota estimada: ${parsed.estimatedScore ?? 0}/1000. ${parsed.summary ?? ""}`;
+    }
+    if (parsed.type === "presentation_pdf") {
+      return `PDF de apresentação pronto: ${parsed.title ?? "Apresentação AprovaAI"}.`;
+    }
+    if (parsed.type === "presentation") {
+      return `Apresentação antiga: ${parsed.title ?? "Apresentação AprovaAI"}.`;
     }
   } catch {
     return content;
   }
   return content;
+}
+
+function normalizeAiMessageForClient(message: AiMessage): AiMessage {
+  return {
+    ...message,
+    content: stripPdfBase64(repairMojibake(message.content))
+  };
+}
+
+function stripPdfBase64(content: string) {
+  if (!content.includes("pdfBase64")) return content;
+  return content.replace(/,\s*"pdfBase64"\s*:\s*"[^"]*"/, "");
+}
+
+function downloadBase64Pdf(base64: string, fileName: string) {
+  if (typeof window === "undefined") return;
+  const binary = window.atob(base64);
+  const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+  const url = URL.createObjectURL(new Blob([bytes], { type: "application/pdf" }));
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = fileName || "apresentacao-aprovaai.pdf";
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 1_000);
+}
+
+function findConversationMatches(messages: AiMessage[], query: string): ConversationSearchResult[] {
+  const normalizedQuery = normalizeSearchText(query);
+  if (!normalizedQuery) return [];
+
+  return messages.reduce<ConversationSearchResult[]>((matches, message) => {
+    const content = formatAssistantContent(repairMojibake(message.content)).slice(0, 4_000);
+    const normalizedContent = normalizeSearchText(content);
+    if (!normalizedContent.includes(normalizedQuery)) return matches;
+
+    matches.push({
+      message,
+      excerpt: buildSearchExcerpt(content, normalizedQuery)
+    });
+    return matches;
+  }, []);
+}
+
+function buildSearchExcerpt(content: string, normalizedQuery: string) {
+  const cleanLines = content
+    .replace(/\[(ARQUIVO|APRESENTAÇÃO|APRESENTACAO|REDAÇÃO|REDACAO)[^\]]*\]/gi, "")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+  const matchedLine = cleanLines.find((line) => normalizeSearchText(line).includes(normalizedQuery)) ?? cleanLines[0] ?? "Mensagem encontrada.";
+  return matchedLine.length > 150 ? `${matchedLine.slice(0, 147)}...` : matchedLine;
+}
+
+function normalizeSearchText(value: string) {
+  return repairMojibake(value)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
+function messageDomId(messageId: string) {
+  return `chat-message-${messageId.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
+}
+
+function summarizeHistoryLabel(content: string) {
+  const clean = repairMojibake(content)
+    .replace(/\[(ARQUIVO|APRESENTAÇÃO|APRESENTACAO|REDAÇÃO|REDACAO)[^\]]*\]/gi, "")
+    .split("\n")
+    .find((line) => line.trim().length > 0)
+    ?.trim() ?? "Mensagem anterior";
+
+  return clean.length > 64 ? `${clean.slice(0, 61)}...` : clean;
 }
 
 function normalizePlanTag(value: unknown): PlanTag {

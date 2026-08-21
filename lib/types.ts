@@ -1,13 +1,16 @@
 export type Difficulty = "start" | "routine" | "subjects" | "motivation";
 export type StudyTime = "30m" | "1h" | "2h" | "3h";
+export type TargetExam = "2026" | "2027";
+export type StudyFrequency = "1-2" | "3-4" | "5-7";
 export type Area = "math" | "essay" | "nature" | "humanities" | "languages";
 export type Level = "zero" | "basic" | "messy" | "improve";
 
 export type QuizAnswers = {
+  targetExam?: TargetExam;
   difficulty?: Difficulty;
-  studyTime?: StudyTime;
   area?: Area;
   level?: Level;
+  studyFrequency?: StudyFrequency;
 };
 
 export type ProfileKind = "Iniciante Perdido" | "Sem Rotina" | "Evolução Acelerada" | "Última Hora";
