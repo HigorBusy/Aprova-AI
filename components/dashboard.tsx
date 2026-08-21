@@ -113,13 +113,10 @@ function QuestionsCard({ className }: { className?: string }) {
             Responda questões autorais, receba a explicação na hora e transforme cada erro em uma prioridade real de estudo.
           </p>
         </div>
-        <Link
-          href="/questoes"
-          className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-accent/30 bg-accent px-5 text-sm font-semibold text-[#041014] shadow-[0_0_30px_rgba(159,207,139,0.16)] transition-transform duration-150 active:scale-[0.97]"
-        >
-          Iniciar treino
-          <ArrowRight className="h-4 w-4" />
-        </Link>
+        <div className="grid gap-2 sm:min-w-44">
+          <Link href="/questoes" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-accent/30 bg-accent px-5 text-sm font-semibold text-[#041014] shadow-[0_0_30px_rgba(159,207,139,0.16)] transition-transform duration-150 active:scale-[0.97]">Iniciar treino <ArrowRight className="h-4 w-4" /></Link>
+          <Link href="/simulado" className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-4 text-sm font-semibold text-white transition-colors hover:border-aura/35">Fazer simulado</Link>
+        </div>
       </div>
     </Card>
   );
@@ -338,30 +335,16 @@ function CommanderCard() {
   );
 }
 
-type WeaknessRow = {
-  competency: string;
-  weakness_type: string;
-  frequency: number;
-  severity: number;
-  latest_score: number;
-  status: "active" | "improving" | "resolved";
-};
-
-type QuestionWeaknessRow = {
-  topic_id: string;
-  total_attempts: number;
-  correct_attempts: number;
-  wrong_attempts: number;
-  question_topics: {
-    name: string;
-    area_key: "math" | "languages" | "humanities" | "nature";
-  } | null;
+type LearningRecommendation = {
+  kind: string;
+  title: string;
+  description: string;
+  href: string;
+  action: string;
 };
 
 function NextStepCard({ className }: { className?: string }) {
-  const [weakness, setWeakness] = useState<WeaknessRow | null>(null);
-  const [questionWeakness, setQuestionWeakness] = useState<QuestionWeaknessRow | null>(null);
-  const [hasEssay, setHasEssay] = useState<boolean | null>(null);
+  const [recommendation, setRecommendation] = useState<LearningRecommendation | null>(null);
 
   useEffect(() => {
     const supabase = getSupabaseClient();
@@ -369,38 +352,9 @@ function NextStepCard({ className }: { className?: string }) {
     let active = true;
 
     void (async () => {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const userId = sessionData.session?.user.id;
-      if (!userId) return;
-
-      const [weaknessResult, essayResult, questionResult] = await Promise.all([
-        supabase
-          .from("user_weaknesses")
-          .select("competency,weakness_type,frequency,severity,latest_score,status")
-          .eq("user_id", userId)
-          .neq("status", "resolved")
-          .order("severity", { ascending: false })
-          .order("frequency", { ascending: false })
-          .limit(1)
-          .maybeSingle<WeaknessRow>(),
-        supabase
-          .from("essay_reviews")
-          .select("id", { count: "exact", head: true })
-          .eq("user_id", userId),
-        supabase
-          .from("question_topic_stats")
-          .select("topic_id,total_attempts,correct_attempts,wrong_attempts,question_topics(name,area_key)")
-          .eq("user_id", userId)
-          .gte("total_attempts", 2)
-      ]);
-
-      if (!active) return;
-      setWeakness(weaknessResult.data ?? null);
-      setHasEssay((essayResult.count ?? 0) > 0);
-      const weakestTopic = ((questionResult.data ?? []) as unknown as QuestionWeaknessRow[])
-        .filter((item) => item.question_topics)
-        .sort((a, b) => (a.correct_attempts / a.total_attempts) - (b.correct_attempts / b.total_attempts))[0] ?? null;
-      setQuestionWeakness(weakestTopic);
+      const { data } = await supabase.rpc("get_student_learning_profile");
+      if (!active || !data) return;
+      setRecommendation((data as { recommendation?: LearningRecommendation }).recommendation ?? null);
     })();
 
     return () => {
@@ -408,22 +362,8 @@ function NextStepCard({ className }: { className?: string }) {
     };
   }, []);
 
-  const questionAccuracy = questionWeakness
-    ? Math.round((questionWeakness.correct_attempts / questionWeakness.total_attempts) * 100)
-    : null;
-  const prioritizeQuestions = Boolean(questionWeakness && questionAccuracy !== null && questionAccuracy < 70);
-  const title = prioritizeQuestions
-    ? `Retome ${questionWeakness?.question_topics?.name}`
-    : weakness
-    ? `Treine ${weakness.competency}: ${weakness.weakness_type}`
-    : hasEssay === false
-      ? "Seu diagnóstico começa com a primeira redação"
-      : "Envie uma nova redação para medir sua evolução";
-  const description = prioritizeQuestions
-    ? `Seu aproveitamento neste assunto está em ${questionAccuracy}% após ${questionWeakness?.total_attempts} tentativas. Um treino curto agora vale mais do que revisar tudo de novo.`
-    : weakness
-    ? `Esse padrão apareceu ${weakness.frequency} ${weakness.frequency === 1 ? "vez" : "vezes"}. Sua última marca foi ${weakness.latest_score}/200.`
-    : "A correção identifica seu nível, registra seus padrões e define o próximo foco de estudo.";
+  const title = recommendation?.title ?? "Analisando seu próximo passo";
+  const description = recommendation?.description ?? "O sistema cruza redações, questões e simulados para escolher uma ação útil.";
 
   return (
     <Card className={`border-accent/25 bg-gradient-to-r from-accent/[0.10] via-white/[0.04] to-transparent ${className ?? ""}`}>
@@ -434,32 +374,7 @@ function NextStepCard({ className }: { className?: string }) {
           <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-300">{description}</p>
         </div>
         <div className="flex shrink-0 flex-wrap gap-2">
-          {prioritizeQuestions && questionWeakness?.question_topics ? (
-            <Link
-              href={`/questoes?area=${questionWeakness.question_topics.area_key}&topic=${questionWeakness.topic_id}`}
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-accent/30 bg-accent px-4 text-sm font-semibold text-[#041014] shadow-[0_0_30px_rgba(159,207,139,0.18)] transition-[background-color,transform] duration-150 active:scale-[0.97]"
-            >
-              Treinar assunto
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          ) : weakness ? (
-            <Link
-              href={`/comandante?context=${encodeURIComponent(`Quero treinar ${weakness.competency}: ${weakness.weakness_type}. Minha última nota nessa competência foi ${weakness.latest_score}/200. Explique meu principal problema e me passe um exercício prático.`)}`}
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-accent/30 bg-accent px-4 text-sm font-semibold text-[#041014] shadow-[0_0_30px_rgba(159,207,139,0.18)] transition-[background-color,transform] duration-150 active:scale-[0.97]"
-            >
-              Treinar com o Tutor
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          ) : null}
-          {!prioritizeQuestions ? (
-            <a
-              href="#centro-redacao"
-              className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold transition-[background-color,transform,border-color] duration-150 active:scale-[0.97] ${weakness ? "border border-white/10 bg-white/[0.05] text-slate-100 hover:border-accent/35" : "border border-accent/30 bg-accent text-[#041014] shadow-[0_0_30px_rgba(159,207,139,0.18)]"}`}
-            >
-              Enviar redação
-              <ArrowRight className="h-4 w-4" />
-            </a>
-          ) : null}
+          {recommendation ? <Link href={recommendation.href} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-accent/30 bg-accent px-4 text-sm font-semibold text-[#041014] shadow-[0_0_30px_rgba(159,207,139,0.18)] transition-[background-color,transform] duration-150 active:scale-[0.97]">{recommendation.action}<ArrowRight className="h-4 w-4" /></Link> : null}
         </div>
       </div>
     </Card>

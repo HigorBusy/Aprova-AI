@@ -1,5 +1,5 @@
 export type QuestionAreaKey = "math" | "languages" | "humanities" | "nature";
-export type QuestionMode = "quick" | "area" | "weakness" | "errors";
+export type QuestionMode = "quick" | "area" | "weakness" | "errors" | "simulation";
 export type QuestionOption = "A" | "B" | "C" | "D" | "E";
 
 export type QuestionAlternative = {
@@ -49,7 +49,41 @@ export type QuestionSession = {
   correctCount: number;
   startedAt: string;
   completedAt: string | null;
+  selectedAreas?: QuestionAreaKey[];
+  timeLimitMinutes?: number | null;
+  lastActivityAt?: string;
+  endedReason?: "submitted" | "time_expired" | null;
   questions: TrainingQuestion[];
+};
+
+export type SimulationAreaResult = {
+  areaKey: QuestionAreaKey;
+  total: number;
+  answered: number;
+  correct: number;
+  accuracy: number;
+};
+
+export type SimulationResult = QuestionSessionSummary & {
+  startedAt: string;
+  completedAt: string;
+  durationSeconds: number;
+  endedReason: "submitted" | "time_expired";
+  byArea: SimulationAreaResult[];
+  questions: TrainingQuestion[];
+};
+
+export type SimulationHistoryEntry = {
+  sessionId: string;
+  questionCount: number;
+  correct: number;
+  accuracy: number;
+  answered: number;
+  startedAt: string;
+  completedAt: string;
+  durationSeconds: number;
+  selectedAreas: QuestionAreaKey[];
+  endedReason: "submitted" | "time_expired";
 };
 
 export type QuestionTopic = {

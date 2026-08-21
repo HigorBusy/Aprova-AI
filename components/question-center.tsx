@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import {
   AlertCircle,
+  AlarmClock,
   ArrowLeft,
   ArrowRight,
   BookOpenCheck,
@@ -373,6 +374,12 @@ function QuestionHome({ catalog, selectedArea, totalAttempts, overallAccuracy, p
         <Metric label="Taxa de acerto" value={overallAccuracy === null ? "—" : `${overallAccuracy}%`} />
         <Metric label="Questões no caderno" value={String(catalog.errorCount)} />
       </section>
+
+      <Link href="/simulado" className="group grid gap-4 rounded-xl border border-aura/25 bg-aura/[0.06] p-5 transition-[border-color,background-color,transform] duration-200 hover:border-aura/45 hover:bg-aura/[0.09] active:scale-[0.995] sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center">
+        <span className="grid h-11 w-11 place-items-center rounded-lg border border-aura/25 bg-aura/[0.09] text-aura"><AlarmClock className="h-5 w-5" /></span>
+        <span><span className="block text-xs font-medium uppercase tracking-[0.16em] text-aura">Ambiente de prova</span><span className="mt-1 block text-xl font-semibold text-white">Simulado com tempo e resultado por área</span><span className="mt-2 block text-sm leading-6 text-muted">O gabarito aparece só depois da entrega. Respostas salvas automaticamente.</span></span>
+        <span className="inline-flex min-h-10 items-center gap-2 text-sm font-semibold text-white">Configurar <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" /></span>
+      </Link>
 
       <section className="grid gap-4 lg:grid-cols-3">
         <ModeCard icon={Brain} eyebrow="Adaptativo" title="Treinar minhas fraquezas" description={priorityTopic ? `${priorityTopic.name} está em ${priorityTopic.accuracy}% de acerto.` : "Disponível após o sistema reunir evidências suficientes."} disabled={!priorityTopic || busy} action="Treinar prioridade" onClick={() => void onStart("weakness")} />

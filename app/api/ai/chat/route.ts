@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { callGroq, COMMANDER_SYSTEM_PROMPT } from "@/lib/ai/groq";
-import { formatQuestionContext, formatRepertoryContext, formatStudentContext } from "@/lib/ai/student-context";
+import { formatLearningProfileContext, formatQuestionContext, formatRepertoryContext, formatStudentContext } from "@/lib/ai/student-context";
 import { sanitizeSingleLine, sanitizeTextInput } from "@/lib/security/input";
 import { checkRateLimit, rateLimitResponse } from "@/lib/security/rate-limit";
 import { rejectLargeRequest } from "@/lib/security/request";
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
 
   if (historyError) return jsonUtf8({ error: "Não foi possível carregar o histórico." }, { status: 500 });
 
-  const [{ data: repertorios }, { data: profile }, { data: essays }, { data: questionCatalog }] = await Promise.all([
+  const [{ data: repertorios }, { data: profile }, { data: essays }, { data: questionCatalog }, { data: learningProfile }] = await Promise.all([
     supabase
       .from("repertorios")
       .select("autor,obra,tema,explicacao,categoria")
@@ -82,11 +82,13 @@ export async function POST(request: NextRequest) {
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
       .limit(3),
-    supabase.rpc("get_question_catalog")
+    supabase.rpc("get_question_catalog"),
+    supabase.rpc("get_student_learning_profile")
   ]);
 
   const runtimeContext = [
     formatStudentContext(profile, essays),
+    formatLearningProfileContext(learningProfile),
     formatQuestionContext(questionCatalog),
     formatRepertoryContext(repertorios)
   ].join("\n\n");
@@ -118,11 +120,17 @@ export async function POST(request: NextRequest) {
 
     if (completionError) throw completionError;
     if (!result?.success) {
+      await supabase.rpc("track_product_event", { p_event_name: "credits_exhausted", p_properties: { source: "tutor" } });
       return jsonUtf8(
         { error: "Você ficou sem créditos.", balance: result?.balance ?? 0 },
         { status: 402 }
       );
     }
+
+    await supabase.rpc("track_product_event", {
+      p_event_name: "tutor_used",
+      p_properties: { mode: isTool ? "tool" : "chat", cost }
+    });
 
     return jsonUtf8({ reply, balance: result.balance });
   } catch (error) {

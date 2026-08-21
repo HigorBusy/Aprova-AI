@@ -44,6 +44,14 @@ type QuestionCatalogSnapshot = {
   topics?: QuestionTopicSnapshot[] | null;
 };
 
+type LearningProfileSnapshot = {
+  evidence?: { essayCount?: number; questionAttempts?: number; simulationCount?: number };
+  recommendation?: { title?: string; description?: string };
+  essay?: { averageScore?: number | null; latestScore?: number | null; priority?: Record<string, unknown> | null };
+  questions?: { attempts?: number; accuracy?: number | null; priority?: Record<string, unknown> | null };
+  simulations?: { count?: number; latest?: { accuracy?: number; completedAt?: string } | null };
+};
+
 export function formatRepertoryContext(repertorios: Repertorio[] | null | undefined) {
   const items = (repertorios ?? []).slice(0, 12);
   if (items.length === 0) return "Banco de repertorios: sem itens carregados agora.";
@@ -113,6 +121,21 @@ export function formatQuestionContext(catalog: QuestionCatalogSnapshot | null | 
       ? ["- Assuntos prioritarios:", ...priorities.map((topic) => `  - ${topic.discipline ?? "Area"} / ${topic.name ?? "Assunto"}: ${topic.accuracy ?? 0}% em ${topic.attempts ?? 0} tentativas.`)]
       : ["- Ainda nao ha repeticao suficiente para definir um assunto prioritario."]),
     "Use esses dados apenas quando ajudarem a responder a solicitacao atual."
+  ].join("\n");
+}
+
+export function formatLearningProfileContext(profile: LearningProfileSnapshot | null | undefined) {
+  if (!profile) return "Perfil unificado: ainda não disponível.";
+  const evidence = profile.evidence ?? {};
+  const recommendation = profile.recommendation;
+  return [
+    "Perfil unificado de aprendizagem:",
+    `- Evidências: ${evidence.essayCount ?? 0} redações, ${evidence.questionAttempts ?? 0} respostas e ${evidence.simulationCount ?? 0} simulados.`,
+    `- Redação: última nota ${profile.essay?.latestScore ?? "indefinida"}; média ${profile.essay?.averageScore ?? "indefinida"}.`,
+    `- Questões: ${profile.questions?.accuracy ?? "sem base"}% de aproveitamento em ${profile.questions?.attempts ?? 0} tentativas.`,
+    profile.simulations?.latest ? `- Último simulado: ${profile.simulations.latest.accuracy ?? 0}% de acerto.` : "- Ainda não há simulado concluído.",
+    recommendation?.title ? `- Próximo passo recomendado pelo sistema: ${recommendation.title}. ${recommendation.description ?? ""}` : "- Próximo passo ainda não definido.",
+    "Use o perfil somente quando ele for relevante. Não invente evolução sem evidência."
   ].join("\n");
 }
 
