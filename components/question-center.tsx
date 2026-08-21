@@ -594,7 +594,8 @@ function firstPendingIndex(session: QuestionSession) {
 }
 
 function buildTutorContext(question: TrainingQuestion) {
-  const selected = question.alternatives.find((item) => item.key === question.result?.selectedOption);
+  const selectedOption = question.result?.selectedOption ?? question.selectedOption;
+  const selected = question.alternatives.find((item) => item.key === selectedOption);
   const correct = question.alternatives.find((item) => item.key === question.result?.correctOption);
-  return `Não entendi esta questão de ${question.discipline} (${question.topic}). Explique de forma mais simples e depois crie um exercício curto para verificar se aprendi. Questão: ${question.prompt} Minha resposta: ${question.result?.selectedOption} - ${selected?.text}. Resposta correta: ${question.result?.correctOption} - ${correct?.text}. Explicação anterior: ${question.result?.explanation}`;
+  return `Não entendi esta questão de ${question.discipline} (${question.topic}). Explique de forma mais simples e depois crie um exercício curto para verificar se aprendi. Questão: ${question.prompt} Minha resposta: ${selectedOption} - ${selected?.text}. Resposta correta: ${question.result?.correctOption} - ${correct?.text}. Explicação anterior: ${question.result?.explanation}`;
 }
