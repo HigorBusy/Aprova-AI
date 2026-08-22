@@ -75,7 +75,7 @@ const plans: Plan[] = [
     detail: "60 créditos por mês",
     hook: "Créditos para corrigir, tirar dúvidas e analisar seus erros durante o mês.",
     featured: true,
-    daily: "Menos de R$1 por dia",
+    daily: "Cerca de R$1 por dia",
     cta: "Garantir mensal",
     checkoutUrl: "https://pay.cakto.com.br/d7tstmz_1049372"
   },
@@ -84,7 +84,7 @@ const plans: Plan[] = [
     price: "R$197/ano",
     detail: "720 créditos no ano",
     hook: "O equivalente a 60 créditos por mês, com o melhor custo-benefício.",
-    daily: "Menos de R$0,55 por dia",
+    daily: "Melhor custo por crédito",
     cta: "Garantir anual",
     checkoutUrl: "https://pay.cakto.com.br/deea3ts"
   }
