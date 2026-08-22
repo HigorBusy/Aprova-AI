@@ -1,6 +1,8 @@
 import { ENEM_BASE_KNOWLEDGE } from "@/lib/ai/enem-knowledge";
 
 const GROQ_CHAT_URL = "https://api.groq.com/openai/v1/chat/completions";
+const DEFAULT_GROQ_MODEL = "openai/gpt-oss-120b";
+const FALLBACK_GROQ_MODEL = "qwen/qwen3.6-27b";
 
 export const COMMANDER_SYSTEM_PROMPT = `Você é o Comandante IA do AprovaAI.
 
@@ -155,27 +157,45 @@ export async function callGroq(messages: GroqMessage[], options: GroqOptions = {
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) throw new Error("GROQ_API_KEY_NOT_CONFIGURED");
 
-  const response = await fetch(GROQ_CHAT_URL, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      model: process.env.GROQ_MODEL || "llama-3.3-70b-versatile",
-      messages,
-      temperature: options.temperature ?? 0.45,
-      max_completion_tokens: options.maxTokens ?? 900,
-      ...(options.json ? { response_format: { type: "json_object" } } : {})
-    }),
-    signal: AbortSignal.timeout(options.timeoutMs ?? 45_000)
-  });
+  const configuredModel = process.env.GROQ_MODEL?.trim();
+  const models = configuredModel
+    ? [configuredModel]
+    : [DEFAULT_GROQ_MODEL, FALLBACK_GROQ_MODEL];
 
-  if (!response.ok) {
+  let response: Response | null = null;
+
+  for (const [index, model] of models.entries()) {
+    response = await fetch(GROQ_CHAT_URL, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model,
+        messages,
+        temperature: options.temperature ?? 0.45,
+        max_completion_tokens: options.maxTokens ?? 900,
+        ...(options.json ? { response_format: { type: "json_object" } } : {})
+      }),
+      signal: AbortSignal.timeout(options.timeoutMs ?? 45_000)
+    });
+
+    if (response.ok) break;
+
+    const requestId = response.headers.get("x-request-id");
+    console.error("Groq request failed", {
+      model,
+      status: response.status,
+      requestId
+    });
     await response.arrayBuffer();
-    console.error("Groq request failed", { status: response.status });
-    throw new Error(`GROQ_REQUEST_FAILED_${response.status}`);
+
+    const canTryFallback = response.status === 404 && index < models.length - 1;
+    if (!canTryFallback) throw new Error(`GROQ_REQUEST_FAILED_${response.status}`);
   }
+
+  if (!response?.ok) throw new Error("GROQ_REQUEST_FAILED");
 
   const data = (await response.json()) as {
     choices?: Array<{ message?: { content?: string } }>;
