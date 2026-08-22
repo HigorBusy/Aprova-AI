@@ -9,7 +9,7 @@ import { AuthCard } from "@/components/auth-card";
 import { Button, Card } from "@/components/ui";
 import { Loader } from "@/components/ui/loader-15";
 import type { EssayReview } from "@/lib/ai/types";
-import { getDaysToEnem } from "@/lib/constants";
+import { getEnemCountdown } from "@/lib/constants";
 import { PRODUCT_CONFIG } from "@/lib/product-config";
 import { getSupabaseClient } from "@/lib/supabase/client";
 import type { PlanTag } from "@/lib/types";
@@ -44,8 +44,8 @@ export function Dashboard({
 }: DashboardProps) {
   return (
     <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-4 animate-float-in lg:grid-cols-12 lg:gap-5">
-      <CountdownPanel className="lg:col-span-5" />
-      <NextStepCard className="lg:col-span-7" />
+      <CountdownPanel className="lg:col-span-12" />
+      <NextStepCard className="lg:col-span-12" />
 
       <WritingCenterCard
         className="lg:col-span-12"
@@ -71,18 +71,39 @@ export function Dashboard({
 }
 
 function CountdownPanel({ className }: { className?: string }) {
-  const daysToEnem = getDaysToEnem();
+  const [countdown, setCountdown] = useState(() => getEnemCountdown());
+
+  useEffect(() => {
+    const updateCountdown = () => setCountdown(getEnemCountdown());
+    updateCountdown();
+    const timer = window.setInterval(updateCountdown, 1_000);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  const units = [
+    { label: "meses", value: countdown.months },
+    { label: "semanas", value: countdown.weeks },
+    { label: "dias", value: countdown.days },
+    { label: "horas", value: countdown.hours }
+  ];
 
   return (
-    <Card className={`command-surface flex min-h-[250px] flex-col justify-center px-5 py-8 text-center sm:px-8 ${className ?? ""}`}>
-      <p className="text-sm font-semibold text-[#9de8fb]">ENEM {PRODUCT_CONFIG.enem.year}</p>
-      <div className="mt-5 flex items-end justify-center gap-3 sm:gap-4">
-        <p className="countdown-value font-mono text-7xl font-semibold leading-[0.78] text-[#f4f1e8] tabular-nums sm:text-8xl">{daysToEnem}</p>
-        <p className="pb-1 text-left text-lg font-semibold leading-5 text-[#b9c8d5] sm:pb-2 sm:text-xl">
-          dias<br />restantes
-        </p>
+    <Card className={`command-surface relative flex min-h-[360px] overflow-hidden px-4 py-10 text-center sm:min-h-[410px] sm:px-8 sm:py-12 ${className ?? ""}`}>
+      <div aria-hidden="true" className="pointer-events-none absolute inset-x-[12%] top-0 h-px bg-gradient-to-r from-transparent via-[#35bfe7]/70 to-transparent" />
+      <div className="relative m-auto w-full max-w-6xl">
+        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#9de8fb]">Contagem regressiva para o ENEM {PRODUCT_CONFIG.enem.year}</p>
+        <div className="mx-auto mt-9 grid max-w-5xl grid-cols-2 place-items-center gap-x-2 gap-y-8 sm:mt-11 sm:gap-x-6 lg:grid-cols-4 lg:gap-y-0">
+          {units.map((unit, index) => (
+            <div key={unit.label} className={`relative flex w-full min-w-0 flex-col items-center justify-center ${index > 0 ? "lg:before:absolute lg:before:-left-3 lg:before:top-[12%] lg:before:h-[76%] lg:before:w-px lg:before:bg-white/10" : ""}`}>
+              <span key={`${unit.label}-${unit.value}`} className="countdown-value font-mono text-6xl font-semibold leading-none text-[#f4f1e8] tabular-nums sm:text-8xl lg:text-9xl">
+                {String(unit.value).padStart(2, "0")}
+              </span>
+              <span className="mt-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#8fa3b8] sm:text-sm">{unit.label}</span>
+            </div>
+          ))}
+        </div>
+        <p className="mt-10 text-sm font-medium text-muted sm:mt-12">Primeiro dia · 8 de novembro · 13h30</p>
       </div>
-      <p className="mt-6 text-sm text-muted">Primeiro dia · 8 de novembro</p>
     </Card>
   );
 }

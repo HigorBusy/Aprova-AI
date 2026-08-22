@@ -9,7 +9,7 @@ export function getDaysToEnem(now = new Date()) {
 
 export function getEnemCountdown(now = new Date()) {
   if (now >= ENEM_FIRST_DAY) {
-    return { months: 0, days: 0, hours: 0, minutes: 0, seconds: 0 };
+    return { months: 0, weeks: 0, days: 0, hours: 0, minutes: 0, seconds: 0 };
   }
 
   let months =
@@ -26,12 +26,14 @@ export function getEnemCountdown(now = new Date()) {
   const remainingSeconds = Math.floor(
     (ENEM_FIRST_DAY.getTime() - cursor.getTime()) / 1000
   );
-  const days = Math.floor(remainingSeconds / 86_400);
+  const totalDays = Math.floor(remainingSeconds / 86_400);
+  const weeks = Math.floor(totalDays / 7);
+  const days = totalDays % 7;
   const hours = Math.floor((remainingSeconds % 86_400) / 3_600);
   const minutes = Math.floor((remainingSeconds % 3_600) / 60);
   const seconds = remainingSeconds % 60;
 
-  return { months, days, hours, minutes, seconds };
+  return { months, weeks, days, hours, minutes, seconds };
 }
 
 function addMonthsClamped(date: Date, amount: number) {
