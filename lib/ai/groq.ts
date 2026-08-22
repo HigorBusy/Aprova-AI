@@ -184,12 +184,19 @@ export async function callGroq(messages: GroqMessage[], options: GroqOptions = {
     if (response.ok) break;
 
     const requestId = response.headers.get("x-request-id");
+    const errorPayload = (await response.json().catch(() => null)) as {
+      error?: { code?: string; type?: string; message?: string };
+    } | null;
     console.error("Groq request failed", {
       model,
       status: response.status,
-      requestId
+      requestId,
+      errorCode: errorPayload?.error?.code,
+      errorType: errorPayload?.error?.type,
+      errorMessage: errorPayload?.error?.message?.slice(0, 240),
+      tokenLimit: response.headers.get("x-ratelimit-limit-tokens"),
+      tokensRemaining: response.headers.get("x-ratelimit-remaining-tokens")
     });
-    await response.arrayBuffer();
 
     const canTryFallback = response.status === 404 && index < models.length - 1;
     if (!canTryFallback) throw new Error(`GROQ_REQUEST_FAILED_${response.status}`);

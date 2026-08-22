@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { callGroq, COMMANDER_SYSTEM_PROMPT } from "@/lib/ai/groq";
+import { buildBoundedChatContext, type ChatContextMessage } from "@/lib/ai/chat-context";
 import { formatLearningProfileContext, formatQuestionContext, formatRepertoryContext, formatStudentContext } from "@/lib/ai/student-context";
 import { sanitizeSingleLine, sanitizeTextInput } from "@/lib/security/input";
 import { checkRateLimit, rateLimitResponse } from "@/lib/security/rate-limit";
@@ -59,7 +60,7 @@ export async function POST(request: NextRequest) {
 
   const { data: recentMessages, error: historyError } = await supabase
     .from("ai_messages")
-    .select("role,content")
+    .select("role,content,created_at")
     .eq("user_id", user.id)
     .order("created_at", { ascending: false })
     .limit(12);
@@ -94,17 +95,33 @@ export async function POST(request: NextRequest) {
   ].join("\n\n");
 
   try {
-    const reply = await callGroq(
-      [
-        { role: "system", content: COMMANDER_SYSTEM_PROMPT },
-        { role: "system", content: runtimeContext },
-        ...[...(recentMessages ?? [])]
-          .reverse()
-          .map((item) => ({ role: item.role as "user" | "assistant", content: item.content })),
-        { role: "user", content: message }
-      ],
-      { temperature: 0.5, maxTokens: 1_100 }
-    );
+    const chronologicalHistory = [...(recentMessages ?? [])]
+      .sort((itemA, itemB) => {
+        const roleOrder = { user: 0, assistant: 1 } as const;
+        const timeDifference = new Date(itemA.created_at).getTime() - new Date(itemB.created_at).getTime();
+        if (timeDifference !== 0) return timeDifference;
+        return roleOrder[itemA.role as "user" | "assistant"] - roleOrder[itemB.role as "user" | "assistant"];
+      })
+      .map((item) => ({
+        role: item.role as "user" | "assistant",
+        content: item.content
+      })) satisfies ChatContextMessage[];
+
+    const prompt = buildBoundedChatContext({
+      systemPrompt: COMMANDER_SYSTEM_PROMPT,
+      runtimeContext,
+      history: chronologicalHistory,
+      userMessage: message
+    });
+
+    console.info("Commander prompt prepared", {
+      userId: user.id,
+      totalChars: prompt.totalChars,
+      runtimeChars: prompt.runtimeChars,
+      historyCount: prompt.historyCount
+    });
+
+    const reply = await callGroq(prompt.messages, { temperature: 0.5, maxTokens: 1_100 });
 
     const { data: completion, error: completionError } = await supabase.rpc(
       "complete_ai_exchange",
