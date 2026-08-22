@@ -1,0 +1,11 @@
+.git
+.next
+.next-stale-*
+.tools
+.impeccable/review
+node_modules
+outputs
+prototypes
+work
+supabase/.temp
+tsconfig.tsbuildinfo
