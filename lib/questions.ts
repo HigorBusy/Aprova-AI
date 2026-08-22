@@ -150,3 +150,26 @@ export function difficultyLabel(difficulty: TrainingQuestion["difficulty"]) {
   if (difficulty === "hard") return "Avançada";
   return "Intermediária";
 }
+
+const officialSourceUrls = {
+  "ENEM-2024-D1-AZUL": "https://download.inep.gov.br/enem/provas_e_gabaritos/2024_PV_impresso_D1_CD1.pdf",
+  "ENEM-2024-D1-AMARELO": "https://download.inep.gov.br/enem/provas_e_gabaritos/2024_PV_impresso_D1_CD2.pdf",
+  "ENEM-2024-D2-AZUL": "https://download.inep.gov.br/enem/provas_e_gabaritos/2024_PV_impresso_D2_CD7.pdf",
+  "INEP-CARTILHA-2025": "https://download.inep.gov.br/publicacoes/institucionais/avaliacoes_e_exames_da_educacao_basica/a_redacao_no_enem_2025_cartilha_do_participante.pdf",
+  "APROVA-MATRIZ": "https://download.inep.gov.br/enem/outros_documentos/enem_matriz_referencia.pdf"
+} as const;
+
+export function questionSourceUrl(question: Pick<TrainingQuestion, "sourceReference">) {
+  const match = Object.entries(officialSourceUrls).find(([prefix]) => question.sourceReference.startsWith(prefix));
+  return match?.[1] ?? "https://www.gov.br/inep/pt-br/areas-de-atuacao/avaliacao-e-exames-educacionais/enem/provas-e-gabaritos";
+}
+
+export function questionSourceLabel(question: Pick<TrainingQuestion, "sourceType">) {
+  if (question.sourceType === "official_enem") return "Questão oficial";
+  if (question.sourceType === "official_other") return "Base oficial INEP";
+  return "Questão autoral";
+}
+
+export function questionOriginalNumber(question: Pick<TrainingQuestion, "sourceReference">) {
+  return question.sourceReference.match(/-Q(\d+)$/)?.[1] ?? null;
+}

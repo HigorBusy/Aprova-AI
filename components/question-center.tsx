@@ -23,6 +23,7 @@ import {
 
 import { Button, Card, GhostButton } from "@/components/ui";
 import { InternalNav } from "@/components/internal-nav";
+import { QuestionSource } from "@/components/question-source";
 import { Loader } from "@/components/ui/loader-15";
 import {
   difficultyLabel,
@@ -356,16 +357,17 @@ function QuestionHome({ catalog, selectedArea, totalAttempts, overallAccuracy, p
     <div className="mt-6 grid gap-4">
       <section className="command-surface grid gap-5 rounded-xl border border-[#35bfe7]/24 p-5 sm:p-7 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-aura">Treino rápido</p>
-          <h2 className="mt-3 max-w-3xl text-3xl font-semibold leading-tight text-white sm:text-4xl">Treine questões com direção.</h2>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-muted">Responda, entenda o erro e use o resultado para decidir o próximo assunto.</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-aura">Banco calibrado pelo ENEM</p>
+          <h2 className="mt-3 max-w-3xl text-3xl font-semibold leading-tight text-white sm:text-4xl">Treine leitura, decisão e repertório de prova.</h2>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-muted">Questões oficiais identificadas, itens autorais pela matriz e explicações que mostram por que cada alternativa funciona ou falha.</p>
         </div>
         <Button disabled={busy} onClick={() => void onStart("quick")} className="min-h-12 px-6">
           {busy ? <Loader size="sm" /> : <><Target className="h-4 w-4" /> Iniciar treino rápido</>}
         </Button>
       </section>
 
-      <section className="grid gap-3 sm:grid-cols-3">
+      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <Metric label="Banco disponível" value={String(catalog.availableQuestions)} />
         <Metric label="Questões respondidas" value={String(totalAttempts)} />
         <Metric label="Taxa de acerto" value={overallAccuracy === null ? "—" : `${overallAccuracy}%`} />
         <Metric label="Questões no caderno" value={String(catalog.errorCount)} />
@@ -404,7 +406,7 @@ function QuestionHome({ catalog, selectedArea, totalAttempts, overallAccuracy, p
           <div className="border-b border-white/[0.08] px-4 py-4">
             <p className="text-xs font-medium uppercase tracking-[0.18em] text-aura">Outros modos</p>
           </div>
-          <QuestionAction icon={AlarmClock} title="Simulado" description="Tempo e resultado por área" href="/simulado" />
+          <QuestionAction icon={AlarmClock} title="Simulado" description="Até 45 questões · ritmo ENEM" href="/simulado" />
           <QuestionAction icon={Brain} title="Treinar prioridade" description={priorityTopic ? `${priorityTopic.name} · ${priorityTopic.accuracy}%` : "Disponível após mais respostas"} disabled={!priorityTopic || busy} onClick={() => void onStart("weakness")} />
           <QuestionAction icon={BookOpenCheck} title="Refazer erros" description={catalog.errorCount ? `${catalog.errorCount} no caderno` : "Nenhum erro registrado"} disabled={catalog.errorCount === 0 || busy} onClick={() => void onStart("errors")} />
           <QuestionAction icon={AlertCircle} title="Caderno de erros" description="Explicações e padrões" disabled={catalog.errorCount === 0 || busy} onClick={onErrors} />
@@ -463,7 +465,8 @@ function TrainingView({ session, question, currentIndex, answeredCount, selected
         </div>
 
         <div className="py-6">
-          <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted">{question.discipline} · {question.topic}</p>
+          <QuestionSource question={question} />
+          <p className="mt-6 text-xs font-medium uppercase tracking-[0.16em] text-muted">{question.discipline} · {question.topic}</p>
           <h2 className="mt-4 whitespace-pre-line text-lg font-medium leading-8 text-white sm:text-xl">{question.prompt}</h2>
           <div className="mt-6 grid gap-3">
             {question.alternatives.map((alternative) => {
@@ -517,12 +520,6 @@ function TrainingView({ session, question, currentIndex, answeredCount, selected
               </button>
             ))}
           </div>
-        </Card>
-        <Card>
-          <p className="text-xs font-medium uppercase tracking-[0.16em] text-aura">Procedência</p>
-          <p className="mt-3 text-sm font-semibold text-white">{question.sourceType === "authored" ? "Questão autoral" : question.sourceName}</p>
-          <p className="mt-2 text-xs leading-5 text-muted">{question.rightsNote}</p>
-          <p className="mt-3 font-mono text-[0.65rem] text-slate-600">{question.sourceReference}</p>
         </Card>
       </aside>
     </div>

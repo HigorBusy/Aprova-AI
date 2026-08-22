@@ -21,6 +21,7 @@ import {
 
 import { Button, Card, GhostButton, ProgressBar } from "@/components/ui";
 import { InternalNav } from "@/components/internal-nav";
+import { QuestionSource } from "@/components/question-source";
 import { Loader } from "@/components/ui/loader-15";
 import {
   questionAreaLabel,
@@ -37,9 +38,9 @@ import { getSupabaseClient } from "@/lib/supabase/client";
 type Screen = "setup" | "exam" | "result";
 
 const durationOptions = [
-  { questions: 5, minutes: 15, label: "Aquecimento" },
-  { questions: 10, minutes: 30, label: "Foco" },
-  { questions: 20, minutes: 60, label: "Completo" }
+  { questions: 15, minutes: 50, label: "Bloco curto" },
+  { questions: 30, minutes: 100, label: "Meia prova" },
+  { questions: 45, minutes: 150, label: "Área completa" }
 ] as const;
 
 export function SimulationCenter() {
@@ -48,8 +49,8 @@ export function SimulationCenter() {
   const [result, setResult] = useState<SimulationResult | null>(null);
   const [history, setHistory] = useState<SimulationHistoryEntry[]>([]);
   const [areas, setAreas] = useState<QuestionAreaKey[]>(questionAreas.map((area) => area.key));
-  const [questionCount, setQuestionCount] = useState(10);
-  const [timeLimit, setTimeLimit] = useState(30);
+  const [questionCount, setQuestionCount] = useState(15);
+  const [timeLimit, setTimeLimit] = useState(50);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [secondsLeft, setSecondsLeft] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
@@ -218,7 +219,7 @@ export function SimulationCenter() {
         <header className="flex items-center justify-between gap-4 border-b border-white/10 pb-4">
           <div className="flex min-w-0 items-center gap-3">
             <Link href="/questoes" aria-label="Voltar para Questões" className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-white/10 bg-white/[0.04] text-slate-300 transition-colors hover:border-accent/35 hover:text-white"><ArrowLeft className="h-4 w-4" /></Link>
-            <div><p className="text-[0.65rem] font-medium uppercase tracking-[0.2em] text-aura">Ambiente de prova</p><h1 className="text-xl font-semibold sm:text-2xl">Simulado</h1></div>
+            <div><p className="text-xs font-medium uppercase tracking-[0.2em] text-aura">Ambiente de prova</p><h1 className="text-xl font-semibold sm:text-2xl">Simulado</h1></div>
           </div>
           {screen === "exam" ? <Timer seconds={secondsLeft} urgent={secondsLeft !== null && secondsLeft <= 300} /> : <span className="rounded-full border border-emerald-300/20 bg-emerald-300/[0.07] px-3 py-2 text-xs font-semibold text-emerald-100">Sem consumo de créditos</span>}
         </header>
@@ -274,9 +275,9 @@ function SetupView({ areas, questionCount, history, busy, onToggleArea, onDurati
     <div className="mt-6 grid gap-5 lg:grid-cols-[minmax(0,1fr)_22rem]">
       <div className="grid gap-5">
         <section className="command-surface premium-glow rounded-xl border border-accent/20 p-5 sm:p-7">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-aura">Teste sob pressão real</p>
-          <h2 className="mt-3 max-w-3xl text-3xl font-semibold leading-tight sm:text-4xl">Treine decisão, tempo e resistência.</h2>
-          <p className="mt-4 max-w-2xl text-sm leading-6 text-muted">O gabarito só aparece após a entrega. Suas respostas ficam salvas automaticamente e alimentam seu diagnóstico.</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-aura">Ritmo de prova</p>
+          <h2 className="mt-3 max-w-3xl text-3xl font-semibold leading-tight sm:text-4xl">Decida sob o mesmo limite de tempo do ENEM.</h2>
+          <p className="mt-4 max-w-2xl text-sm leading-6 text-muted">O bloco de 45 questões usa 150 minutos, proporção do segundo dia oficial. As áreas são balanceadas e o gabarito só aparece após a entrega.</p>
         </section>
 
         <Card>
@@ -304,7 +305,7 @@ function SetupView({ areas, questionCount, history, busy, onToggleArea, onDurati
       <Card className="h-fit lg:sticky lg:top-6">
         <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-aura"><History className="h-4 w-4" /> Histórico</p>
         <div className="mt-4 grid gap-3">
-          {history.length ? history.slice(0, 8).map((entry) => <button key={entry.sessionId} type="button" onClick={() => onOpenResult(entry)} className="rounded-lg border border-white/10 bg-black/20 p-3 text-left transition-colors hover:border-accent/30"><div className="flex items-center justify-between gap-2"><span className="text-sm font-semibold">{entry.accuracy}% de acerto</span><ArrowRight className="h-4 w-4 text-aura" /></div><p className="mt-1 text-xs text-muted">{entry.answered}/{entry.questionCount} respondidas · {formatDuration(entry.durationSeconds)}</p><p className="mt-2 text-[0.7rem] text-slate-500">{new Intl.DateTimeFormat("pt-BR", { dateStyle: "short" }).format(new Date(entry.completedAt))}</p></button>) : <p className="rounded-lg border border-dashed border-white/10 p-4 text-sm leading-6 text-muted">Seu primeiro resultado aparecerá aqui para comparação.</p>}
+          {history.length ? history.slice(0, 8).map((entry) => <button key={entry.sessionId} type="button" onClick={() => onOpenResult(entry)} className="rounded-lg border border-white/10 bg-black/20 p-3 text-left transition-colors hover:border-accent/30"><div className="flex items-center justify-between gap-2"><span className="text-sm font-semibold">{entry.accuracy}% de acerto</span><ArrowRight className="h-4 w-4 text-aura" /></div><p className="mt-1 text-xs text-muted">{entry.answered}/{entry.questionCount} respondidas · {formatDuration(entry.durationSeconds)}</p><p className="mt-2 text-xs text-slate-500">{new Intl.DateTimeFormat("pt-BR", { dateStyle: "short" }).format(new Date(entry.completedAt))}</p></button>) : <p className="rounded-lg border border-dashed border-white/10 p-4 text-sm leading-6 text-muted">Seu primeiro resultado aparecerá aqui para comparação.</p>}
         </div>
       </Card>
     </div>
@@ -327,6 +328,7 @@ function ExamView({ session, question, currentIndex, answered, busy, confirmFini
     <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_17rem]">
       <Card className="min-w-0 p-4 sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4"><div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-aura">{question.discipline} · {question.topic}</p><p className="mt-1 text-xs text-muted">Questão {currentIndex + 1} de {session.questions.length}</p></div><button type="button" onClick={onToggleReview} className={`inline-flex min-h-10 items-center gap-2 rounded-lg border px-3 text-sm transition-colors ${question.markedReview ? "border-amber-300/35 bg-amber-300/[0.08] text-amber-100" : "border-white/10 text-muted hover:text-white"}`}><Flag className="h-4 w-4" /> {question.markedReview ? "Marcada" : "Revisar depois"}</button></div>
+        <div className="mt-5 overflow-hidden rounded-xl border border-white/[0.08]"><QuestionSource question={question} compact /></div>
         <p className="mt-6 whitespace-pre-wrap text-base font-medium leading-8 text-white sm:text-lg">{question.prompt}</p>
         <div className="mt-6 grid gap-3">{question.alternatives.map((alternative) => { const selected = question.selectedOption === alternative.key; return <button key={alternative.key} type="button" disabled={busy} onClick={() => onSelect(alternative.key)} className={`flex min-h-14 items-start gap-3 rounded-lg border p-3 text-left transition-[border-color,background-color,transform] duration-150 active:scale-[0.99] ${selected ? "border-accent/50 bg-accent/[0.10] text-white" : "border-white/10 bg-white/[0.02] text-slate-300 hover:border-white/20"}`}><span className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg border text-xs font-semibold ${selected ? "border-accent bg-accent text-[#041014]" : "border-white/15"}`}>{alternative.key}</span><span className="pt-0.5 text-sm leading-6">{alternative.text}</span></button>; })}</div>
         <div className="mt-7 flex items-center justify-between gap-3"><GhostButton disabled={currentIndex === 0} onClick={() => onJump(currentIndex - 1)}><ChevronLeft className="h-4 w-4" /> Anterior</GhostButton>{currentIndex < session.questions.length - 1 ? <Button onClick={() => onJump(currentIndex + 1)}>Próxima <ChevronRight className="h-4 w-4" /></Button> : <Button onClick={onFinish}>Entregar simulado <CheckCircle2 className="h-4 w-4" /></Button>}</div>
@@ -352,7 +354,7 @@ function ResultView({ result, onBack }: { result: SimulationResult; onBack: () =
       <section className="command-surface premium-glow rounded-xl border border-accent/20 p-5 sm:p-7"><p className="text-xs font-semibold uppercase tracking-[0.2em] text-aura">Resultado registrado</p><div className="mt-4 grid gap-5 lg:grid-cols-[auto_minmax(0,1fr)] lg:items-end"><div><p className="energy-text text-6xl font-semibold">{result.accuracy}%</p><p className="mt-2 text-sm text-muted">{result.correct} acertos em {result.answered} respostas</p></div><div className="lg:text-right"><p className="text-xl font-semibold">{priority ? `Prioridade: ${questionAreaLabel(priority.areaKey)}` : "Construa sua linha de base"}</p><p className="mt-2 text-sm text-muted">{result.blank} em branco · {formatDuration(result.durationSeconds)} · {result.endedReason === "time_expired" ? "tempo encerrado" : "entrega voluntária"}</p></div></div></section>
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{result.byArea.map((area) => <Card key={area.areaKey}><p className="text-xs uppercase tracking-[0.14em] text-muted">{questionAreaLabel(area.areaKey)}</p><p className="mt-3 text-3xl font-semibold">{area.accuracy}%</p><p className="mt-2 text-sm text-muted">{area.correct}/{area.answered} corretas</p><ProgressBar value={area.accuracy} className="mt-4" /></Card>)}</section>
       <Card><div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-xs uppercase tracking-[0.14em] text-aura">Revisão técnica</p><h2 className="mt-2 text-2xl font-semibold">Veja exatamente onde perdeu pontos.</h2></div><GhostButton onClick={onBack}><RotateCcw className="h-4 w-4" /> Novo simulado</GhostButton></div><div className="mt-5 grid grid-cols-5 gap-2 sm:grid-cols-10 lg:grid-cols-[repeat(20,minmax(0,1fr))]">{result.questions.map((question, index) => <button key={question.id} type="button" onClick={() => setReviewIndex(index)} className={`grid aspect-square place-items-center rounded-lg border text-xs font-semibold ${question.selectedOption === null ? "border-white/10 text-muted" : question.result?.isCorrect ? "border-emerald-300/30 bg-emerald-300/[0.08] text-emerald-100" : "border-rose-300/30 bg-rose-300/[0.08] text-rose-100"}`}>{index + 1}</button>)}</div>
-        {reviewQuestion ? <div className="mt-6 rounded-lg border border-white/10 bg-black/25 p-4 sm:p-5"><p className="text-xs font-semibold uppercase tracking-[0.14em] text-aura">{reviewQuestion.discipline} · {reviewQuestion.topic}</p><p className="mt-3 text-sm font-medium leading-7 text-white">{reviewQuestion.prompt}</p>{reviewQuestion.selectedOption ? <div className="mt-4 grid gap-2 sm:grid-cols-2"><AnswerLine label="Sua resposta" option={reviewQuestion.selectedOption} text={reviewQuestion.alternatives.find((item) => item.key === reviewQuestion.selectedOption)?.text ?? ""} correct={Boolean(reviewQuestion.result?.isCorrect)} /><AnswerLine label="Resposta correta" option={reviewQuestion.result?.correctOption ?? "—"} text={reviewQuestion.alternatives.find((item) => item.key === reviewQuestion.result?.correctOption)?.text ?? ""} correct /></div> : <p className="mt-4 text-sm text-muted">Questão deixada em branco.</p>}<p className="mt-4 text-sm leading-7 text-slate-300">{reviewQuestion.result?.explanation ?? "Revise o assunto antes da próxima tentativa."}</p></div> : <p className="mt-5 text-sm text-muted">Selecione uma questão para abrir o gabarito comentado.</p>}
+        {reviewQuestion ? <div className="mt-6 overflow-hidden rounded-lg border border-white/10 bg-black/25"><QuestionSource question={reviewQuestion} compact /><div className="p-4 sm:p-5"><p className="text-xs font-semibold uppercase tracking-[0.14em] text-aura">{reviewQuestion.discipline} · {reviewQuestion.topic}</p><p className="mt-3 text-sm font-medium leading-7 text-white">{reviewQuestion.prompt}</p>{reviewQuestion.selectedOption ? <div className="mt-4 grid gap-2 sm:grid-cols-2"><AnswerLine label="Sua resposta" option={reviewQuestion.selectedOption} text={reviewQuestion.alternatives.find((item) => item.key === reviewQuestion.selectedOption)?.text ?? ""} correct={Boolean(reviewQuestion.result?.isCorrect)} /><AnswerLine label="Resposta correta" option={reviewQuestion.result?.correctOption ?? "—"} text={reviewQuestion.alternatives.find((item) => item.key === reviewQuestion.result?.correctOption)?.text ?? ""} correct /></div> : <p className="mt-4 text-sm text-muted">Questão deixada em branco.</p>}<p className="mt-4 text-sm leading-7 text-slate-300">{reviewQuestion.result?.explanation ?? "Revise o assunto antes da próxima tentativa."}</p></div></div> : <p className="mt-5 text-sm text-muted">Selecione uma questão para abrir o gabarito comentado.</p>}
       </Card>
     </div>
   );
