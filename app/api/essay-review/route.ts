@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
 
   if (creditError) return jsonUtf8({ error: "Não foi possível verificar seus créditos." }, { status: 500 });
   if (!creditRow || creditRow.balance < ESSAY_COST) {
-    return jsonUtf8({ error: "Você precisa de 5 créditos para corrigir uma redação.", balance: creditRow?.balance ?? 0 }, { status: 402 });
+    return jsonUtf8({ error: `Você precisa de ${ESSAY_COST} crédito para corrigir uma redação.`, balance: creditRow?.balance ?? 0 }, { status: 402 });
   }
 
   try {
@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
     if (completionError) throw completionError;
     if (!result?.success) {
       return jsonUtf8(
-        { error: "Você precisa de 5 créditos para corrigir uma redação.", balance: result?.balance ?? 0 },
+        { error: `Você precisa de ${ESSAY_COST} crédito para corrigir uma redação.`, balance: result?.balance ?? 0 },
         { status: 402 }
       );
     }

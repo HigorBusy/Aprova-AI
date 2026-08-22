@@ -13,7 +13,7 @@ O corretor de redacao e o coracao do produto. Chat, apresentacoes, OCR, PDF, voz
 ### O que já existia e foi preservado
 
 - Next.js App Router com Supabase Auth e rotas privadas no cliente.
-- Correção de redação no backend, chamada Groq protegida e consumo atômico de 5 créditos.
+- Correção de redação no backend, chamada Groq protegida e consumo atômico de 1 crédito.
 - Saída JSON, histórico em `essay_reviews` e resumo em `student_profile`.
 - Benchmark local sem custo de API.
 - Tutor IA, uploads, apresentações, painel administrativo e telemetria como módulos secundários.

@@ -63,14 +63,14 @@ const plans: Plan[] = [
   {
     name: "Avulso",
     price: "R$9,90",
-    detail: "30 créditos",
-    hook: "Para testar o método sem compromisso."
+    detail: "50 créditos",
+    hook: "Até 50 correções completas, sem assinatura."
   },
   {
     name: "Mensal",
     price: "R$29,90/mês",
-    detail: "150 créditos por mês",
-    hook: "Para criar rotina de correção e revisão sem travar.",
+    detail: "300 créditos por mês",
+    hook: "Até 300 correções para criar rotina e evoluir sem travar.",
     featured: true,
     daily: "Menos de R$1 por dia",
     cta: "Garantir mensal",
@@ -79,8 +79,8 @@ const plans: Plan[] = [
   {
     name: "Anual",
     price: "R$197/ano",
-    detail: "3650 créditos no ano",
-    hook: "Para estudar com direção durante toda a preparação.",
+    detail: "4.800 créditos no ano",
+    hook: "Créditos para estudar com direção durante toda a preparação.",
     daily: "Menos de R$0,55 por dia",
     cta: "Garantir anual",
     checkoutUrl: "https://pay.cakto.com.br/deea3ts"
@@ -245,18 +245,25 @@ export function LandingPage({ onStart }: LandingPageProps) {
 
       <section id="planos" className="relative z-10 mx-auto w-full max-w-7xl px-5 py-16 sm:px-6 lg:px-8">
         <SectionHeader
-          title="Créditos para corrigir sem travar."
-          text="Créditos são usados para correções, Tutor IA e análises avançadas."
+          title="Mais correções pelo mesmo investimento."
+          text="Agora, um crédito libera uma correção completa pelas cinco competências do ENEM."
         />
         <div className="mt-10 grid gap-4 lg:grid-cols-3 lg:items-stretch">
           {plans.map((plan) => (
             <PlanCard key={plan.name} plan={plan} onStart={onStart} />
           ))}
         </div>
-        <div className="mt-5 grid gap-3 rounded-[1.5rem] border border-[#e8eee8]/15 bg-[#e8eee8]/[0.045] p-4 text-sm text-[#c9d4cc] backdrop-blur-xl sm:grid-cols-3">
-          <span>Chat com IA: <strong className="text-[#e8eee8]">1 crédito</strong></span>
-          <span>Ferramenta rápida: <strong className="text-[#e8eee8]">2 créditos</strong></span>
-          <span>Correção de redação: <strong className="text-[#e8eee8]">5 créditos</strong></span>
+        <div className="mt-5 grid gap-3 rounded-[1.5rem] border border-[#e8eee8]/15 bg-[#e8eee8]/[0.045] p-3 backdrop-blur-xl sm:grid-cols-3">
+          {[
+            ["Correção completa", "1", "crédito"],
+            ["Pergunta ao Tutor", "1", "crédito"],
+            ["Análise de arquivo", "2", "créditos"]
+          ].map(([label, amount, unit]) => (
+            <div key={label} className="rounded-2xl border border-[#e8eee8]/10 bg-[#041014]/55 px-4 py-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#84938b]">{label}</p>
+              <p className="mt-2 text-2xl font-semibold text-[#e8eee8]">{amount} <span className="text-sm font-medium text-[#9fcf8b]">{unit}</span></p>
+            </div>
+          ))}
         </div>
       </section>
 

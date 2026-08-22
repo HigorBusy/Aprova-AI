@@ -119,7 +119,6 @@ export function Comandante({ initialContext = "" }: { initialContext?: string })
   const [error, setError] = useState("");
   const [planTag, setPlanTag] = useState<PlanTag>("free");
   const [showFullHistory, setShowFullHistory] = useState(false);
-  const [showMobileTools, setShowMobileTools] = useState(false);
   const [conversationSearch, setConversationSearch] = useState("");
   const [activeSearchMessageId, setActiveSearchMessageId] = useState<string | null>(null);
   const [toolForm, setToolForm] = useState<ToolFormState>({
@@ -266,8 +265,8 @@ export function Comandante({ initialContext = "" }: { initialContext?: string })
   async function sendFile(file: File, toolName: string, prompt: string) {
     const supabase = getSupabaseClient();
     if (!supabase || sending || fileSending || presentationSending) return;
-    if ((balance ?? 0) < 3) {
-      setError("Você precisa de 3 créditos para analisar arquivo.");
+    if ((balance ?? 0) < 2) {
+      setError("Você precisa de 2 créditos para analisar arquivo.");
       return;
     }
 
@@ -457,25 +456,11 @@ export function Comandante({ initialContext = "" }: { initialContext?: string })
   }
 
   return (
-    <main className="mission-grid min-h-[100dvh] bg-canvas px-4 py-4 text-white sm:px-6 lg:px-8 lg:py-6">
-      <div className="mx-auto flex min-h-[calc(100dvh-2rem)] w-full max-w-7xl flex-col lg:min-h-[calc(100dvh-3rem)]">
+    <main className="mission-grid min-h-[100dvh] bg-canvas pb-24 text-white lg:pb-6 lg:pl-64">
+      <InternalNav active="tutor" />
+      <div className="mx-auto flex min-h-[calc(100dvh-2rem)] w-full max-w-7xl flex-col px-4 py-4 sm:px-6 lg:min-h-[calc(100dvh-3rem)] lg:px-8 lg:py-6">
         <header className="flex flex-col gap-4 border-b border-white/10 pb-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex min-w-0 items-center gap-3">
-            <Link
-              href="/"
-              className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-white/10 bg-white/[0.04] text-slate-300 transition hover:border-accent/35 hover:text-white"
-              aria-label="Voltar para sua redação"
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </Link>
-            <Image
-              src="/aprova-ai-logo-lockup.svg"
-              alt="AprovaAI"
-              width={640}
-              height={220}
-              priority
-              className="hidden h-9 w-auto object-contain sm:block"
-            />
             <div className="min-w-0">
               <p className="text-[0.65rem] font-medium uppercase tracking-[0.2em] text-aura">Canal estratégico</p>
               <h1 className="truncate text-xl font-semibold text-white sm:text-2xl">Tutor IA</h1>
@@ -493,7 +478,6 @@ export function Comandante({ initialContext = "" }: { initialContext?: string })
             </div>
           </div>
         </header>
-        <InternalNav active="tutor" />
 
         <div className="grid min-h-0 flex-1 items-start gap-4 pt-4 xl:grid-cols-[minmax(0,1fr)_330px]">
           <Card className="flex min-h-[76dvh] min-w-0 flex-col overflow-hidden rounded-xl border-white/[0.09] bg-[#091417]/90 p-0 shadow-[0_24px_80px_rgba(0,0,0,0.34)] xl:sticky xl:top-4 xl:h-[calc(100dvh-12rem)] xl:min-h-0">
@@ -529,7 +513,7 @@ export function Comandante({ initialContext = "" }: { initialContext?: string })
                     <p className="mt-7 text-xs font-medium uppercase tracking-[0.22em] text-aura">Canal aberto</p>
                     <h2 className="mt-3 text-3xl font-semibold text-white sm:text-4xl">O que você precisa entender hoje?</h2>
                     <p className="mx-auto mt-3 max-w-lg text-sm leading-6 text-muted">
-                      Envie texto, PDF, imagem ou fale com o Tutor IA. Ele usa seu histórico para orientar o próximo passo.
+                      Envie sua dúvida ou anexe um PDF ou imagem. O Tutor usa seu histórico para manter o contexto.
                     </p>
                   </div>
                 </div>
@@ -540,7 +524,6 @@ export function Comandante({ initialContext = "" }: { initialContext?: string })
                       key={message.id}
                       message={message}
                       highlighted={message.id === activeSearchMessageId}
-                      onSpeak={speak}
                     />
                   ))}
                   {busy && (
@@ -560,7 +543,6 @@ export function Comandante({ initialContext = "" }: { initialContext?: string })
                   Você ficou sem créditos.
                 </p>
               )}
-              <QuickSuggestions disabled={!hasCredits || busy} onSelect={(prompt) => void sendMessage(prompt)} />
               <AiInput
                 disabled={!hasCredits}
                 loading={busy}
@@ -569,48 +551,16 @@ export function Comandante({ initialContext = "" }: { initialContext?: string })
                 onSubmit={(message) => void sendMessage(message)}
               />
               <p className="mt-2 text-center text-[0.68rem] text-slate-600">
-                Texto usa 1 crédito. Ferramentas usam 2. PDF e imagem usam 3.
+                Mensagem: 1 crédito · Arquivo: 2 créditos
               </p>
             </div>
           </Card>
 
-          <aside className="grid content-start gap-4 xl:max-h-[calc(100dvh-12rem)] xl:overflow-y-auto xl:pr-1">
-            <button
-              type="button"
-              aria-expanded={showMobileTools}
-              onClick={() => setShowMobileTools((current) => !current)}
-              className="flex min-h-12 items-center justify-between rounded-xl border border-white/10 bg-white/[0.04] px-4 text-sm font-semibold text-white transition-[background-color,border-color,transform] duration-150 active:scale-[0.99] xl:hidden"
-            >
-              Recursos do Tutor
-              <ChevronDown className={`h-4 w-4 text-aura transition-transform duration-200 ${showMobileTools ? "rotate-180" : ""}`} />
-            </button>
-            <div className={`${showMobileTools ? "grid" : "hidden"} gap-4 xl:grid`}>
-              <FileUploadPanel
-                disabled={busy || (balance ?? 0) < 3}
-                onSubmit={(file, toolName, prompt) => void sendFile(file, toolName, prompt)}
-              />
-              <VoicePanel
-                disabled={busy || (balance ?? 0) < 2}
-                listening={listening}
-                onTranscribe={() => startVoiceCommand("transcribe")}
-                onSummary={() => startVoiceCommand("summary")}
-              />
-              <ToolsPanel
-                values={toolForm}
-                disabled={!hasToolCredits || busy}
-                onChange={setToolForm}
-                onRun={(toolName, prompt) => void sendMessage(prompt, { cost: 2, mode: "tool", toolName })}
-              />
-            </div>
-            <Card className="premium-glow">
-              <div className="flex items-center gap-2 text-aura">
-                <Sparkles className="h-4 w-4" />
-                <p className="text-xs font-medium uppercase tracking-[0.18em]">Diretriz</p>
-              </div>
-              <p className="mt-4 text-lg font-semibold leading-7 text-white">
-                Ninguém está vindo te salvar, então faça acontecer.
-              </p>
-            </Card>
+          <aside className="grid content-start gap-4 xl:sticky xl:top-4">
+            <FileUploadPanel
+              disabled={busy || (balance ?? 0) < 2}
+              onSubmit={(file, toolName, prompt) => void sendFile(file, toolName, prompt)}
+            />
           </aside>
         </div>
       </div>
@@ -911,7 +861,7 @@ function FileUploadPanel({
         }}
         className="mt-3 min-h-10 w-full rounded-lg border border-accent/30 bg-accent/15 px-3 py-2 text-xs font-semibold text-aura transition hover:bg-accent/20 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/[0.03] disabled:text-slate-600"
       >
-        Enviar arquivo · 3 créditos
+        Enviar arquivo · 2 créditos
       </button>
     </Card>
   );
@@ -1079,12 +1029,10 @@ function ToolInput({
 
 function MessageBubble({
   message,
-  highlighted = false,
-  onSpeak
+  highlighted = false
 }: {
   message: AiMessage;
   highlighted?: boolean;
-  onSpeak: (text: string) => void;
 }) {
   const isUser = message.role === "user";
   const normalizedContent = repairMojibake(message.content);
@@ -1132,16 +1080,6 @@ function MessageBubble({
           <PresentationLegacyCard deck={presentation} />
         ) : (
           <FormattedMessage content={content} isUser={isUser} />
-        )}
-        {!isUser && !presentation && !presentationPdf && (
-          <button
-            type="button"
-            onClick={() => onSpeak(content)}
-            className="mt-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/20 px-3 py-1.5 text-[0.68rem] font-semibold text-muted transition hover:border-accent/30 hover:text-white"
-          >
-            <Volume2 className="h-3.5 w-3.5" />
-            Ouvir resposta
-          </button>
         )}
       </div>
       {isUser && (

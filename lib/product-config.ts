@@ -6,9 +6,10 @@ export const PRODUCT_CONFIG = {
   },
   credits: {
     freeTrialInitial: 5,
-    essayReview: 5,
+    essayReview: 1,
     tutorMessage: 1,
-    tutorTool: 2
+    tutorTool: 1,
+    fileAnalysis: 2
   },
   features: {
     presentations: false,

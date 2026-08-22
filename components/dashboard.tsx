@@ -75,24 +75,15 @@ function CountdownPanel({ className }: { className?: string }) {
   const daysToEnem = getDaysToEnem();
 
   return (
-    <Card className={`command-surface premium-glow p-5 sm:p-7 lg:p-8 ${className ?? ""}`}>
-      <div className="grid gap-7 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
-        <div className="min-w-0">
-          <p className="text-sm font-semibold uppercase tracking-[0.20em] text-aura">
-            Contagem regressiva para o ENEM
-          </p>
-          <h2 className="mt-4 max-w-3xl text-3xl font-semibold leading-tight text-white sm:text-4xl">
-            A prova está chegando. Seu próximo passo precisa acontecer hoje.
-          </h2>
-          <p className="mt-4 max-w-2xl text-sm leading-6 text-muted">
-            Primeiro dia em 8 de novembro de {PRODUCT_CONFIG.enem.year}.
-          </p>
-        </div>
-        <div className="min-w-56 border-l border-accent/30 px-6 py-2 text-left lg:text-right">
-          <p className="countdown-value energy-text text-7xl font-semibold leading-none text-white sm:text-8xl">{daysToEnem}</p>
-          <p className="mt-2 text-xs font-semibold uppercase tracking-[0.18em] text-aura">dias restantes</p>
-        </div>
+    <Card className={`command-surface premium-glow px-5 py-8 text-center sm:px-8 sm:py-10 ${className ?? ""}`}>
+      <p className="text-xs font-semibold uppercase tracking-[0.20em] text-aura">ENEM {PRODUCT_CONFIG.enem.year}</p>
+      <div className="mt-5 flex items-end justify-center gap-3 sm:gap-4">
+        <p className="countdown-value energy-text text-8xl font-semibold leading-[0.78] text-white sm:text-9xl">{daysToEnem}</p>
+        <p className="pb-1 text-left text-lg font-semibold leading-5 text-slate-300 sm:pb-2 sm:text-xl">
+          dias<br />restantes
+        </p>
       </div>
+      <p className="mt-6 text-sm text-muted">Primeiro dia: 8 de novembro</p>
     </Card>
   );
 }
@@ -150,7 +141,7 @@ function WritingCenterCard({
 
   async function handleCorrection() {
     if (!hasCredits) {
-      setMessage(`Você precisa de ${PRODUCT_CONFIG.credits.essayReview} créditos para corrigir uma redação.`);
+      setMessage("Você precisa de 1 crédito para corrigir uma redação.");
       return;
     }
     if (essayText.trim().length < 50) {
@@ -206,7 +197,7 @@ function WritingCenterCard({
         ...current
       ].slice(0, 6));
       if (typeof result.balance === "number") onBalanceChange(result.balance);
-      setMessage(`Correção concluída. ${PRODUCT_CONFIG.credits.essayReview} créditos foram consumidos.`);
+      setMessage("Correção concluída. 1 crédito foi consumido.");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Não foi possível corrigir a redação.");
     } finally {
@@ -242,7 +233,7 @@ function WritingCenterCard({
         onClick={() => void handleCorrection()}
         className="mt-3 min-h-12 w-full"
       >
-        {submitting ? <Loader size="sm" /> : hasCredits ? `Iniciar correção · ${PRODUCT_CONFIG.credits.essayReview} créditos` : "Créditos insuficientes"}
+        {submitting ? <Loader size="sm" /> : hasCredits ? "Iniciar correção · 1 crédito" : "Créditos insuficientes"}
       </Button>
 
       <div className="mt-4 flex items-center justify-between gap-3 text-xs text-muted">
@@ -264,7 +255,7 @@ function WritingCenterCard({
           }}
           onRewrite={() => {
             setReview(null);
-            setMessage(`Reescreva abaixo usando a correção como guia. Esta nova correção usará ${PRODUCT_CONFIG.credits.essayReview} créditos.`);
+            setMessage("Reescreva abaixo usando a correção como guia. Esta nova correção usará 1 crédito.");
           }}
         />
       )}
@@ -278,7 +269,7 @@ function WritingCenterCard({
       />
       {!hasCredits && !message && (
         <p className="mt-3 rounded-lg border border-white/10 bg-black/30 p-3 text-sm leading-6 text-slate-300">
-          São necessários {PRODUCT_CONFIG.credits.essayReview} créditos. A ferramenta não inicia cobranças nem permite saldo negativo.
+          É necessário 1 crédito. A ferramenta não inicia cobranças nem permite saldo negativo.
         </p>
       )}
     </Card>
@@ -706,22 +697,31 @@ function CreditsCard({ balance, planTag }: { balance: number | null; planTag: Pl
   const isEmpty = balance === 0;
 
   return (
-    <Card className="premium-glow">
+    <Card className="premium-glow overflow-hidden p-0">
+      <div className="border-b border-white/[0.08] bg-accent/[0.07] px-5 py-4">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-aura">Seu saldo</p>
+      </div>
+      <div className="p-5">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted">Créditos disponíveis</p>
-          <div className="energy-text mt-2 min-h-16 text-6xl font-semibold text-white">
+          <div className="energy-text min-h-16 text-6xl font-semibold text-white">
             {balance === null ? <Loader size="sm" /> : balance}
           </div>
+          <p className="mt-1 text-sm font-medium text-slate-300">créditos disponíveis</p>
         </div>
         <CreditCard className="h-5 w-5 text-aura" />
       </div>
-      <p className="mt-3 text-sm leading-6 text-muted">
-        {isEmpty
-          ? "Saldo esgotado. Nenhuma operação poderá gerar saldo negativo."
-          : "Cada pergunta usa 1 crédito e cada correção de redação usa 5."}{" "}
-        Plano atual: {formatPlanTag(planTag)}.
-      </p>
+      <div className="mt-5 rounded-lg border border-accent/20 bg-accent/[0.07] p-4">
+        <p className="text-xl font-semibold text-white">1 crédito = 1 correção</p>
+        <p className="mt-1 text-sm leading-6 text-muted">Uma redação completa, avaliada pelas cinco competências.</p>
+      </div>
+      <div className="mt-3 flex flex-wrap gap-2 text-xs font-medium text-slate-400">
+        <span className="rounded-full border border-white/10 px-3 py-1.5">Tutor: 1</span>
+        <span className="rounded-full border border-white/10 px-3 py-1.5">Arquivo: 2</span>
+        <span className="rounded-full border border-white/10 px-3 py-1.5">Plano {formatPlanTag(planTag)}</span>
+      </div>
+      {isEmpty ? <p className="mt-4 text-sm text-rose-200">Saldo esgotado. Nenhuma operação pode gerar saldo negativo.</p> : null}
+      </div>
     </Card>
   );
 }

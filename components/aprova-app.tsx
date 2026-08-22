@@ -15,7 +15,6 @@ import { Loader } from "@/components/ui/loader-15";
 import { getDaysToEnem } from "@/lib/constants";
 import { loadLocalState, saveLocalState } from "@/lib/local-store";
 import {
-  dailyPhrases,
   initialState,
   minutesFromStudyFrequency,
   prioritySubject,
@@ -235,7 +234,6 @@ export function AprovaApp() {
     user
   ]);
 
-  const phrase = dailyPhrases[0];
   const daysToEnem = getDaysToEnem();
   const visibleTabs = planTag === "ADM" ? [...tabs, adminTab] : tabs;
 
@@ -343,9 +341,9 @@ export function AprovaApp() {
   }
 
   return (
-    <main className="mission-grid min-h-screen bg-canvas text-white lg:grid lg:grid-cols-[284px_1fr]">
-      <aside className="sticky top-0 hidden h-screen flex-col border-r border-white/10 bg-black/40 px-5 py-6 backdrop-blur-2xl lg:flex">
-        <div className="flex h-12 w-44 items-center justify-center">
+    <main className="mission-grid min-h-screen bg-canvas text-white lg:grid lg:grid-cols-[256px_1fr]">
+      <aside className="sticky top-0 hidden h-screen flex-col border-r border-white/[0.08] bg-[#050b0d]/95 px-5 py-6 backdrop-blur-xl lg:flex">
+        <div className="flex h-11 items-center">
           <Image
             src="/aprova-ai-logo-lockup.svg"
             alt="AprovaAI"
@@ -356,11 +354,7 @@ export function AprovaApp() {
           />
         </div>
 
-        <p className="energy-text mt-5 rounded-lg border border-accent/20 bg-accent/[0.07] p-4 text-center text-sm font-medium leading-6 text-white">
-          {phrase}
-        </p>
-
-        <nav className="mt-8 grid gap-2">
+        <nav className="mt-10 grid gap-1.5">
           {visibleTabs.map((tab) => {
             const Icon = tab.icon;
             const active = tab.id === "home";
@@ -368,13 +362,13 @@ export function AprovaApp() {
               <Link
                 key={tab.id}
                 href={tab.href}
-                className={`flex min-h-12 items-center gap-3 rounded-lg px-3 text-left text-sm transition duration-300 ${
+                className={`flex min-h-12 items-center gap-3 rounded-lg px-3 text-left text-sm font-semibold transition duration-150 ${
                   active
-                    ? "border border-accent/25 bg-accent/10 text-aura shadow-[0_0_28px_rgba(58,167,216,0.14)]"
+                    ? "bg-accent/10 text-white"
                     : "text-slate-500 hover:bg-white/[0.05] hover:text-slate-200"
                 }`}
               >
-                <Icon className="h-4 w-4" />
+                <Icon className={`h-4 w-4 ${active ? "text-aura" : ""}`} />
                 {tab.label}
               </Link>
             );
@@ -423,9 +417,6 @@ export function AprovaApp() {
               {state.name.slice(0, 1).toUpperCase()}
             </div>
           </div>
-          <p className="energy-text mt-4 rounded-lg border border-accent/20 bg-accent/[0.07] p-3 text-center text-sm font-medium leading-6 text-white">
-            {phrase}
-          </p>
         </header>
 
         <div className="mx-auto mt-5 w-full max-w-7xl lg:mt-0">

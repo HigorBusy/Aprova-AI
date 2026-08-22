@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -213,18 +212,16 @@ export function SimulationCenter() {
   if (loading) return <main className="mission-grid grid min-h-[100dvh] place-items-center bg-canvas"><Loader size="lg" /></main>;
 
   return (
-    <main className="mission-grid min-h-[100dvh] bg-canvas px-4 py-4 text-white sm:px-6 lg:px-8 lg:py-6">
-      <div className="mx-auto w-full max-w-7xl">
+    <main className="mission-grid min-h-[100dvh] bg-canvas pb-24 text-white lg:pb-6 lg:pl-64">
+      <InternalNav active="questions" />
+      <div className="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 lg:px-8 lg:py-6">
         <header className="flex items-center justify-between gap-4 border-b border-white/10 pb-4">
           <div className="flex min-w-0 items-center gap-3">
             <Link href="/questoes" aria-label="Voltar para Questões" className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-white/10 bg-white/[0.04] text-slate-300 transition-colors hover:border-accent/35 hover:text-white"><ArrowLeft className="h-4 w-4" /></Link>
-            <Image src="/aprova-ai-logo-lockup.svg" alt="AprovaAI" width={640} height={220} priority className="hidden h-9 w-auto object-contain sm:block" />
             <div><p className="text-[0.65rem] font-medium uppercase tracking-[0.2em] text-aura">Ambiente de prova</p><h1 className="text-xl font-semibold sm:text-2xl">Simulado</h1></div>
           </div>
           {screen === "exam" ? <Timer seconds={secondsLeft} urgent={secondsLeft !== null && secondsLeft <= 300} /> : <span className="rounded-full border border-emerald-300/20 bg-emerald-300/[0.07] px-3 py-2 text-xs font-semibold text-emerald-100">Sem consumo de créditos</span>}
         </header>
-        <InternalNav active="questions" />
-
         {screen === "setup" ? (
           <SetupView
             areas={areas}

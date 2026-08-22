@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -259,8 +258,9 @@ export function QuestionCenter({ initialArea, initialTopicId }: QuestionCenterPr
   }
 
   return (
-    <main className="mission-grid min-h-[100dvh] bg-canvas px-4 py-4 text-white sm:px-6 lg:px-8 lg:py-6">
-      <div className="mx-auto w-full max-w-7xl">
+    <main className="mission-grid min-h-[100dvh] bg-canvas pb-24 text-white lg:pb-6 lg:pl-64">
+      <InternalNav active="questions" />
+      <div className="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 lg:px-8 lg:py-6">
         <QuestionHeader screen={screen} onHome={() => { setScreen("home"); setMessage(""); void refreshCatalog(); }} />
 
         {screen === "home" && catalog ? (
@@ -320,30 +320,22 @@ export function QuestionCenter({ initialArea, initialTopicId }: QuestionCenterPr
 
 function QuestionHeader({ screen, onHome }: { screen: Screen; onHome: () => void }) {
   return (
-    <>
       <header className="flex items-center justify-between gap-4 border-b border-white/10 pb-4">
       <div className="flex min-w-0 items-center gap-3">
-        {screen === "home" ? (
-          <Link href="/" aria-label="Voltar para Hoje" className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-white/10 bg-white/[0.04] text-slate-300 hover:border-accent/35 hover:text-white">
-            <ArrowLeft className="h-4 w-4" />
-          </Link>
-        ) : (
+        {screen !== "home" ? (
           <button type="button" onClick={onHome} aria-label="Voltar para Questões" className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-white/10 bg-white/[0.04] text-slate-300 hover:border-accent/35 hover:text-white">
             <ArrowLeft className="h-4 w-4" />
           </button>
-        )}
-        <Image src="/aprova-ai-logo-lockup.svg" alt="AprovaAI" width={640} height={220} priority className="hidden h-9 w-auto object-contain sm:block" />
+        ) : null}
         <div className="min-w-0">
-          <p className="text-[0.65rem] font-medium uppercase tracking-[0.2em] text-aura">Treino e diagnóstico</p>
-          <h1 className="truncate text-xl font-semibold text-white sm:text-2xl">Questões</h1>
+          <p className="text-xs font-medium uppercase tracking-[0.18em] text-aura">Treino por evidência</p>
+          <h1 className="mt-1 truncate text-2xl font-semibold text-white">Questões</h1>
         </div>
       </div>
       <span className="rounded-full border border-emerald-300/20 bg-emerald-300/[0.07] px-3 py-2 text-xs font-semibold text-emerald-100">
         Treino sem créditos
       </span>
       </header>
-      <InternalNav active="questions" />
-    </>
   );
 }
 
@@ -361,12 +353,12 @@ function QuestionHome({ catalog, selectedArea, totalAttempts, overallAccuracy, p
   const areaTopics = catalog.topics.filter((topic) => topic.areaKey === selectedArea);
 
   return (
-    <div className="mt-6 grid gap-5">
-      <section className="command-surface premium-glow grid gap-6 rounded-xl border border-accent/20 p-5 sm:p-7 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+    <div className="mt-6 grid gap-4">
+      <section className="command-surface premium-glow grid gap-5 rounded-xl border border-accent/20 p-5 sm:p-7 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-aura">Centro de Questões</p>
-          <h2 className="mt-3 max-w-3xl text-3xl font-semibold leading-tight text-white sm:text-4xl">Descubra o que você sabe. E onde ainda está errando.</h2>
-          <p className="mt-4 max-w-2xl text-sm leading-6 text-muted">Cada resposta alimenta seu diagnóstico. O treino não consome créditos e todas as questões deste primeiro banco estão identificadas como autorais.</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-aura">Treino rápido</p>
+          <h2 className="mt-3 max-w-3xl text-3xl font-semibold leading-tight text-white sm:text-4xl">Treine questões com direção.</h2>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-muted">Responda, entenda o erro e use o resultado para decidir o próximo assunto.</p>
         </div>
         <Button disabled={busy} onClick={() => void onStart("quick")} className="min-h-12 px-6">
           {busy ? <Loader size="sm" /> : <><Target className="h-4 w-4" /> Iniciar treino rápido</>}
@@ -379,49 +371,61 @@ function QuestionHome({ catalog, selectedArea, totalAttempts, overallAccuracy, p
         <Metric label="Questões no caderno" value={String(catalog.errorCount)} />
       </section>
 
-      <Link href="/simulado" className="group grid gap-4 rounded-xl border border-aura/25 bg-aura/[0.06] p-5 transition-[border-color,background-color,transform] duration-200 hover:border-aura/45 hover:bg-aura/[0.09] active:scale-[0.995] sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center">
-        <span className="grid h-11 w-11 place-items-center rounded-lg border border-aura/25 bg-aura/[0.09] text-aura"><AlarmClock className="h-5 w-5" /></span>
-        <span><span className="block text-xs font-medium uppercase tracking-[0.16em] text-aura">Ambiente de prova</span><span className="mt-1 block text-xl font-semibold text-white">Simulado com tempo e resultado por área</span><span className="mt-2 block text-sm leading-6 text-muted">O gabarito aparece só depois da entrega. Respostas salvas automaticamente.</span></span>
-        <span className="inline-flex min-h-10 items-center gap-2 text-sm font-semibold text-white">Configurar <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" /></span>
-      </Link>
-
-      <section className="grid gap-4 lg:grid-cols-3">
-        <ModeCard icon={Brain} eyebrow="Adaptativo" title="Treinar minhas fraquezas" description={priorityTopic ? `${priorityTopic.name} está em ${priorityTopic.accuracy}% de acerto.` : "Disponível após o sistema reunir evidências suficientes."} disabled={!priorityTopic || busy} action="Treinar prioridade" onClick={() => void onStart("weakness")} />
-        <ModeCard icon={BookOpenCheck} eyebrow="Revisão ativa" title="Questões que errei" description={catalog.errorCount ? `${catalog.errorCount} ${catalog.errorCount === 1 ? "questão espera" : "questões esperam"} uma nova tentativa.` : "Seus erros aparecerão aqui depois do primeiro treino."} disabled={catalog.errorCount === 0 || busy} action="Refazer erros" onClick={() => void onStart("errors")} />
-        <ModeCard icon={AlertCircle} eyebrow="Caderno de erros" title="Entenda padrões recorrentes" description="Veja sua resposta, o gabarito, a explicação e o assunto de cada erro." disabled={catalog.errorCount === 0 || busy} action="Abrir caderno" onClick={onErrors} />
-      </section>
-
-      <section className="rounded-xl border border-white/10 bg-white/[0.025] p-4 sm:p-5">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="text-xs font-medium uppercase tracking-[0.18em] text-aura">Treino por área</p>
-            <h2 className="mt-2 text-2xl font-semibold text-white">Escolha onde quer medir seu nível.</h2>
+      <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <section className="rounded-xl border border-white/10 bg-white/[0.025] p-4 sm:p-6">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-xs font-medium uppercase tracking-[0.18em] text-aura">Treino por área</p>
+              <h2 className="mt-2 text-2xl font-semibold text-white">Escolha o foco.</h2>
+            </div>
+            <p className="text-sm text-muted">5 questões por treino</p>
           </div>
-          <p className="text-sm text-muted">5 questões por treino</p>
-        </div>
-        <div className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-          {questionAreas.map((area) => (
-            <button key={area.key} type="button" onClick={() => onAreaChange(area.key)} className={`min-h-20 rounded-lg border p-3 text-left transition ${selectedArea === area.key ? "border-accent/45 bg-accent/[0.10] text-white" : "border-white/10 bg-black/20 text-slate-400 hover:border-accent/25 hover:text-white"}`}>
-              <span className="text-sm font-semibold">{area.shortLabel}</span>
-              <span className="mt-1 block text-xs leading-5 text-muted">{area.label}</span>
-            </button>
-          ))}
-        </div>
-        <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
-          <div className="flex flex-wrap gap-2">
+          <div className="mt-5 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+            {questionAreas.map((area) => (
+              <button key={area.key} type="button" onClick={() => onAreaChange(area.key)} className={`min-h-20 rounded-lg border p-3 text-left transition ${selectedArea === area.key ? "border-accent/45 bg-accent/[0.10] text-white" : "border-white/10 bg-black/20 text-slate-400 hover:border-accent/25 hover:text-white"}`}>
+                <span className="text-sm font-semibold">{area.shortLabel}</span>
+                <span className="mt-1 block text-xs leading-5 text-muted">{area.label}</span>
+              </button>
+            ))}
+          </div>
+          <div className="mt-5 flex flex-wrap gap-2 border-t border-white/[0.08] pt-5">
             {areaTopics.map((topic) => (
               <button key={topic.id} type="button" disabled={busy} onClick={() => void onStart("area", selectedArea, topic.id)} className="rounded-full border border-white/10 bg-white/[0.035] px-3 py-2 text-xs font-medium text-slate-300 transition hover:border-accent/35 hover:text-white">
                 {topic.name}{topic.accuracy !== null ? ` · ${topic.accuracy}%` : ""}
               </button>
             ))}
           </div>
-          <Button disabled={busy} onClick={() => void onStart("area", selectedArea)} className="min-h-11 px-5">
+          <Button disabled={busy} onClick={() => void onStart("area", selectedArea)} className="mt-5 min-h-11 w-full px-5 sm:w-auto">
             Treinar {questionAreaLabel(selectedArea)} <ArrowRight className="h-4 w-4" />
           </Button>
-        </div>
-      </section>
+        </section>
+
+        <aside className="overflow-hidden rounded-xl border border-white/10 bg-white/[0.025]">
+          <div className="border-b border-white/[0.08] px-4 py-4">
+            <p className="text-xs font-medium uppercase tracking-[0.18em] text-aura">Outros modos</p>
+          </div>
+          <QuestionAction icon={AlarmClock} title="Simulado" description="Tempo e resultado por área" href="/simulado" />
+          <QuestionAction icon={Brain} title="Treinar prioridade" description={priorityTopic ? `${priorityTopic.name} · ${priorityTopic.accuracy}%` : "Disponível após mais respostas"} disabled={!priorityTopic || busy} onClick={() => void onStart("weakness")} />
+          <QuestionAction icon={BookOpenCheck} title="Refazer erros" description={catalog.errorCount ? `${catalog.errorCount} no caderno` : "Nenhum erro registrado"} disabled={catalog.errorCount === 0 || busy} onClick={() => void onStart("errors")} />
+          <QuestionAction icon={AlertCircle} title="Caderno de erros" description="Explicações e padrões" disabled={catalog.errorCount === 0 || busy} onClick={onErrors} />
+        </aside>
+      </div>
     </div>
   );
+}
+
+function QuestionAction({ icon: Icon, title, description, href, disabled = false, onClick }: {
+  icon: typeof Target;
+  title: string;
+  description: string;
+  href?: string;
+  disabled?: boolean;
+  onClick?: () => void;
+}) {
+  const content = <><span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-white/10 bg-white/[0.04] text-aura"><Icon className="h-4 w-4" /></span><span className="min-w-0 flex-1"><span className="block text-sm font-semibold text-white">{title}</span><span className="mt-1 block truncate text-xs text-muted">{description}</span></span><ChevronRight className="h-4 w-4 text-slate-600" /></>;
+  const className = "flex min-h-20 w-full items-center gap-3 border-b border-white/[0.08] px-4 text-left transition last:border-b-0 hover:bg-white/[0.04] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent";
+
+  return href ? <Link href={href} className={className}>{content}</Link> : <button type="button" disabled={disabled} onClick={onClick} className={className}>{content}</button>;
 }
 
 function TrainingView({ session, question, currentIndex, answeredCount, selectedOption, busy, confirmIncomplete, onSelect, onSubmit, onToggleReview, onPrevious, onNext, onJump, onFinish }: {

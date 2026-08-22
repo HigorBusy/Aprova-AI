@@ -7,11 +7,12 @@ import { sanitizeSingleLine, sanitizeTextInput } from "@/lib/security/input";
 import { checkRateLimit, rateLimitResponse } from "@/lib/security/rate-limit";
 import { jsonUtf8, rejectLargeRequest } from "@/lib/security/request";
 import { authenticateRequest } from "@/lib/supabase/server";
+import { PRODUCT_CONFIG } from "@/lib/product-config";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
-const FILE_COST = 3;
+const FILE_COST = PRODUCT_CONFIG.credits.fileAnalysis;
 const PDF_MAX_BYTES = 10 * 1024 * 1024;
 const IMAGE_MAX_BYTES = 5 * 1024 * 1024;
 const TEXT_LIMIT = 12_000;
@@ -60,7 +61,7 @@ export async function POST(request: NextRequest) {
 
   if (creditError) return jsonUtf8({ error: "Não foi possível verificar seus créditos." }, { status: 500 });
   if (!creditRow || creditRow.balance < FILE_COST) {
-    return jsonUtf8({ error: "Você precisa de 3 créditos para analisar arquivo.", balance: creditRow?.balance ?? 0 }, { status: 402 });
+    return jsonUtf8({ error: `Você precisa de ${FILE_COST} créditos para analisar arquivo.`, balance: creditRow?.balance ?? 0 }, { status: 402 });
   }
 
   const bytes = Buffer.from(await file.arrayBuffer());
@@ -158,7 +159,7 @@ export async function POST(request: NextRequest) {
     if (!result?.success) {
       await deleteUploadedFile(supabase, storagePath);
       return jsonUtf8(
-        { error: "Você precisa de 3 créditos para analisar arquivo.", balance: result?.balance ?? 0 },
+        { error: `Você precisa de ${FILE_COST} créditos para analisar arquivo.`, balance: result?.balance ?? 0 },
         { status: 402 }
       );
     }

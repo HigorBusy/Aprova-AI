@@ -209,7 +209,7 @@ export function SignInPage({
               )}
               {mode === "signup" && (
                 <p className="text-center text-xs leading-5 text-[#84938b]">
-                  Sua conta começa com 5 créditos, suficientes para uma correção completa.
+                  Sua conta começa com 5 créditos, suficientes para cinco correções completas.
                 </p>
               )}
               {mode !== "recovery" && (

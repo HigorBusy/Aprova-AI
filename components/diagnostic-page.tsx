@@ -1,9 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { Activity, ArrowLeft, ArrowRight, CalendarDays, CheckCircle2, FileText, Gauge, Target, TrendingDown, TrendingUp } from "lucide-react";
+import { Activity, ArrowRight, CalendarDays, CheckCircle2, FileText, Gauge, Target, TrendingDown, TrendingUp } from "lucide-react";
 
 import { Card, ProgressBar } from "@/components/ui";
 import { InternalNav } from "@/components/internal-nav";
@@ -68,14 +67,10 @@ export function DiagnosticPage() {
   if (loading) return <main className="mission-grid grid min-h-[100dvh] place-items-center bg-canvas"><Loader size="lg" /></main>;
 
   return (
-    <main className="mission-grid min-h-[100dvh] bg-canvas px-4 py-5 text-white sm:px-6 lg:px-10 lg:py-8">
-      <div className="mx-auto w-full max-w-7xl">
-        <header className="flex items-center justify-between gap-4 border-b border-white/10 pb-5">
-          <Link href="/" className="inline-flex min-h-11 items-center gap-2 rounded-lg px-2 text-sm text-slate-300 transition-colors hover:text-white"><ArrowLeft className="h-4 w-4" /> Sua redação</Link>
-          <Image src="/aprova-ai-logo-lockup.svg" alt="AprovaAI" width={640} height={220} priority className="h-9 w-auto object-contain" />
-        </header>
-        <InternalNav active="evolution" />
-        <section className="py-8 sm:py-10"><p className="text-xs font-medium uppercase tracking-[0.20em] text-aura">Evidência de evolução</p><h1 className="mt-3 max-w-3xl text-4xl font-semibold leading-tight sm:text-5xl">O que mudou. E o que ainda exige trabalho.</h1><p className="mt-4 max-w-2xl text-sm leading-6 text-muted">Redações, questões e simulados reunidos em um diagnóstico que muda com a sua prática.</p></section>
+    <main className="mission-grid min-h-[100dvh] bg-canvas pb-24 text-white lg:pb-8 lg:pl-64">
+      <InternalNav active="evolution" />
+      <div className="mx-auto w-full max-w-7xl px-4 py-5 sm:px-6 lg:px-10 lg:py-8">
+        <section className="pb-6 pt-2 sm:pb-8"><p className="text-xs font-medium uppercase tracking-[0.20em] text-aura">Evidência de evolução</p><h1 className="mt-3 max-w-3xl text-3xl font-semibold leading-tight sm:text-4xl">O que mudou. E o que ainda exige trabalho.</h1><p className="mt-3 max-w-2xl text-sm leading-6 text-muted">Redações, questões e simulados reunidos em um diagnóstico que muda com a sua prática.</p></section>
         {error ? <Card className="border-rose-300/20 text-sm text-rose-100">{error}</Card> : null}
         {data ? <EvolutionContent data={data} /> : null}
       </div>
