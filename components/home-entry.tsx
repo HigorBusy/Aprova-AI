@@ -14,6 +14,7 @@ export function HomeEntry() {
   const [checkingSession, setCheckingSession] = useState(true);
   const [hasSession, setHasSession] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
+  const [recoveringPassword, setRecoveringPassword] = useState(false);
 
   useEffect(() => {
     const supabase = getSupabaseClient();
@@ -42,6 +43,11 @@ export function HomeEntry() {
       });
 
     const { data } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "PASSWORD_RECOVERY") {
+        setRecoveringPassword(true);
+        setShowAuth(true);
+        return;
+      }
       if (event === "SIGNED_OUT") {
         setHasSession(false);
         setShowAuth(false);
@@ -62,6 +68,16 @@ export function HomeEntry() {
       <main className="mission-grid grid min-h-[100dvh] place-items-center bg-canvas px-5">
         <Loader size="lg" />
       </main>
+    );
+  }
+
+  if (recoveringPassword) {
+    return (
+      <AuthScreen
+        initialMode="recovery"
+        onAuthenticated={() => setHasSession(true)}
+        onRecoveryComplete={() => setRecoveringPassword(false)}
+      />
     );
   }
 

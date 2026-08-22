@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Activity, ArrowLeft, ArrowRight, CalendarDays, CheckCircle2, FileText, Gauge, Target, TrendingDown, TrendingUp } from "lucide-react";
 
 import { Card, ProgressBar } from "@/components/ui";
+import { InternalNav } from "@/components/internal-nav";
 import { Loader } from "@/components/ui/loader-15";
 import { questionAreaLabel, type QuestionAreaKey } from "@/lib/questions";
 import { getSupabaseClient } from "@/lib/supabase/client";
@@ -73,6 +74,7 @@ export function DiagnosticPage() {
           <Link href="/" className="inline-flex min-h-11 items-center gap-2 rounded-lg px-2 text-sm text-slate-300 transition-colors hover:text-white"><ArrowLeft className="h-4 w-4" /> Sua redação</Link>
           <Image src="/aprova-ai-logo-lockup.svg" alt="AprovaAI" width={640} height={220} priority className="h-9 w-auto object-contain" />
         </header>
+        <InternalNav active="evolution" />
         <section className="py-8 sm:py-10"><p className="text-xs font-medium uppercase tracking-[0.20em] text-aura">Evidência de evolução</p><h1 className="mt-3 max-w-3xl text-4xl font-semibold leading-tight sm:text-5xl">O que mudou. E o que ainda exige trabalho.</h1><p className="mt-4 max-w-2xl text-sm leading-6 text-muted">Redações, questões e simulados reunidos em um diagnóstico que muda com a sua prática.</p></section>
         {error ? <Card className="border-rose-300/20 text-sm text-rose-100">{error}</Card> : null}
         {data ? <EvolutionContent data={data} /> : null}

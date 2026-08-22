@@ -10,6 +10,7 @@ import {
   BookOpen,
   Bot,
   CalendarDays,
+  ChevronDown,
   ChevronRight,
   CreditCard,
   Download,
@@ -29,6 +30,7 @@ import {
 import { Card } from "@/components/ui";
 import { AiInput } from "@/components/ui/ai-input";
 import { Loader } from "@/components/ui/loader-15";
+import { InternalNav } from "@/components/internal-nav";
 import {
   PRESENTATION_COST,
   presentationTemplates,
@@ -117,6 +119,7 @@ export function Comandante({ initialContext = "" }: { initialContext?: string })
   const [error, setError] = useState("");
   const [planTag, setPlanTag] = useState<PlanTag>("free");
   const [showFullHistory, setShowFullHistory] = useState(false);
+  const [showMobileTools, setShowMobileTools] = useState(false);
   const [conversationSearch, setConversationSearch] = useState("");
   const [activeSearchMessageId, setActiveSearchMessageId] = useState<string | null>(null);
   const [toolForm, setToolForm] = useState<ToolFormState>({
@@ -490,9 +493,10 @@ export function Comandante({ initialContext = "" }: { initialContext?: string })
             </div>
           </div>
         </header>
+        <InternalNav active="tutor" />
 
-        <div className="grid min-h-0 flex-1 gap-4 pt-4 xl:grid-cols-[minmax(0,1fr)_330px]">
-          <Card className="flex min-h-[76dvh] min-w-0 flex-col overflow-hidden rounded-[28px] border-accent/10 bg-white/[0.035] p-0 shadow-[0_0_70px_rgba(76,29,149,0.16)] lg:min-h-0">
+        <div className="grid min-h-0 flex-1 items-start gap-4 pt-4 xl:grid-cols-[minmax(0,1fr)_330px]">
+          <Card className="flex min-h-[76dvh] min-w-0 flex-col overflow-hidden rounded-xl border-white/[0.09] bg-[#091417]/90 p-0 shadow-[0_24px_80px_rgba(0,0,0,0.34)] xl:sticky xl:top-4 xl:h-[calc(100dvh-12rem)] xl:min-h-0">
             <div className="border-b border-white/10 bg-white/[0.025] px-4 py-3 sm:px-6 lg:px-8">
               <ChatFocusHeader
                 totalMessages={messages.length}
@@ -570,23 +574,34 @@ export function Comandante({ initialContext = "" }: { initialContext?: string })
             </div>
           </Card>
 
-          <aside className="grid content-start gap-4">
-            <FileUploadPanel
-              disabled={busy || (balance ?? 0) < 3}
-              onSubmit={(file, toolName, prompt) => void sendFile(file, toolName, prompt)}
-            />
-            <VoicePanel
-              disabled={busy || (balance ?? 0) < 2}
-              listening={listening}
-              onTranscribe={() => startVoiceCommand("transcribe")}
-              onSummary={() => startVoiceCommand("summary")}
-            />
-            <ToolsPanel
-              values={toolForm}
-              disabled={!hasToolCredits || busy}
-              onChange={setToolForm}
-              onRun={(toolName, prompt) => void sendMessage(prompt, { cost: 2, mode: "tool", toolName })}
-            />
+          <aside className="grid content-start gap-4 xl:max-h-[calc(100dvh-12rem)] xl:overflow-y-auto xl:pr-1">
+            <button
+              type="button"
+              aria-expanded={showMobileTools}
+              onClick={() => setShowMobileTools((current) => !current)}
+              className="flex min-h-12 items-center justify-between rounded-xl border border-white/10 bg-white/[0.04] px-4 text-sm font-semibold text-white transition-[background-color,border-color,transform] duration-150 active:scale-[0.99] xl:hidden"
+            >
+              Recursos do Tutor
+              <ChevronDown className={`h-4 w-4 text-aura transition-transform duration-200 ${showMobileTools ? "rotate-180" : ""}`} />
+            </button>
+            <div className={`${showMobileTools ? "grid" : "hidden"} gap-4 xl:grid`}>
+              <FileUploadPanel
+                disabled={busy || (balance ?? 0) < 3}
+                onSubmit={(file, toolName, prompt) => void sendFile(file, toolName, prompt)}
+              />
+              <VoicePanel
+                disabled={busy || (balance ?? 0) < 2}
+                listening={listening}
+                onTranscribe={() => startVoiceCommand("transcribe")}
+                onSummary={() => startVoiceCommand("summary")}
+              />
+              <ToolsPanel
+                values={toolForm}
+                disabled={!hasToolCredits || busy}
+                onChange={setToolForm}
+                onRun={(toolName, prompt) => void sendMessage(prompt, { cost: 2, mode: "tool", toolName })}
+              />
+            </div>
             <Card className="premium-glow">
               <div className="flex items-center gap-2 text-aura">
                 <Sparkles className="h-4 w-4" />

@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/glass-card";
 import { Loader } from "@/components/ui/loader-15";
 
-export type AuthMode = "login" | "signup";
+export type AuthMode = "login" | "signup" | "recovery";
 
 type SignInPageProps = {
   mode: AuthMode;
@@ -85,12 +85,18 @@ export function SignInPage({
           <GlassCard className="border-[#e8eee8]/18 bg-[#061014]/70 shadow-[0_34px_110px_rgba(0,0,0,0.48)]">
             <GlassCardHeader>
               <GlassCardTitle className="text-4xl leading-[0.95] sm:text-5xl">
-                {mode === "login" ? "Volte para o treino." : "Comece antes que vire reta final."}
+                {mode === "login"
+                  ? "Volte para o treino."
+                  : mode === "recovery"
+                    ? "Defina sua nova senha."
+                    : "Comece antes que vire reta final."}
               </GlassCardTitle>
               <GlassCardDescription className="mt-3">
                 {mode === "login"
                   ? "O ENEM não espera você se sentir pronto. Entre e continue corrigindo com direção."
-                  : "Crie sua conta e descubra onde sua redação está perdendo ponto enquanto ainda dá tempo de corrigir."}
+                  : mode === "recovery"
+                    ? "Escolha uma senha segura para recuperar o acesso ao seu treino."
+                    : "Crie sua conta e descubra onde sua redação está perdendo ponto enquanto ainda dá tempo de corrigir."}
               </GlassCardDescription>
               <GlassCardAction>
                 <div className="rounded-full border border-[#efb65a]/25 bg-[#efb65a]/10 p-2 text-[#f0c777]">
@@ -114,19 +120,21 @@ export function SignInPage({
                   </label>
                 )}
 
-                <label className="grid gap-2 text-sm font-semibold text-[#c9d4cc]">
-                  E-mail
-                  <input
-                    name="email"
-                    type="email"
-                    autoComplete="email"
-                    required
-                    value={email}
-                    onChange={(event) => setEmail(event.target.value)}
-                    placeholder="voce@exemplo.com"
-                    className="h-12 rounded-2xl border border-[#e8eee8]/15 bg-[#e8eee8]/[0.055] px-4 text-sm text-[#e8eee8] outline-none backdrop-blur-xl transition placeholder:text-[#84938b] focus:border-[#3aa7d8]/60 focus:bg-[#3aa7d8]/10 focus:shadow-[0_0_30px_rgba(58,167,216,0.16)]"
-                  />
-                </label>
+                {mode !== "recovery" && (
+                  <label className="grid gap-2 text-sm font-semibold text-[#c9d4cc]">
+                    E-mail
+                    <input
+                      name="email"
+                      type="email"
+                      autoComplete="email"
+                      required
+                      value={email}
+                      onChange={(event) => setEmail(event.target.value)}
+                      placeholder="voce@exemplo.com"
+                      className="h-12 rounded-2xl border border-[#e8eee8]/15 bg-[#e8eee8]/[0.055] px-4 text-sm text-[#e8eee8] outline-none backdrop-blur-xl transition placeholder:text-[#84938b] focus:border-[#3aa7d8]/60 focus:bg-[#3aa7d8]/10 focus:shadow-[0_0_30px_rgba(58,167,216,0.16)]"
+                    />
+                  </label>
+                )}
 
                 <label className="grid gap-2 text-sm font-semibold text-[#c9d4cc]">
                   Senha
@@ -172,6 +180,8 @@ export function SignInPage({
                     <Loader size="sm" />
                   ) : mode === "login" ? (
                     "Entrar e continuar treinando"
+                  ) : mode === "recovery" ? (
+                    "Salvar nova senha"
                   ) : (
                     "Criar conta grátis"
                   )}
@@ -185,27 +195,31 @@ export function SignInPage({
                   {message}
                 </p>
               )}
-              <p className="text-center text-sm text-[#84938b]">
-                {mode === "login" ? "Ainda não tem conta?" : "Já possui uma conta?"}{" "}
-                <button
-                  type="button"
-                  onClick={() => onModeChange?.(mode === "login" ? "signup" : "login")}
-                  className="font-semibold text-[#8bd8f8] transition hover:text-[#e8eee8]"
-                >
-                  {mode === "login" ? "Teste uma correção grátis" : "Entrar"}
-                </button>
-              </p>
+              {mode !== "recovery" && (
+                <p className="text-center text-sm text-[#84938b]">
+                  {mode === "login" ? "Ainda não tem conta?" : "Já possui uma conta?"}{" "}
+                  <button
+                    type="button"
+                    onClick={() => onModeChange?.(mode === "login" ? "signup" : "login")}
+                    className="font-semibold text-[#8bd8f8] transition hover:text-[#e8eee8]"
+                  >
+                    {mode === "login" ? "Teste uma correção grátis" : "Entrar"}
+                  </button>
+                </p>
+              )}
               {mode === "signup" && (
                 <p className="text-center text-xs leading-5 text-[#84938b]">
                   Sua conta começa com 5 créditos, suficientes para uma correção completa.
                 </p>
               )}
-              <p className="text-center text-sm text-[#84938b]">
-                Comprou agora?{" "}
-                <a href="/ativar" className="font-semibold text-[#8bd8f8] transition hover:text-[#e8eee8]">
-                  Ative seu acesso
-                </a>
-              </p>
+              {mode !== "recovery" && (
+                <p className="text-center text-sm text-[#84938b]">
+                  Comprou agora?{" "}
+                  <a href="/ativar" className="font-semibold text-[#8bd8f8] transition hover:text-[#e8eee8]">
+                    Ative seu acesso
+                  </a>
+                </p>
+              )}
             </GlassCardFooter>
           </GlassCard>
         </div>

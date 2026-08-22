@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 
 import { Button, Card, GhostButton } from "@/components/ui";
+import { InternalNav } from "@/components/internal-nav";
 import { Loader } from "@/components/ui/loader-15";
 import {
   difficultyLabel,
@@ -319,7 +320,8 @@ export function QuestionCenter({ initialArea, initialTopicId }: QuestionCenterPr
 
 function QuestionHeader({ screen, onHome }: { screen: Screen; onHome: () => void }) {
   return (
-    <header className="flex items-center justify-between gap-4 border-b border-white/10 pb-4">
+    <>
+      <header className="flex items-center justify-between gap-4 border-b border-white/10 pb-4">
       <div className="flex min-w-0 items-center gap-3">
         {screen === "home" ? (
           <Link href="/" aria-label="Voltar para Hoje" className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-white/10 bg-white/[0.04] text-slate-300 hover:border-accent/35 hover:text-white">
@@ -339,7 +341,9 @@ function QuestionHeader({ screen, onHome }: { screen: Screen; onHome: () => void
       <span className="rounded-full border border-emerald-300/20 bg-emerald-300/[0.07] px-3 py-2 text-xs font-semibold text-emerald-100">
         Treino sem créditos
       </span>
-    </header>
+      </header>
+      <InternalNav active="questions" />
+    </>
   );
 }
 

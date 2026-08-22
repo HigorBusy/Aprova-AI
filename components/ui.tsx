@@ -10,7 +10,7 @@ export function Card({
 }) {
   return (
     <section
-      className={clsx("glass rounded-lg p-4 shadow-command transition duration-300 hover:border-white/[0.12] hover:bg-white/[0.052]", className)}
+      className={clsx("glass rounded-xl p-4 shadow-command", className)}
       {...props}
     >
       {children}
@@ -26,8 +26,8 @@ export function Button({
   return (
     <button
       className={clsx(
-        "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition duration-300 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50",
-        "border border-accent/30 bg-gradient-to-br from-[#eef6ef] via-accent to-cosmic text-[#041014] shadow-[0_0_34px_rgba(58,167,216,0.20)] hover:shadow-[0_0_44px_rgba(159,207,139,0.22)]",
+        "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-[background-color,border-color,box-shadow,transform] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50",
+        "border border-accent/35 bg-accent text-[#041014] shadow-[0_0_28px_rgba(159,207,139,0.14)] hover:bg-[#b5dda3] hover:shadow-[0_0_34px_rgba(159,207,139,0.18)]",
         className
       )}
       {...props}
@@ -45,7 +45,7 @@ export function GhostButton({
   return (
     <button
       className={clsx(
-        "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/[0.045] px-4 py-2 text-sm font-semibold text-slate-200 transition duration-300 hover:border-accent/40 hover:bg-white/[0.07] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50",
+        "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-slate-200 transition-[background-color,border-color,color,transform] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] hover:border-white/20 hover:bg-white/[0.065] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50",
         className
       )}
       {...props}

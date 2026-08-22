@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 
 import { Button, Card, GhostButton, ProgressBar } from "@/components/ui";
+import { InternalNav } from "@/components/internal-nav";
 import { Loader } from "@/components/ui/loader-15";
 import {
   questionAreaLabel,
@@ -222,6 +223,7 @@ export function SimulationCenter() {
           </div>
           {screen === "exam" ? <Timer seconds={secondsLeft} urgent={secondsLeft !== null && secondsLeft <= 300} /> : <span className="rounded-full border border-emerald-300/20 bg-emerald-300/[0.07] px-3 py-2 text-xs font-semibold text-emerald-100">Sem consumo de créditos</span>}
         </header>
+        <InternalNav active="questions" />
 
         {screen === "setup" ? (
           <SetupView

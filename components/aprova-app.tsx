@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { User } from "@supabase/supabase-js";
-import { ChartNoAxesCombined, CircleHelp, CreditCard, Database, FileText, LogOut, MessageCircle, ShieldCheck } from "lucide-react";
+import { ChartNoAxesCombined, ClipboardList, CreditCard, Database, FileText, GraduationCap, LogOut, ShieldCheck } from "lucide-react";
 
 import { AuthScreen } from "@/components/auth-screen";
 import { BrandTransition } from "@/components/brand-transition";
@@ -27,9 +27,9 @@ import type { PlanTag, ProfileKind, QuizAnswers, StudyState } from "@/lib/types"
 
 const tabs = [
   { id: "home", label: "Hoje", icon: FileText, href: "/" },
-  { id: "questions", label: "Questões", icon: CircleHelp, href: "/questoes" },
+  { id: "questions", label: "Questões", icon: ClipboardList, href: "/questoes" },
   { id: "diagnostic", label: "Evolução", icon: ChartNoAxesCombined, href: "/diagnostico" },
-  { id: "commander", label: "Tutor IA", icon: MessageCircle, href: "/comandante" }
+  { id: "commander", label: "Tutor IA", icon: GraduationCap, href: "/comandante" }
 ] as const;
 
 const adminTab = { id: "admin", label: "Painel ADM", icon: Database, href: "/admin" } as const;
@@ -42,6 +42,7 @@ type ProfileRow = {
   quiz_profile: ProfileKind | null;
   daily_goal_minutes: number;
   plan_tag: PlanTag;
+  is_blocked: boolean;
 };
 
 export function AprovaApp() {
@@ -142,7 +143,7 @@ export function AprovaApp() {
           Promise.all([
             supabase
               .from("profiles")
-              .select("full_name,name,quiz_profile,daily_goal_minutes,plan_tag")
+              .select("full_name,name,quiz_profile,daily_goal_minutes,plan_tag,is_blocked")
               .eq("id", user.id)
               .maybeSingle<ProfileRow>(),
             supabase.from("user_credits").select("balance").eq("user_id", user.id).maybeSingle()
@@ -157,6 +158,10 @@ export function AprovaApp() {
         if (!mounted) return;
 
         const profile = profileResult.data;
+        if (profile?.is_blocked) {
+          setAccountError("Seu acesso ao AprovaAI está bloqueado. Entre em contato com o suporte para revisar sua conta.");
+          return;
+        }
         if (profile) {
           setPlanTag(profile.plan_tag ?? "free");
           setState((current) => ({
@@ -312,6 +317,10 @@ export function AprovaApp() {
           <p className="text-sm leading-6 text-slate-300">{accountError}</p>
           <GhostButton className="mt-5 w-full" onClick={() => setAccountReloadKey((key) => key + 1)}>
             Tentar novamente
+          </GhostButton>
+          <GhostButton className="mt-2 w-full" onClick={() => void handleSignOut()}>
+            <LogOut className="h-4 w-4" />
+            Encerrar sessão
           </GhostButton>
         </div>
       </main>

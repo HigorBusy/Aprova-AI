@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
-import { ArrowRight, Bot, CheckCircle2, ChevronDown, CircleHelp, CreditCard, FileText, Target } from "lucide-react";
+import { ArrowRight, Bot, CheckCircle2, CreditCard, FileText, Target } from "lucide-react";
 
 import { AuthCard } from "@/components/auth-card";
 import { Button, Card } from "@/components/ui";
@@ -54,14 +54,12 @@ export function Dashboard({
         onBalanceChange={onCreditBalanceChange}
       />
 
-      <QuestionsCard className="lg:col-span-12" />
-
       <div className="grid gap-4 md:grid-cols-2 lg:col-span-12">
         <CommanderCard />
         <CreditsCard balance={creditBalance} planTag={planTag} />
       </div>
 
-      <div className="lg:col-span-12">
+      <div id="conta" className="scroll-mt-6 lg:col-span-12">
         <AuthCard
           user={user}
           planTag={planTag}
@@ -90,32 +88,9 @@ function CountdownPanel({ className }: { className?: string }) {
             Primeiro dia em 8 de novembro de {PRODUCT_CONFIG.enem.year}.
           </p>
         </div>
-        <div className="min-w-56 rounded-lg border border-accent/30 bg-accent/[0.08] px-6 py-5 text-left shadow-[0_0_34px_rgba(58,167,216,0.16)] lg:text-right">
+        <div className="min-w-56 border-l border-accent/30 px-6 py-2 text-left lg:text-right">
           <p className="countdown-value energy-text text-7xl font-semibold leading-none text-white sm:text-8xl">{daysToEnem}</p>
           <p className="mt-2 text-xs font-semibold uppercase tracking-[0.18em] text-aura">dias restantes</p>
-        </div>
-      </div>
-    </Card>
-  );
-}
-
-function QuestionsCard({ className }: { className?: string }) {
-  return (
-    <Card className={`border-sky-300/20 bg-gradient-to-br from-sky-300/[0.08] via-white/[0.035] to-transparent ${className ?? ""}`}>
-      <div className="grid gap-5 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center">
-        <div className="grid h-12 w-12 place-items-center rounded-lg border border-sky-300/25 bg-sky-300/[0.08] text-sky-100">
-          <CircleHelp className="h-5 w-5" />
-        </div>
-        <div>
-          <p className="text-xs font-medium uppercase tracking-[0.18em] text-aura">Questões</p>
-          <h2 className="mt-2 text-2xl font-semibold text-white">Treine e descubra suas lacunas.</h2>
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-300">
-            Responda questões autorais, receba a explicação na hora e transforme cada erro em uma prioridade real de estudo.
-          </p>
-        </div>
-        <div className="grid gap-2 sm:min-w-44">
-          <Link href="/questoes" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-accent/30 bg-accent px-5 text-sm font-semibold text-[#041014] shadow-[0_0_30px_rgba(159,207,139,0.16)] transition-transform duration-150 active:scale-[0.97]">Iniciar treino <ArrowRight className="h-4 w-4" /></Link>
-          <Link href="/simulado" className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-4 text-sm font-semibold text-white transition-colors hover:border-aura/35">Fazer simulado</Link>
         </div>
       </div>
     </Card>
@@ -414,8 +389,8 @@ function EssayReviewResult({
           <p className="mt-1 text-lg font-semibold">{classification.label}</p>
         </div>
       </div>
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(300px,0.9fr)]">
-        <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-4">
+        <div className="grid grid-cols-[repeat(5,minmax(148px,1fr))] gap-2 overflow-x-auto pb-2">
           {competencies.map((competency) => {
             const active = openCompetency === competency.numero;
             return (
@@ -424,7 +399,7 @@ function EssayReviewResult({
                 type="button"
                 onClick={() => setOpenCompetency(competency.numero)}
                 aria-pressed={active}
-                className={`group min-h-44 rounded-xl border p-4 text-left transition-[background-color,border-color,box-shadow,transform] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] active:scale-[0.99] ${
+                className={`group min-h-32 rounded-lg border p-3 text-left transition-[background-color,border-color,box-shadow,transform] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] active:scale-[0.99] ${
                   active
                     ? "border-accent/45 bg-accent/[0.09] shadow-[0_0_34px_rgba(58,167,216,0.16)]"
                     : "border-white/10 bg-white/[0.035] hover:border-accent/30 hover:bg-white/[0.055]"
@@ -441,19 +416,15 @@ function EssayReviewResult({
                     {competency.status}
                   </span>
                 </div>
-                <div className="mt-4 flex items-end justify-between gap-3">
+                <div className="mt-3 flex items-end justify-between gap-3">
                   <p className="energy-text text-3xl font-semibold text-white">{competency.nota}/200</p>
-                  <span className={`flex h-8 w-8 items-center justify-center rounded-full border text-aura transition ${active ? "rotate-180 border-accent/35 bg-accent/10" : "border-white/10 bg-black/20"}`}>
-                    <ChevronDown className="h-4 w-4" />
-                  </span>
                 </div>
-                <p className="mt-3 text-sm leading-6 text-slate-300">{competency.resumo}</p>
               </button>
             );
           })}
         </div>
 
-        <section className="rounded-xl border border-white/10 bg-white/[0.04] p-4 shadow-[0_18px_50px_rgba(0,0,0,0.18)] xl:sticky xl:top-5 xl:self-start">
+        <section className="rounded-xl border border-white/10 bg-black/20 p-4 sm:p-5">
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-xs font-medium uppercase tracking-[0.16em] text-aura">
@@ -467,10 +438,10 @@ function EssayReviewResult({
               {selectedCompetency.nota}
             </span>
           </div>
-          <p className="mt-4 text-sm leading-6 text-muted">{selectedCompetency.descricao}</p>
-          <div className="mt-4 rounded-lg border border-white/10 bg-black/25 p-4">
+          <p className="mt-4 max-w-3xl text-sm leading-6 text-muted">{selectedCompetency.descricao}</p>
+          <div className="mt-4 border-l-2 border-accent/40 pl-4 sm:pl-5">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Leitura do corretor</p>
-            <p className="mt-3 whitespace-pre-line text-sm leading-7 text-slate-200">{selectedCompetency.detalhes}</p>
+            <p className="mt-3 max-w-5xl whitespace-pre-line text-sm leading-7 text-slate-200">{selectedCompetency.detalhes}</p>
           </div>
         </section>
       </div>

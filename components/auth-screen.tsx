@@ -9,10 +9,12 @@ import { getSupabaseClient } from "@/lib/supabase/client";
 type AuthScreenProps = {
   onAuthenticated: (user: User) => void;
   onBackToLanding?: () => void;
+  initialMode?: AuthMode;
+  onRecoveryComplete?: () => void;
 };
 
-export function AuthScreen({ onAuthenticated, onBackToLanding }: AuthScreenProps) {
-  const [mode, setMode] = useState<AuthMode>("login");
+export function AuthScreen({ onAuthenticated, onBackToLanding, initialMode = "login", onRecoveryComplete }: AuthScreenProps) {
+  const [mode, setMode] = useState<AuthMode>(initialMode);
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -30,7 +32,7 @@ export function AuthScreen({ onAuthenticated, onBackToLanding }: AuthScreenProps
       setMessage("A conexão com o Supabase não está configurada.");
       return;
     }
-    if (!email || password.length < 6) {
+    if (password.length < 6 || (mode !== "recovery" && !email)) {
       setMessage("Use um e-mail válido e uma senha com pelo menos 6 caracteres.");
       return;
     }
@@ -39,6 +41,17 @@ export function AuthScreen({ onAuthenticated, onBackToLanding }: AuthScreenProps
     setMessage("");
 
     try {
+      if (mode === "recovery") {
+        const { data, error } = await supabase.auth.updateUser({ password });
+        if (error || !data.user) {
+          setMessage(error?.message ?? "Não foi possível atualizar sua senha.");
+          return;
+        }
+        onRecoveryComplete?.();
+        onAuthenticated(data.user);
+        return;
+      }
+
       if (mode === "signup") {
         const { data, error } = await supabase.auth.signUp({
           email,
