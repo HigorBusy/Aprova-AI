@@ -203,13 +203,13 @@ export function SignInPage({
                     onClick={() => onModeChange?.(mode === "login" ? "signup" : "login")}
                     className="font-semibold text-[#8bd8f8] transition hover:text-[#e8eee8]"
                   >
-                    {mode === "login" ? "Teste uma correção grátis" : "Entrar"}
+                    {mode === "login" ? "Teste três correções grátis" : "Entrar"}
                   </button>
                 </p>
               )}
               {mode === "signup" && (
                 <p className="text-center text-xs leading-5 text-[#84938b]">
-                  Sua conta começa com 5 créditos, suficientes para cinco correções completas.
+                  Sua conta começa com 3 créditos, suficientes para três correções completas.
                 </p>
               )}
               {mode !== "recovery" && (

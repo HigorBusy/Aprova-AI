@@ -21,6 +21,7 @@ type Plan = {
   daily?: string;
   cta?: string;
   checkoutUrl?: string;
+  trial?: boolean;
 };
 
 const howItWorks = [
@@ -61,16 +62,18 @@ const comfortCards = [
 
 const plans: Plan[] = [
   {
-    name: "Avulso",
-    price: "R$9,90",
-    detail: "50 créditos",
-    hook: "Até 50 correções completas, sem assinatura."
+    name: "Teste gratuito",
+    price: "R$0",
+    detail: "3 créditos",
+    hook: "Três correções completas para conhecer o método antes de pagar.",
+    cta: "Testar grátis",
+    trial: true
   },
   {
     name: "Mensal",
     price: "R$29,90/mês",
-    detail: "300 créditos por mês",
-    hook: "Até 300 correções para criar rotina e evoluir sem travar.",
+    detail: "60 créditos por mês",
+    hook: "Créditos para corrigir, tirar dúvidas e analisar seus erros durante o mês.",
     featured: true,
     daily: "Menos de R$1 por dia",
     cta: "Garantir mensal",
@@ -79,8 +82,8 @@ const plans: Plan[] = [
   {
     name: "Anual",
     price: "R$197/ano",
-    detail: "4.800 créditos no ano",
-    hook: "Créditos para estudar com direção durante toda a preparação.",
+    detail: "720 créditos no ano",
+    hook: "O equivalente a 60 créditos por mês, com o melhor custo-benefício.",
     daily: "Menos de R$0,55 por dia",
     cta: "Garantir anual",
     checkoutUrl: "https://pay.cakto.com.br/deea3ts"
@@ -349,6 +352,7 @@ function ContrastCard({ title, items, tone }: { title: string; items: string[]; 
 
 function PlanCard({ plan, onStart }: { plan: Plan; onStart: () => void }) {
   const hasCheckout = Boolean(plan.checkoutUrl);
+  const canStart = hasCheckout || Boolean(plan.trial);
 
   return (
     <article className={`relative rounded-[2.125rem] border p-7 backdrop-blur-xl transition hover:-translate-y-1 ${
@@ -373,7 +377,7 @@ function PlanCard({ plan, onStart }: { plan: Plan; onStart: () => void }) {
       <p className="mt-6 min-h-16 text-base leading-7 text-[#84938b]">{plan.hook}</p>
       <button
         type="button"
-        disabled={!hasCheckout}
+        disabled={!canStart}
         onClick={() => plan.checkoutUrl ? openCheckout(plan.checkoutUrl) : onStart()}
         className={`mt-6 inline-flex min-h-12 w-full items-center justify-center rounded-full text-sm font-semibold transition hover:-translate-y-0.5 ${
           plan.featured
@@ -381,7 +385,7 @@ function PlanCard({ plan, onStart }: { plan: Plan; onStart: () => void }) {
             : "border border-[#e8eee8]/15 bg-[#e8eee8]/[0.055] text-[#e8eee8] hover:border-[#3aa7d8]/45 hover:bg-[#e8eee8]/[0.085]"
         } disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:translate-y-0`}
       >
-        {hasCheckout ? plan.cta ?? "Comprar agora" : "Checkout em ajuste"}
+        {plan.cta ?? (hasCheckout ? "Comprar agora" : "Indisponível")}
       </button>
     </article>
   );

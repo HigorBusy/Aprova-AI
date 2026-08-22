@@ -56,15 +56,15 @@ export function detectPurchasePlan(data: CaktoPayloadData): PurchasePlan {
   const oneOffOfferId = process.env.CAKTO_ONE_OFF_OFFER_ID ?? "";
 
   if (annualOfferId && offerId === annualOfferId) {
-    return { planTag: "premium", credits: 4800, label: "Plano anual" };
+    return { planTag: "premium", credits: 720, label: "Plano anual" };
   }
 
   if (monthlyOfferId && offerId === monthlyOfferId) {
-    return { planTag: "premium", credits: 300, label: "Plano mensal" };
+    return { planTag: "premium", credits: 60, label: "Plano mensal" };
   }
 
   if (oneOffOfferId && offerId === oneOffOfferId) {
-    return { planTag: "premium", credits: 50, label: "Plano avulso" };
+    return { planTag: "premium", credits: 10, label: "Plano avulso" };
   }
 
   const text = [
@@ -79,14 +79,14 @@ export function detectPurchasePlan(data: CaktoPayloadData): PurchasePlan {
   const price = Number(data.offer?.price ?? Number.NaN);
 
   if (text.includes("anual") || text.includes("ano") || approximately(price, 197)) {
-    return { planTag: "premium", credits: 4800, label: "Plano anual" };
+    return { planTag: "premium", credits: 720, label: "Plano anual" };
   }
 
   if (text.includes("mensal") || text.includes("mês") || text.includes("mes") || approximately(price, 29.9)) {
-    return { planTag: "premium", credits: 300, label: "Plano mensal" };
+    return { planTag: "premium", credits: 60, label: "Plano mensal" };
   }
 
-  return { planTag: "premium", credits: 50, label: "Plano avulso" };
+  return { planTag: "premium", credits: 10, label: "Plano avulso" };
 }
 
 function approximately(value: number, expected: number) {
