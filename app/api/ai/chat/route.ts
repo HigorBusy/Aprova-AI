@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
     .select("role,content,created_at")
     .eq("user_id", user.id)
     .order("created_at", { ascending: false })
-    .limit(12);
+    .limit(18);
 
   if (historyError) return jsonUtf8({ error: "Não foi possível carregar o histórico." }, { status: 500 });
 
@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
       historyCount: prompt.historyCount
     });
 
-    const reply = await callGroq(prompt.messages, { temperature: 0.5, maxTokens: 1_100 });
+    const reply = await callGroq(prompt.messages, { temperature: 0.4, maxTokens: 1_600 });
 
     const { data: completion, error: completionError } = await supabase.rpc(
       "complete_ai_exchange",

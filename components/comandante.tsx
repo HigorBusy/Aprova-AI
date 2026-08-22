@@ -502,7 +502,7 @@ export function Comandante({ initialContext = "" }: { initialContext?: string })
                 disabled={!hasCredits || busy}
               />
             </div>
-            <div className="min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-6 lg:px-8">
+            <div className="min-h-0 flex-1 overflow-y-auto scroll-smooth px-4 py-5 sm:px-6 lg:px-8">
               {messages.length === 0 ? (
                 <div className="grid h-full min-h-[400px] place-items-center text-center">
                   <div className="max-w-2xl">
@@ -516,7 +516,7 @@ export function Comandante({ initialContext = "" }: { initialContext?: string })
                   </div>
                 </div>
               ) : (
-                <div className="space-y-5">
+                <div className="mx-auto w-full max-w-5xl space-y-7">
                   {visibleMessages.map((message) => (
                     <MessageBubble
                       key={message.id}
@@ -1054,17 +1054,17 @@ function MessageBubble({
         highlighted ? "bg-[#f2c94c]/10 shadow-[0_16px_44px_rgba(2,7,15,0.3)]" : "bg-transparent"
       }`}
     >
-      <div className={`flex gap-3 p-1 ${isUser ? "justify-end" : "justify-start"}`}>
+      <div className={`flex w-full gap-3 p-1 ${isUser ? "justify-end" : "justify-start"}`}>
       {!isUser && (
         <div className="mt-1 grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-[#f2c94c] text-[#08111f]">
           <Bot className="h-4 w-4" />
         </div>
       )}
       <div
-        className={`group max-w-[90%] rounded-xl border px-4 py-3 text-sm leading-7 shadow-[0_14px_36px_rgba(2,7,15,0.24)] sm:max-w-[78%] lg:max-w-[70%] ${
+        className={`group rounded-xl border shadow-[0_14px_36px_rgba(2,7,15,0.24)] ${
           isUser
-            ? "rounded-br-sm border-[#35bfe7]/35 bg-[#12637a] text-white"
-            : "rounded-bl-sm border-[#8fa3b8]/15 bg-[#0f1e31] text-[#dce6ec]"
+            ? "max-w-[88%] rounded-br-sm border-[#35bfe7]/35 bg-[#12637a] px-4 py-3 text-sm leading-7 text-white sm:max-w-[75%]"
+            : "min-w-0 w-full max-w-[76ch] rounded-bl-sm border-[#8fa3b8]/15 border-l-[#35bfe7]/45 bg-[#0f1e31]/80 px-5 py-4 text-base leading-7 text-[#dce6ec] sm:px-6 sm:py-5"
         }`}
       >
         <div className={`mb-2 flex items-center gap-2 text-[0.65rem] font-semibold uppercase tracking-[0.16em] ${isUser ? "text-[#f4f1e8]/80" : "text-aura"}`}>
@@ -1116,29 +1116,57 @@ function MessageLine({ line, isUser }: { line: string; isUser: boolean }) {
   const cleanLine = line.trim();
   const bulletMatch = cleanLine.match(/^[-*•]\s+(.+)/);
   const numberMatch = cleanLine.match(/^(\d+)[\).]\s+(.+)/);
+  const markdownHeading = cleanLine.match(/^#{1,4}\s+(.+)/);
   const heading = cleanLine
     .replace(/^#{1,4}\s*/, "")
     .replace(/^\*\*(.+)\*\*$/, "$1");
-  const looksLikeHeading = !isUser && !bulletMatch && !numberMatch && heading.length <= 80 && (/[:：]$/.test(heading) || /^competência\s+\d/i.test(heading));
+  const looksLikeHeading = !isUser && !bulletMatch && !numberMatch && heading.length <= 80 && (Boolean(markdownHeading) || /[:：]$/.test(heading) || /^competência\s+\d/i.test(heading));
 
   if (bulletMatch || numberMatch) {
     const marker = numberMatch?.[1] ?? "";
     const text = bulletMatch?.[1] ?? numberMatch?.[2] ?? cleanLine;
     return (
-      <div className="flex gap-2">
-        <span className={`mt-2.5 h-1.5 shrink-0 rounded-full ${isUser ? "w-1.5 bg-white/80" : "w-1.5 bg-aura shadow-[0_0_10px_rgba(159,207,139,0.7)]"}`}>
-          {marker ? <span className="sr-only">{marker}</span> : null}
-        </span>
-        <p className="min-w-0 break-words">{text}</p>
+      <div className="flex items-start gap-3">
+        {marker ? (
+          <span className={`mt-0.5 min-w-5 shrink-0 font-mono text-xs font-semibold tabular-nums ${isUser ? "text-white/75" : "text-[#35bfe7]"}`}>
+            {marker}.
+          </span>
+        ) : (
+          <span className={`mt-[0.68rem] h-1.5 w-1.5 shrink-0 rounded-full ${isUser ? "bg-white/80" : "bg-[#35bfe7]"}`} />
+        )}
+        <p className="min-w-0 break-words"><InlineText text={text} isUser={isUser} /></p>
       </div>
     );
   }
 
   if (looksLikeHeading) {
-    return <p className="pt-1 text-sm font-semibold uppercase tracking-[0.08em] text-aura">{heading.replace(/:$/, "")}</p>;
+    return <h3 className="pt-2 text-base font-semibold leading-6 text-white"><InlineText text={heading.replace(/:$/, "")} isUser={isUser} /></h3>;
   }
 
-  return <p className="break-words">{cleanLine}</p>;
+  return <p className="break-words"><InlineText text={cleanLine} isUser={isUser} /></p>;
+}
+
+function InlineText({ text, isUser }: { text: string; isUser: boolean }) {
+  const segments = text.split(/(\*\*[^*]+\*\*|`[^`]+`)/g).filter(Boolean);
+
+  return segments.map((segment, index) => {
+    if (segment.startsWith("**") && segment.endsWith("**")) {
+      return <strong key={`${segment}-${index}`} className="font-semibold text-white">{segment.slice(2, -2)}</strong>;
+    }
+
+    if (segment.startsWith("`") && segment.endsWith("`")) {
+      return (
+        <code
+          key={`${segment}-${index}`}
+          className={`rounded px-1.5 py-0.5 font-mono text-[0.86em] ${isUser ? "bg-black/20 text-white" : "bg-black/30 text-[#b9e9f7]"}`}
+        >
+          {segment.slice(1, -1)}
+        </code>
+      );
+    }
+
+    return <span key={`${segment}-${index}`}>{segment}</span>;
+  });
 }
 
 function PresentationDeckView({ deck }: { deck: PresentationDeck }) {
