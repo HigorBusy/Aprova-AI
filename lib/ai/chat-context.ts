@@ -11,8 +11,8 @@ type BuildChatContextInput = {
   maxChars?: number;
 };
 
-const DEFAULT_MAX_CHARS = 18_000;
-const MAX_RUNTIME_CHARS = 4_000;
+const DEFAULT_MAX_CHARS = 30_000;
+const MAX_RUNTIME_CHARS = 6_000;
 const MAX_HISTORY_MESSAGE_CHARS = 2_000;
 
 export function buildBoundedChatContext({

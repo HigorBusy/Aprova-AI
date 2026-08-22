@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { callGroq, COMMANDER_SYSTEM_PROMPT } from "@/lib/ai/groq";
 import { buildBoundedChatContext, type ChatContextMessage } from "@/lib/ai/chat-context";
+import { selectEssayRepertoireContext } from "@/lib/ai/enem-repertoire";
 import { formatLearningProfileContext, formatQuestionContext, formatRepertoryContext, formatStudentContext } from "@/lib/ai/student-context";
+import { getDaysToEnem } from "@/lib/constants";
 import { sanitizeSingleLine, sanitizeTextInput } from "@/lib/security/input";
 import { checkRateLimit, rateLimitResponse } from "@/lib/security/rate-limit";
 import { rejectLargeRequest } from "@/lib/security/request";
@@ -88,10 +90,12 @@ export async function POST(request: NextRequest) {
   ]);
 
   const runtimeContext = [
+    `CONTEXTO TEMPORAL\nFaltam ${getDaysToEnem()} dias para o primeiro dia do ENEM ${PRODUCT_CONFIG.enem.year}. Use essa informação com responsabilidade: priorize execução e não provoque ansiedade artificial.`,
     formatStudentContext(profile, essays),
     formatLearningProfileContext(learningProfile),
     formatQuestionContext(questionCatalog),
-    formatRepertoryContext(repertorios)
+    formatRepertoryContext(repertorios),
+    selectEssayRepertoireContext(message)
   ].join("\n\n");
 
   try {
