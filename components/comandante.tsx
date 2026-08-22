@@ -459,10 +459,9 @@ export function Comandante({ initialContext = "" }: { initialContext?: string })
     <main className="mission-grid min-h-[100dvh] bg-canvas pb-24 text-white lg:pb-6 lg:pl-64">
       <InternalNav active="tutor" />
       <div className="mx-auto flex min-h-[calc(100dvh-2rem)] w-full max-w-7xl flex-col px-4 py-4 sm:px-6 lg:min-h-[calc(100dvh-3rem)] lg:px-8 lg:py-6">
-        <header className="flex flex-col gap-4 border-b border-white/10 pb-4 sm:flex-row sm:items-center sm:justify-between">
+        <header className="flex flex-col gap-4 border-b border-[#8fa3b8]/15 pb-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex min-w-0 items-center gap-3">
             <div className="min-w-0">
-              <p className="text-[0.65rem] font-medium uppercase tracking-[0.2em] text-aura">Canal estratégico</p>
               <h1 className="truncate text-xl font-semibold text-white sm:text-2xl">Tutor IA</h1>
               <p className="mt-1 text-sm text-muted">Seu apoio estratégico para redação e ENEM</p>
             </div>
@@ -471,7 +470,7 @@ export function Comandante({ initialContext = "" }: { initialContext?: string })
             <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.045] px-3 py-2 text-xs font-semibold text-slate-200">
               Plano {formatPlanTag(planTag)}
             </div>
-            <div className="flex items-center gap-2 rounded-full border border-accent/25 bg-accent/[0.08] px-3 py-2 shadow-[0_0_24px_rgba(58,167,216,0.14)]">
+            <div className="flex items-center gap-2 rounded-full border border-[#f2c94c]/30 bg-[#f2c94c]/10 px-3 py-2">
               <CreditCard className="h-4 w-4 text-aura" />
               <span className="text-sm font-semibold text-white">{balance ?? 0}</span>
               <span className="text-xs text-muted">créditos</span>
@@ -480,8 +479,8 @@ export function Comandante({ initialContext = "" }: { initialContext?: string })
         </header>
 
         <div className="grid min-h-0 flex-1 items-start gap-4 pt-4 xl:grid-cols-[minmax(0,1fr)_330px]">
-          <Card className="flex min-h-[76dvh] min-w-0 flex-col overflow-hidden rounded-xl border-white/[0.09] bg-[#091417]/90 p-0 shadow-[0_24px_80px_rgba(0,0,0,0.34)] xl:sticky xl:top-4 xl:h-[calc(100dvh-12rem)] xl:min-h-0">
-            <div className="border-b border-white/10 bg-white/[0.025] px-4 py-3 sm:px-6 lg:px-8">
+          <Card className="flex min-h-[76dvh] min-w-0 flex-col overflow-hidden rounded-xl border-[#8fa3b8]/15 bg-[#0b1829] p-0 shadow-[0_24px_72px_rgba(2,7,15,0.38)] xl:sticky xl:top-4 xl:h-[calc(100dvh-12rem)] xl:min-h-0">
+            <div className="border-b border-[#8fa3b8]/15 bg-[#0f1e31] px-4 py-3 sm:px-6 lg:px-8">
               <ChatFocusHeader
                 totalMessages={messages.length}
                 hiddenMessagesCount={hiddenMessagesCount}
@@ -510,8 +509,7 @@ export function Comandante({ initialContext = "" }: { initialContext?: string })
                     <div className="ai-orb mx-auto h-28 w-28" aria-hidden="true">
                       <div className="ai-orb-core" />
                     </div>
-                    <p className="mt-7 text-xs font-medium uppercase tracking-[0.22em] text-aura">Canal aberto</p>
-                    <h2 className="mt-3 text-3xl font-semibold text-white sm:text-4xl">O que você precisa entender hoje?</h2>
+                    <h2 className="mt-7 text-3xl font-semibold text-white sm:text-4xl">O que você precisa entender hoje?</h2>
                     <p className="mx-auto mt-3 max-w-lg text-sm leading-6 text-muted">
                       Envie sua dúvida ou anexe um PDF ou imagem. O Tutor usa seu histórico para manter o contexto.
                     </p>
@@ -527,7 +525,7 @@ export function Comandante({ initialContext = "" }: { initialContext?: string })
                     />
                   ))}
                   {busy && (
-                    <div className="flex w-fit items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.045] px-4 py-3 text-sm text-muted shadow-[0_0_30px_rgba(58,167,216,0.12)]">
+                    <div className="flex w-fit items-center gap-3 rounded-lg border border-[#8fa3b8]/15 bg-[#0f1e31] px-4 py-3 text-sm text-muted">
                       <Loader size="sm" />
                       Tutor IA analisando...
                     </div>
@@ -536,7 +534,7 @@ export function Comandante({ initialContext = "" }: { initialContext?: string })
                 </div>
               )}
             </div>
-            <div className="border-t border-white/10 bg-black/35 p-3 backdrop-blur-xl sm:p-4">
+            <div className="border-t border-[#8fa3b8]/15 bg-[#07101d] p-3 sm:p-4">
               {error && <p className="mb-3 rounded-2xl border border-rose-300/15 bg-rose-500/[0.07] px-4 py-3 text-sm text-rose-100">{repairMojibake(error)}</p>}
               {!hasCredits && (
                 <p className="mb-3 rounded-lg border border-rose-400/20 bg-rose-500/[0.07] p-3 text-sm text-rose-100">
@@ -1052,24 +1050,24 @@ function MessageBubble({
   return (
     <div
       id={messageDomId(message.id)}
-      className={`scroll-mt-32 rounded-[28px] transition-[background-color,box-shadow] duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] ${
-        highlighted ? "bg-accent/[0.08] shadow-[0_0_42px_rgba(58,167,216,0.20)]" : "bg-transparent"
+      className={`scroll-mt-32 rounded-xl transition-[background-color,box-shadow] duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] ${
+        highlighted ? "bg-[#f2c94c]/10 shadow-[0_16px_44px_rgba(2,7,15,0.3)]" : "bg-transparent"
       }`}
     >
       <div className={`flex gap-3 p-1 ${isUser ? "justify-end" : "justify-start"}`}>
       {!isUser && (
-        <div className="mt-1 grid h-9 w-9 shrink-0 place-items-center rounded-2xl border border-accent/30 bg-accent/10 text-aura shadow-[0_0_28px_rgba(58,167,216,0.18)]">
+        <div className="mt-1 grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-[#f2c94c] text-[#08111f]">
           <Bot className="h-4 w-4" />
         </div>
       )}
       <div
-        className={`group max-w-[90%] rounded-[24px] border px-4 py-3 text-sm leading-7 shadow-[0_18px_50px_rgba(0,0,0,0.22)] sm:max-w-[78%] lg:max-w-[70%] ${
+        className={`group max-w-[90%] rounded-xl border px-4 py-3 text-sm leading-7 shadow-[0_14px_36px_rgba(2,7,15,0.24)] sm:max-w-[78%] lg:max-w-[70%] ${
           isUser
-            ? "rounded-br-lg border-accent/35 bg-gradient-to-br from-accent/85 via-violet/70 to-cosmic/70 text-white shadow-[0_0_36px_rgba(58,167,216,0.18)]"
-            : "rounded-bl-lg border-white/10 bg-white/[0.055] text-slate-200 backdrop-blur-xl"
+            ? "rounded-br-sm border-[#35bfe7]/35 bg-[#12637a] text-white"
+            : "rounded-bl-sm border-[#8fa3b8]/15 bg-[#0f1e31] text-[#dce6ec]"
         }`}
       >
-        <div className={`mb-2 flex items-center gap-2 text-[0.65rem] font-semibold uppercase tracking-[0.16em] ${isUser ? "text-[#e8eee8]/80" : "text-aura"}`}>
+        <div className={`mb-2 flex items-center gap-2 text-[0.65rem] font-semibold uppercase tracking-[0.16em] ${isUser ? "text-[#f4f1e8]/80" : "text-aura"}`}>
           <span>{isUser ? "Você" : "Tutor IA"}</span>
           <span className={isUser ? "text-white/35" : "text-slate-600"}>·</span>
           <span className={isUser ? "text-white/55" : "text-slate-500"}>{formatMessageTime(message.created_at)}</span>
@@ -1220,7 +1218,7 @@ function PresentationPdfCard({ payload }: { payload: PresentationPdfPayload }) {
           <button
             type="button"
             onClick={() => downloadBase64Pdf(payload.pdfBase64 as string, payload.fileName)}
-            className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-lg border border-accent/35 bg-accent px-4 py-2 text-sm font-semibold text-white shadow-[0_0_28px_rgba(58,167,216,0.22)] transition-[background-color,box-shadow,transform] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] hover:bg-[#b8dca8] hover:shadow-[0_0_36px_rgba(58,167,216,0.30)] active:scale-[0.98]"
+            className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-lg bg-[#f2c94c] px-4 py-2 text-sm font-semibold text-[#08111f] transition-colors duration-150 hover:bg-[#f8d866]"
           >
             <Download className="h-4 w-4" />
             Baixar PDF

@@ -73,7 +73,7 @@ export function AiInput({
         type="button"
         disabled={disabled || loading || !value.trim()}
         onClick={handleSubmit}
-        className="absolute bottom-4 right-4 grid h-10 w-10 place-items-center rounded-2xl border border-accent/35 bg-gradient-to-br from-accent to-cosmic text-[#041014] shadow-[0_0_28px_rgba(58,167,216,0.28)] transition-[box-shadow,transform,border-color] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] hover:shadow-[0_0_34px_rgba(159,207,139,0.26)] active:scale-[0.96] disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/[0.05] disabled:text-slate-600 disabled:shadow-none disabled:active:scale-100"
+        className="absolute bottom-4 right-4 grid h-10 w-10 place-items-center rounded-lg bg-[#f2c94c] text-[#08111f] transition-colors duration-150 hover:bg-[#f8d866] active:translate-y-px disabled:cursor-not-allowed disabled:bg-[#17283d] disabled:text-[#60758a]"
         aria-label="Enviar mensagem"
       >
         {loading ? <Loader size="sm" /> : <Send className="h-4 w-4" />}

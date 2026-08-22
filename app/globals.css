@@ -4,8 +4,13 @@
 
 :root {
   color-scheme: dark;
-  --background: 7 13 16;
-  --foreground: 232 238 232;
+  --background: 8 17 31;
+  --foreground: 244 241 232;
+  --surface: 15 30 49;
+  --line: 123 153 180;
+  --analysis: 53 191 231;
+  --highlight: 242 201 76;
+  --correction: 255 107 107;
 }
 
 * {
@@ -14,14 +19,14 @@
 
 html {
   scroll-behavior: smooth;
-  background: #070d10;
+  background: #08111f;
 }
 
 body {
   min-height: 100vh;
   margin: 0;
   overflow-x: hidden;
-  background: #070d10;
+  background: #08111f;
   color: rgb(var(--foreground));
   font-family: var(--font-space-grotesk), "Space Grotesk", "Geist", "Inter", ui-sans-serif, system-ui, sans-serif;
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
@@ -32,15 +37,12 @@ body::before {
   pointer-events: none;
   content: "";
   position: fixed;
-  inset: -18%;
+  inset: 0;
   z-index: -2;
   background:
-    radial-gradient(circle at 18% 20%, rgba(239, 182, 90, 0.14), transparent 28%),
-    radial-gradient(circle at 78% 8%, rgba(58, 167, 216, 0.13), transparent 30%),
-    radial-gradient(circle at 52% 88%, rgba(159, 207, 139, 0.08), transparent 38%),
-    linear-gradient(180deg, #05090b 0%, #071014 45%, #070d10 100%);
-  animation: cosmicDrift 70s ease-in-out infinite alternate;
-  will-change: transform;
+    radial-gradient(ellipse at 50% -10%, rgba(53, 191, 231, 0.13), transparent 43%),
+    radial-gradient(ellipse at 100% 76%, rgba(242, 201, 76, 0.055), transparent 31%),
+    linear-gradient(180deg, #08111f 0%, #07101d 55%, #050a12 100%);
 }
 
 body::after {
@@ -50,20 +52,25 @@ body::after {
   inset: 0;
   z-index: -1;
   background:
-    radial-gradient(circle at 12% 18%, rgba(248, 250, 252, 0.42) 0 1px, transparent 1.4px),
-    radial-gradient(circle at 72% 24%, rgba(58, 167, 216, 0.28) 0 1px, transparent 1.5px),
-    radial-gradient(circle at 44% 68%, rgba(159, 207, 139, 0.18) 0 1px, transparent 1.4px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.026) 1px, transparent 1px),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.020) 1px, transparent 1px),
-    linear-gradient(180deg, rgba(7, 13, 16, 0.08), rgba(7, 13, 16, 0.72));
-  background-size: 220px 220px, 310px 310px, 260px 260px, 96px 96px, 96px 96px, auto;
-  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.88), rgba(0, 0, 0, 0.72) 58%, rgba(0, 0, 0, 0.44));
-  animation: starParallax 120s linear infinite;
-  will-change: background-position;
+    linear-gradient(90deg, transparent 0 49.9%, rgba(157, 232, 251, 0.025) 50%, transparent 50.1%),
+    linear-gradient(180deg, transparent 0 49.9%, rgba(157, 232, 251, 0.018) 50%, transparent 50.1%);
+  background-size: 128px 128px;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.52), transparent 68%);
 }
 
 ::selection {
-  background: rgba(58, 167, 216, 0.34);
+  background: rgba(242, 201, 76, 0.72);
+  color: #08111f;
+}
+
+:focus-visible {
+  outline: 2px solid #9de8fb;
+  outline-offset: 3px;
+}
+
+* {
+  scrollbar-color: rgba(143, 163, 184, 0.42) rgba(5, 10, 18, 0.4);
+  scrollbar-width: thin;
 }
 
 button,
@@ -83,36 +90,56 @@ select {
   color-scheme: dark;
 }
 
+.auth-field {
+  height: 3.25rem;
+  width: 100%;
+  border: 1px solid rgba(143, 163, 184, 0.22);
+  border-radius: 0.5rem;
+  background: rgba(15, 30, 49, 0.78);
+  padding: 0 1rem;
+  color: #f4f1e8;
+  outline: none;
+  transition: border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
+}
+
+.auth-field::placeholder {
+  color: #6f8498;
+}
+
+.auth-field:focus {
+  border-color: rgba(53, 191, 231, 0.72);
+  background: #102138;
+  box-shadow: 0 0 0 3px rgba(53, 191, 231, 0.11);
+}
+
 .glass {
   position: relative;
-  background: rgba(10, 20, 23, 0.82);
-  border: 1px solid rgba(232, 238, 232, 0.095);
-  box-shadow: 0 20px 70px rgba(0, 0, 0, 0.32);
-  backdrop-filter: blur(14px);
+  background: rgba(15, 30, 49, 0.78);
+  border: 1px solid rgba(143, 163, 184, 0.16);
+  box-shadow: 0 22px 64px rgba(2, 7, 15, 0.42);
+  backdrop-filter: blur(10px);
 }
 
 .mission-grid {
-  background-image: linear-gradient(180deg, rgba(7, 13, 16, 0.16), transparent 24%);
+  background-image: linear-gradient(180deg, rgba(53, 191, 231, 0.025), transparent 24%);
 }
 
 .command-surface {
-  background:
-    linear-gradient(180deg, rgba(7, 24, 29, 0.82) 0%, rgba(7, 13, 16, 0.78) 44%, rgba(5, 9, 11, 0.92) 100%),
-    linear-gradient(120deg, rgba(58, 167, 216, 0.18), transparent 42%);
-  border-color: rgba(58, 167, 216, 0.24);
-  box-shadow: 0 0 0 1px rgba(58, 167, 216, 0.16), 0 0 58px rgba(58, 167, 216, 0.12), 0 34px 120px rgba(0, 0, 0, 0.58);
+  background: rgba(12, 25, 42, 0.94);
+  border-color: rgba(53, 191, 231, 0.28);
+  box-shadow: 0 28px 84px rgba(2, 7, 15, 0.54);
 }
 
 .scanline {
-  background-image: repeating-linear-gradient(90deg, rgba(58, 167, 216, 0.30) 0 1px, transparent 1px 10px);
+  background-image: linear-gradient(90deg, #35bfe7 0 72%, transparent 72%);
 }
 
 .premium-glow {
-  box-shadow: 0 0 0 1px rgba(159, 207, 139, 0.18), 0 0 44px rgba(58, 167, 216, 0.16), 0 28px 90px rgba(0, 0, 0, 0.56);
+  box-shadow: 0 0 0 1px rgba(242, 201, 76, 0.22), 0 28px 84px rgba(2, 7, 15, 0.54);
 }
 
 .energy-text {
-  text-shadow: 0 0 28px rgba(58, 167, 216, 0.28);
+  text-shadow: 0 10px 32px rgba(53, 191, 231, 0.22);
 }
 
 .ai-orb {
@@ -124,10 +151,10 @@ select {
   border-radius: 9999px;
   background:
     radial-gradient(circle at 32% 24%, rgba(255, 255, 255, 0.86), transparent 10%),
-    radial-gradient(circle at 62% 42%, rgba(58, 167, 216, 0.72), transparent 32%),
-    radial-gradient(circle at 38% 66%, rgba(159, 207, 139, 0.58), transparent 36%),
-    radial-gradient(circle, rgba(7, 24, 29, 0.96), rgba(5, 9, 11, 0.98));
-  box-shadow: 0 0 42px rgba(58, 167, 216, 0.32), inset 0 0 38px rgba(255, 255, 255, 0.12);
+    radial-gradient(circle at 62% 42%, rgba(53, 191, 231, 0.72), transparent 32%),
+    radial-gradient(circle at 38% 66%, rgba(242, 201, 76, 0.46), transparent 36%),
+    radial-gradient(circle, rgba(11, 24, 41, 0.96), rgba(5, 10, 18, 0.98));
+  box-shadow: 0 18px 52px rgba(2, 7, 15, 0.42), inset 0 0 38px rgba(255, 255, 255, 0.10);
   animation: orbFloat 5200ms ease-in-out infinite;
 }
 
@@ -137,13 +164,13 @@ select {
   position: absolute;
   inset: -14px;
   border-radius: inherit;
-  border: 1px solid rgba(58, 167, 216, 0.25);
+  border: 1px solid rgba(53, 191, 231, 0.25);
   animation: orbRing 3600ms ease-in-out infinite;
 }
 
 .ai-orb::after {
   inset: -28px;
-  border-color: rgba(159, 207, 139, 0.18);
+  border-color: rgba(242, 201, 76, 0.20);
   animation-delay: 900ms;
 }
 
@@ -153,7 +180,7 @@ select {
   border-radius: inherit;
   background:
     linear-gradient(135deg, transparent 32%, rgba(255, 255, 255, 0.82) 48%, transparent 55%),
-    radial-gradient(circle, rgba(58, 167, 216, 0.18), rgba(7, 13, 16, 0.42));
+    radial-gradient(circle, rgba(53, 191, 231, 0.18), rgba(8, 17, 31, 0.42));
   filter: blur(0.2px);
   opacity: 0.9;
   animation: orbSpin 9000ms linear infinite;

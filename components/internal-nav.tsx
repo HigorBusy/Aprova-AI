@@ -14,7 +14,7 @@ const items = [
 export function InternalNav({ active }: { active: InternalSection }) {
   return (
     <>
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-white/[0.08] bg-[#050b0d]/95 px-5 py-6 backdrop-blur-xl lg:flex">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-[#8fa3b8]/15 bg-[#07101d]/95 px-5 py-6 backdrop-blur-xl lg:flex">
         <Link href="/" className="flex h-11 items-center" aria-label="AprovaAI - Hoje">
           <Image
             src="/aprova-ai-logo-lockup.svg"
@@ -38,23 +38,23 @@ export function InternalNav({ active }: { active: InternalSection }) {
                 aria-current={selected ? "page" : undefined}
                 className={`flex min-h-12 items-center gap-3 rounded-lg px-3 text-sm font-semibold transition-[background-color,color,transform] duration-150 active:scale-[0.98] ${
                   selected
-                    ? "bg-accent/10 text-white"
-                    : "text-slate-500 hover:bg-white/[0.045] hover:text-slate-200"
+                    ? "bg-[#f2c94c] text-[#08111f]"
+                    : "text-[#8fa3b8] hover:bg-[#0f1e31] hover:text-[#f4f1e8]"
                 }`}
               >
-                <Icon className={`h-4 w-4 ${selected ? "text-aura" : ""}`} />
+                <Icon className={`h-4 w-4 ${selected ? "text-[#08111f]" : ""}`} />
                 {item.label}
               </Link>
             );
           })}
         </nav>
 
-        <p className="mt-auto border-t border-white/[0.08] pt-5 text-xs leading-5 text-slate-600">
+        <p className="mt-auto border-t border-[#8fa3b8]/15 pt-5 text-xs leading-5 text-[#6f8498]">
           AprovaAI · preparação orientada para o ENEM
         </p>
       </aside>
 
-      <nav className="safe-bottom fixed inset-x-0 bottom-0 z-30 border-t border-white/[0.08] bg-[#050b0d]/95 px-2 py-2 backdrop-blur-xl lg:hidden" aria-label="Navegação principal">
+      <nav className="safe-bottom fixed inset-x-0 bottom-0 z-30 border-t border-[#8fa3b8]/15 bg-[#07101d]/95 px-2 py-2 backdrop-blur-xl lg:hidden" aria-label="Navegação principal">
         <div className="mx-auto grid max-w-lg grid-cols-4 gap-1">
           {items.map((item) => {
             const Icon = item.icon;
@@ -66,7 +66,7 @@ export function InternalNav({ active }: { active: InternalSection }) {
                 href={item.href}
                 aria-current={selected ? "page" : undefined}
                 className={`min-h-12 rounded-lg px-1 py-2 text-center text-[0.68rem] font-semibold transition-colors ${
-                  selected ? "bg-accent/10 text-aura" : "text-slate-500"
+                  selected ? "bg-[#f2c94c] text-[#08111f]" : "text-[#8fa3b8]"
                 }`}
               >
                 <Icon className="mx-auto h-4 w-4" />

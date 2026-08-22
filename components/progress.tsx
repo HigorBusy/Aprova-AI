@@ -44,7 +44,7 @@ export function Progress({ state }: ProgressProps) {
           {state.weeklyMinutes.map((minutes, index) => (
             <div key={`${index}-${minutes}`} className="flex flex-1 flex-col items-center gap-2">
               <div
-                className="w-full rounded-t bg-gradient-to-t from-cosmic via-accent to-aura opacity-80 shadow-[0_0_18px_rgba(159,207,139,0.18)] transition-all duration-700"
+                className="w-full rounded-t bg-[#35bfe7] opacity-90 transition-all duration-700"
                 style={{ height: `${Math.max(8, (minutes / max) * 100)}%` }}
               />
               <span className="text-xs text-slate-500">{dayLabels[index]}</span>
@@ -82,7 +82,7 @@ function Heatmap({ streak, weeklyMinutes }: { streak: number; weeklyMinutes: num
         <div
           key={`${index}-${intensity}`}
           className={`aspect-square rounded-md border border-white/5 ${classes[intensity]} ${
-            intensity > 2 ? "shadow-[0_0_14px_rgba(56,189,248,0.22)]" : ""
+            intensity > 2 ? "shadow-[0_10px_22px_rgba(2,7,15,0.24)]" : ""
           }`}
           aria-label={`dia ${index + 1} intensidade ${intensity}`}
         />

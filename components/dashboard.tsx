@@ -44,9 +44,8 @@ export function Dashboard({
 }: DashboardProps) {
   return (
     <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-4 animate-float-in lg:grid-cols-12 lg:gap-5">
-      <CountdownPanel className="lg:col-span-12" />
-
-      <NextStepCard className="lg:col-span-12" />
+      <CountdownPanel className="lg:col-span-5" />
+      <NextStepCard className="lg:col-span-7" />
 
       <WritingCenterCard
         className="lg:col-span-12"
@@ -75,15 +74,15 @@ function CountdownPanel({ className }: { className?: string }) {
   const daysToEnem = getDaysToEnem();
 
   return (
-    <Card className={`command-surface premium-glow px-5 py-8 text-center sm:px-8 sm:py-10 ${className ?? ""}`}>
-      <p className="text-xs font-semibold uppercase tracking-[0.20em] text-aura">ENEM {PRODUCT_CONFIG.enem.year}</p>
+    <Card className={`command-surface flex min-h-[250px] flex-col justify-center px-5 py-8 text-center sm:px-8 ${className ?? ""}`}>
+      <p className="text-sm font-semibold text-[#9de8fb]">ENEM {PRODUCT_CONFIG.enem.year}</p>
       <div className="mt-5 flex items-end justify-center gap-3 sm:gap-4">
-        <p className="countdown-value energy-text text-8xl font-semibold leading-[0.78] text-white sm:text-9xl">{daysToEnem}</p>
-        <p className="pb-1 text-left text-lg font-semibold leading-5 text-slate-300 sm:pb-2 sm:text-xl">
+        <p className="countdown-value font-mono text-7xl font-semibold leading-[0.78] text-[#f4f1e8] tabular-nums sm:text-8xl">{daysToEnem}</p>
+        <p className="pb-1 text-left text-lg font-semibold leading-5 text-[#b9c8d5] sm:pb-2 sm:text-xl">
           dias<br />restantes
         </p>
       </div>
-      <p className="mt-6 text-sm text-muted">Primeiro dia: 8 de novembro</p>
+      <p className="mt-6 text-sm text-muted">Primeiro dia · 8 de novembro</p>
     </Card>
   );
 }
@@ -206,13 +205,13 @@ function WritingCenterCard({
   }
 
   return (
-    <Card id="centro-redacao" className={`premium-glow p-5 sm:p-6 lg:p-7 ${className ?? ""}`}>
+    <Card id="centro-redacao" className={`border-[#35bfe7]/28 bg-[#0b1829] p-5 sm:p-6 lg:p-8 ${className ?? ""}`}>
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-medium uppercase tracking-[0.20em] text-aura">Centro de Redação</p>
-          <h2 className="mt-2 text-3xl font-semibold text-white sm:text-4xl">Corrigir minha redação</h2>
+          <h2 className="text-3xl font-semibold text-white sm:text-4xl">Sua redação</h2>
+          <p className="mt-2 text-sm font-medium text-aura">Correção pelas cinco competências do ENEM</p>
         </div>
-        <div className="grid h-11 w-11 shrink-0 place-items-center rounded-lg border border-accent/25 bg-accent/10 text-aura">
+        <div className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-[#f2c94c] text-[#08111f]">
           <FileText className="h-5 w-5" />
         </div>
       </div>
@@ -225,7 +224,7 @@ function WritingCenterCard({
         onChange={(event) => setEssayText(event.target.value)}
         placeholder="Cole sua redação aqui..."
         maxLength={30_000}
-        className="mt-6 min-h-64 w-full resize-y rounded-lg border border-white/10 bg-black/40 px-4 py-4 text-sm leading-6 text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-accent/50 focus:shadow-[0_0_28px_rgba(58,167,216,0.16)]"
+        className="mt-6 min-h-72 w-full resize-y rounded-lg border border-[#8fa3b8]/20 bg-[#07101d] px-5 py-5 text-base leading-7 text-[#e6edf2] outline-none transition placeholder:text-[#60758a] focus:border-[#35bfe7]/65 focus:shadow-[0_0_0_3px_rgba(53,191,231,0.10)]"
       />
 
       <Button
@@ -238,7 +237,7 @@ function WritingCenterCard({
 
       <div className="mt-4 flex items-center justify-between gap-3 text-xs text-muted">
         <span>{wordCount} palavras</span>
-        <span>Cada redação corrigida é um erro a menos no dia da prova.</span>
+        <span>1 crédito por correção completa</span>
       </div>
       {message && (
         <p className="mt-3 rounded-lg border border-accent/20 bg-black/30 p-3 text-sm leading-6 text-slate-300">
@@ -278,13 +277,13 @@ function WritingCenterCard({
 
 function CommanderCard() {
   return (
-    <Card className="premium-glow">
+    <Card>
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-medium uppercase tracking-[0.18em] text-aura">Tutor IA</p>
-          <h2 className="mt-2 text-2xl font-semibold leading-tight text-white">
+          <h2 className="text-2xl font-semibold leading-tight text-white">
             Orientação para avançar com direção.
           </h2>
+          <p className="mt-2 text-xs font-medium text-aura">Tutor IA</p>
         </div>
         <Bot className="h-5 w-5 shrink-0 text-aura" />
       </div>
@@ -293,7 +292,7 @@ function CommanderCard() {
       </p>
       <Link
         href="/comandante"
-        className="mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-lg border border-accent/30 bg-accent px-4 py-2 text-sm font-semibold text-white shadow-[0_0_34px_rgba(58,167,216,0.30)] transition-[background-color,transform,border-color] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] hover:bg-[#b8dca8] active:scale-[0.98]"
+        className="mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-[#f2c94c] px-4 py-2 text-sm font-semibold text-[#08111f] transition-colors duration-150 hover:bg-[#f8d866]"
       >
         Abrir Tutor IA
       </Link>
@@ -332,15 +331,15 @@ function NextStepCard({ className }: { className?: string }) {
   const description = recommendation?.description ?? "O sistema cruza redações, questões e simulados para escolher uma ação útil.";
 
   return (
-    <Card className={`border-accent/25 bg-gradient-to-r from-accent/[0.10] via-white/[0.04] to-transparent ${className ?? ""}`}>
+    <Card className={`border-[#8fa3b8]/18 bg-[#0f1e31] ${className ?? ""}`}>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
-          <p className="text-xs font-medium uppercase tracking-[0.18em] text-aura">Seu próximo passo</p>
-          <h2 className="mt-2 text-2xl font-semibold text-white sm:text-3xl">{title}</h2>
+          <h2 className="text-2xl font-semibold text-white sm:text-3xl">{title}</h2>
+          <p className="mt-2 text-xs font-medium text-aura">Seu próximo passo</p>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-300">{description}</p>
         </div>
         <div className="flex shrink-0 flex-wrap gap-2">
-          {recommendation ? <Link href={recommendation.href} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-accent/30 bg-accent px-4 text-sm font-semibold text-[#041014] shadow-[0_0_30px_rgba(159,207,139,0.18)] transition-[background-color,transform] duration-150 active:scale-[0.97]">{recommendation.action}<ArrowRight className="h-4 w-4" /></Link> : null}
+          {recommendation ? <Link href={recommendation.href} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-[#f2c94c] px-4 text-sm font-semibold text-[#08111f] transition-colors duration-150 hover:bg-[#f8d866]">{recommendation.action}<ArrowRight className="h-4 w-4" /></Link> : null}
         </div>
       </div>
     </Card>
@@ -363,15 +362,15 @@ function EssayReviewResult({
   const selectedCompetency = competencies.find((competency) => competency.numero === openCompetency) ?? competencies[0];
 
   return (
-    <div className="mt-5 space-y-5 rounded-2xl border border-accent/25 bg-black/35 p-4 shadow-[0_0_42px_rgba(58,167,216,0.12)] sm:p-5 lg:p-6">
-      <div className="grid gap-4 rounded-lg border border-white/10 bg-gradient-to-br from-accent/20 via-white/[0.04] to-black/30 p-4 sm:grid-cols-[1fr_auto] sm:p-5">
+    <div className="mt-5 space-y-5 border-t border-[#8fa3b8]/18 pt-6">
+      <div className="grid gap-4 rounded-xl bg-[#edf2f4] p-5 text-[#0b1726] sm:grid-cols-[1fr_auto] sm:p-6">
         <div>
-          <p className="text-xs font-medium uppercase tracking-[0.18em] text-aura">Resultado da correção</p>
+          <p className="text-sm font-semibold text-[#05799a]">Resultado da correção</p>
           <div className="mt-3 flex flex-wrap items-end gap-3">
-            <p className="energy-text text-6xl font-semibold leading-none text-white sm:text-7xl">{score}</p>
-            <p className="pb-2 text-lg font-semibold text-slate-300">/ 1000</p>
+            <p className="font-mono text-6xl font-semibold leading-none tabular-nums sm:text-7xl">{score}</p>
+            <p className="pb-2 text-lg font-semibold text-[#607689]">/ 1000</p>
           </div>
-          <p className="mt-3 text-sm leading-6 text-slate-300">
+          <p className="mt-3 text-sm leading-6 text-[#607689]">
             Avaliação orientativa por IA baseada nas cinco competências. Não é uma nota oficial do INEP.
           </p>
         </div>
@@ -476,7 +475,7 @@ function EssayReviewResult({
       <div className="grid gap-3 sm:grid-cols-2">
         <Link
           href={`/comandante?context=${encodeURIComponent(`Quero treinar minha competência mais fraca desta redação: C${selectedCompetency.numero}, ${selectedCompetency.nome}, nota ${selectedCompetency.nota}/200. Use meu histórico e me passe um exercício específico.`)}`}
-          className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-accent/30 bg-accent px-4 text-sm font-semibold text-[#041014] transition-transform duration-150 active:scale-[0.97] sm:col-span-2"
+          className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-[#f2c94c] px-4 text-sm font-semibold text-[#08111f] transition-colors duration-150 hover:bg-[#f8d866] sm:col-span-2"
         >
           Treinar esta dificuldade com o Tutor
           <ArrowRight className="h-4 w-4" />
@@ -697,21 +696,21 @@ function CreditsCard({ balance, planTag }: { balance: number | null; planTag: Pl
   const isEmpty = balance === 0;
 
   return (
-    <Card className="premium-glow overflow-hidden p-0">
-      <div className="border-b border-white/[0.08] bg-accent/[0.07] px-5 py-4">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-aura">Seu saldo</p>
+    <Card className="overflow-hidden p-0">
+      <div className="border-b border-[#8fa3b8]/15 bg-[#0b1829] px-5 py-4">
+        <p className="text-sm font-semibold text-[#9de8fb]">Seu saldo</p>
       </div>
       <div className="p-5">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <div className="energy-text min-h-16 text-6xl font-semibold text-white">
+          <div className="min-h-16 font-mono text-6xl font-semibold text-[#f2c94c] tabular-nums">
             {balance === null ? <Loader size="sm" /> : balance}
           </div>
           <p className="mt-1 text-sm font-medium text-slate-300">créditos disponíveis</p>
         </div>
         <CreditCard className="h-5 w-5 text-aura" />
       </div>
-      <div className="mt-5 rounded-lg border border-accent/20 bg-accent/[0.07] p-4">
+      <div className="mt-5 rounded-lg bg-[#07101d] p-4">
         <p className="text-xl font-semibold text-white">1 crédito = 1 correção</p>
         <p className="mt-1 text-sm leading-6 text-muted">Uma redação completa, avaliada pelas cinco competências.</p>
       </div>

@@ -26,8 +26,8 @@ export function Button({
   return (
     <button
       className={clsx(
-        "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-[background-color,border-color,box-shadow,transform] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50",
-        "border border-accent/35 bg-accent text-[#041014] shadow-[0_0_28px_rgba(159,207,139,0.14)] hover:bg-[#b5dda3] hover:shadow-[0_0_34px_rgba(159,207,139,0.18)]",
+        "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-[background-color,border-color,box-shadow,transform] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] active:translate-y-px disabled:cursor-not-allowed disabled:opacity-50",
+        "border border-[#f2c94c] bg-[#f2c94c] text-[#08111f] shadow-[0_12px_30px_rgba(2,7,15,0.28)] hover:bg-[#f8d866] hover:shadow-[0_16px_36px_rgba(2,7,15,0.34)]",
         className
       )}
       {...props}
@@ -45,7 +45,7 @@ export function GhostButton({
   return (
     <button
       className={clsx(
-        "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-slate-200 transition-[background-color,border-color,color,transform] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] hover:border-white/20 hover:bg-white/[0.065] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50",
+        "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-[#8fa3b8]/20 bg-[#0f1e31]/80 px-4 py-2 text-sm font-semibold text-[#dce6ec] transition-[background-color,border-color,color,transform] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] hover:border-[#35bfe7]/45 hover:bg-[#14263d] active:translate-y-px disabled:cursor-not-allowed disabled:opacity-50",
         className
       )}
       {...props}
@@ -66,13 +66,13 @@ export function Stat({
 }) {
   const toneClass = {
     blue: "text-aura",
-    green: "text-accent",
+    green: "text-mint",
     orange: "text-amber",
     aqua: "text-aura"
   }[tone];
 
   return (
-    <div className="rounded-lg border border-white/10 bg-white/[0.035] p-3 transition duration-300 hover:border-accent/25 hover:bg-white/[0.052]">
+    <div className="rounded-lg border border-[#8fa3b8]/15 bg-[#0f1e31]/74 p-3 transition duration-200 hover:border-[#35bfe7]/28 hover:bg-[#13243a]">
       <p className="text-[0.68rem] font-medium uppercase tracking-[0.14em] text-muted">
         {label}
       </p>
@@ -93,9 +93,9 @@ export function ProgressBar({
   const safeValue = Math.min(100, Math.max(0, value));
 
   return (
-    <div className={clsx("h-2 overflow-hidden rounded-full border border-white/10 bg-black/40", className)}>
+    <div className={clsx("h-2 overflow-hidden rounded-full bg-[#050a12]/75", className)}>
       <div
-        className="h-full rounded-full bg-gradient-to-r from-cosmic via-aura to-accent shadow-[0_0_24px_rgba(58,167,216,0.26)] transition-all duration-700 ease-out"
+        className="h-full rounded-full bg-[#35bfe7] transition-all duration-700 ease-out"
         style={{ width: `${safeValue}%` }}
       />
     </div>

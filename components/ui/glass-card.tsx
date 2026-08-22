@@ -7,7 +7,7 @@ function GlassCard({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="glass-card"
       className={cn(
-        "flex flex-col gap-6 rounded-3xl border border-[#e8eee8]/15 bg-[#e8eee8]/[0.065] py-6 text-[#e8eee8] shadow-[inset_0_1px_rgba(255,255,255,0.05),0_34px_100px_rgba(0,0,0,0.42)] backdrop-blur-2xl",
+        "flex flex-col gap-6 rounded-xl border border-[#8fa3b8]/18 bg-[#0f1e31]/90 py-6 text-[#f4f1e8] shadow-[0_24px_72px_rgba(2,7,15,0.42)] backdrop-blur-xl",
         className
       )}
       {...props}
@@ -42,7 +42,7 @@ function GlassCardDescription({ className, ...props }: React.ComponentProps<"div
   return (
     <div
       data-slot="glass-card-description"
-      className={cn("text-sm leading-6 text-[#c9d4cc]", className)}
+      className={cn("text-sm leading-6 text-[#9fb1c1]", className)}
       {...props}
     />
   );

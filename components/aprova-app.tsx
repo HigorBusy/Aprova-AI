@@ -342,7 +342,7 @@ export function AprovaApp() {
 
   return (
     <main className="mission-grid min-h-screen bg-canvas text-white lg:grid lg:grid-cols-[256px_1fr]">
-      <aside className="sticky top-0 hidden h-screen flex-col border-r border-white/[0.08] bg-[#050b0d]/95 px-5 py-6 backdrop-blur-xl lg:flex">
+      <aside className="sticky top-0 hidden h-screen flex-col border-r border-[#8fa3b8]/15 bg-[#07101d]/95 px-5 py-6 backdrop-blur-xl lg:flex">
         <div className="flex h-11 items-center">
           <Image
             src="/aprova-ai-logo-lockup.svg"
@@ -364,18 +364,18 @@ export function AprovaApp() {
                 href={tab.href}
                 className={`flex min-h-12 items-center gap-3 rounded-lg px-3 text-left text-sm font-semibold transition duration-150 ${
                   active
-                    ? "bg-accent/10 text-white"
-                    : "text-slate-500 hover:bg-white/[0.05] hover:text-slate-200"
+                    ? "bg-[#f2c94c] text-[#08111f]"
+                    : "text-[#8fa3b8] hover:bg-[#0f1e31] hover:text-[#f4f1e8]"
                 }`}
               >
-                <Icon className={`h-4 w-4 ${active ? "text-aura" : ""}`} />
+                <Icon className={`h-4 w-4 ${active ? "text-[#08111f]" : ""}`} />
                 {tab.label}
               </Link>
             );
           })}
         </nav>
 
-        <div className="mt-auto rounded-lg border border-white/10 bg-white/[0.04] p-4">
+        <div className="mt-auto rounded-xl border border-[#8fa3b8]/15 bg-[#0f1e31]/80 p-4">
           <p className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.16em] text-muted">
             <ShieldCheck className="h-4 w-4 text-aura" />
             Perfil
@@ -430,7 +430,7 @@ export function AprovaApp() {
         </div>
       </section>
 
-      <nav className="safe-bottom fixed inset-x-0 bottom-0 z-20 border-t border-white/10 bg-black/80 px-3 py-2 backdrop-blur-xl lg:hidden">
+      <nav className="safe-bottom fixed inset-x-0 bottom-0 z-20 border-t border-[#8fa3b8]/15 bg-[#07101d]/95 px-3 py-2 backdrop-blur-xl lg:hidden">
         <div
           className="mx-auto grid max-w-lg gap-1"
           style={{ gridTemplateColumns: `repeat(${visibleTabs.length}, minmax(0, 1fr))` }}
@@ -443,7 +443,7 @@ export function AprovaApp() {
                 key={tab.id}
                 href={tab.href}
                 className={`rounded-lg px-2 py-2 text-xs transition duration-300 ${
-                  active ? "bg-accent/10 text-aura" : "text-slate-500 hover:text-slate-200"
+                  active ? "bg-[#f2c94c] text-[#08111f]" : "text-[#8fa3b8] hover:text-[#f4f1e8]"
                 }`}
               >
                 <Icon className="mx-auto h-5 w-5" />

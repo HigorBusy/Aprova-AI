@@ -354,7 +354,7 @@ function QuestionHome({ catalog, selectedArea, totalAttempts, overallAccuracy, p
 
   return (
     <div className="mt-6 grid gap-4">
-      <section className="command-surface premium-glow grid gap-5 rounded-xl border border-accent/20 p-5 sm:p-7 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+      <section className="command-surface grid gap-5 rounded-xl border border-[#35bfe7]/24 p-5 sm:p-7 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-aura">Treino rápido</p>
           <h2 className="mt-3 max-w-3xl text-3xl font-semibold leading-tight text-white sm:text-4xl">Treine questões com direção.</h2>
@@ -457,7 +457,7 @@ function TrainingView({ session, question, currentIndex, answeredCount, selected
             <span className="rounded-full border border-white/10 bg-white/[0.035] px-3 py-1.5 text-slate-300">{questionAreaLabel(question.areaKey)}</span>
             <span className="rounded-full border border-white/10 bg-white/[0.035] px-3 py-1.5 text-slate-400">{difficultyLabel(question.difficulty)}</span>
           </div>
-          <button type="button" onClick={onToggleReview} disabled={busy} className={`inline-flex min-h-9 items-center gap-2 rounded-lg border px-3 text-xs font-semibold transition ${question.markedReview ? "border-amber-300/35 bg-amber-300/[0.10] text-amber-100" : "border-white/10 text-slate-400 hover:text-white"}`}>
+          <button type="button" onClick={onToggleReview} disabled={busy} className={`inline-flex min-h-9 items-center gap-2 rounded-lg border px-3 text-xs font-semibold transition ${question.markedReview ? "border-amber-300/35 bg-amber-300/[0.10] text-amber-100" : "border-white/10 text-[#dce6ec] hover:text-white"}`}>
             <Flag className="h-3.5 w-3.5" /> {question.markedReview ? "Marcada" : "Revisar depois"}
           </button>
         </div>
@@ -512,7 +512,7 @@ function TrainingView({ session, question, currentIndex, answeredCount, selected
           <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/[0.06]"><div className="h-full rounded-full bg-accent transition-all" style={{ width: `${(answeredCount / session.questions.length) * 100}%` }} /></div>
           <div className="mt-5 grid grid-cols-5 gap-2">
             {session.questions.map((item, index) => (
-              <button key={item.id} type="button" onClick={() => onJump(index)} aria-label={`Ir para questão ${index + 1}`} className={`relative grid aspect-square place-items-center rounded-md border text-xs font-semibold transition ${index === currentIndex ? "border-accent bg-accent/15 text-white" : item.result?.isCorrect ? "border-emerald-300/25 bg-emerald-300/[0.08] text-emerald-100" : item.result ? "border-rose-300/25 bg-rose-300/[0.08] text-rose-100" : "border-white/10 bg-white/[0.03] text-slate-400"}`}>
+              <button key={item.id} type="button" onClick={() => onJump(index)} aria-label={`Ir para questão ${index + 1}`} className={`relative grid aspect-square place-items-center rounded-md border text-xs font-semibold transition ${index === currentIndex ? "border-accent bg-accent/15 text-white" : item.result?.isCorrect ? "border-emerald-300/25 bg-emerald-300/[0.08] text-emerald-100" : item.result ? "border-rose-300/25 bg-rose-300/[0.08] text-rose-100" : "border-white/10 bg-white/[0.03] text-[#dce6ec]"}`}>
                 {index + 1}{item.markedReview ? <Flag className="absolute -right-1 -top-1 h-3 w-3 text-amber-200" /> : null}
               </button>
             ))}
@@ -532,9 +532,9 @@ function TrainingView({ session, question, currentIndex, answeredCount, selected
 function ResultView({ summary, onHome, onRetryErrors }: { summary: QuestionSessionSummary; onHome: () => void; onRetryErrors: () => void }) {
   return (
     <section className="mx-auto mt-10 max-w-4xl">
-      <Card className="premium-glow p-5 text-center sm:p-8">
+      <Card className="border-[#35bfe7]/24 p-5 text-center sm:p-8">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-aura">Seu resultado</p>
-        <p className="energy-text mt-5 text-7xl font-semibold text-white sm:text-8xl">{summary.accuracy}%</p>
+        <p className="mt-5 font-mono text-7xl font-semibold text-[#f2c94c] tabular-nums sm:text-8xl">{summary.accuracy}%</p>
         <p className="mt-3 text-sm text-muted">{summary.correct} acertos em {summary.answered} questões respondidas</p>
         <div className="mt-7 grid gap-3 sm:grid-cols-4">
           <Metric label="Acertos" value={String(summary.correct)} />
@@ -569,8 +569,8 @@ function ErrorNotebook({ entries, busy, onRetry }: { entries: QuestionErrorEntry
                 <div className="flex flex-wrap items-center justify-between gap-2"><span className="text-xs font-semibold uppercase tracking-[0.14em] text-aura">{entry.discipline} · {entry.topic}</span><span className="text-xs text-muted">{entry.accuracy}% no assunto</span></div>
                 <h3 className="mt-4 text-base font-medium leading-7 text-white">{entry.prompt}</h3>
                 <div className="mt-4 grid gap-2 text-sm">
-                  <p className="rounded-lg border border-rose-300/20 bg-rose-300/[0.06] p-3 text-rose-100"><strong>Sua resposta: {entry.selectedOption}</strong><span className="mt-1 block text-slate-300">{selectedText}</span></p>
-                  <p className="rounded-lg border border-emerald-300/20 bg-emerald-300/[0.06] p-3 text-emerald-100"><strong>Correta: {entry.correctOption}</strong><span className="mt-1 block text-slate-300">{correctText}</span></p>
+                  <p className="rounded-lg border border-rose-300/20 bg-rose-300/[0.06] p-3 text-rose-100"><strong>Sua resposta: {entry.selectedOption}</strong><span className="mt-1 block text-rose-50">{selectedText}</span></p>
+                  <p className="rounded-lg border border-emerald-300/20 bg-emerald-300/[0.06] p-3 text-emerald-100"><strong>Correta: {entry.correctOption}</strong><span className="mt-1 block text-emerald-50">{correctText}</span></p>
                 </div>
                 <p className="mt-4 text-sm leading-6 text-muted">{entry.explanation}</p>
                 <Link href={`/comandante?context=${encodeURIComponent(tutorContext)}`} className="mt-4 inline-flex min-h-10 items-center gap-2 rounded-lg border border-white/10 px-3 text-sm font-semibold text-white hover:border-accent/35"><CircleHelp className="h-4 w-4 text-aura" /> Pedir outra explicação</Link>
@@ -596,7 +596,7 @@ function Metric({ label, value }: { label: string; value: string }) {
 function optionState(key: QuestionOption, selected: QuestionOption | null, result: QuestionAnswerResult | null) {
   if (result) {
     if (key === result.correctOption) return { className: "border-emerald-300/35 bg-emerald-300/[0.08] text-white", keyClassName: "border-emerald-300/35 bg-emerald-300/10 text-emerald-100", icon: <Check className="h-4 w-4" /> };
-    if (key === result.selectedOption) return { className: "border-rose-300/35 bg-rose-300/[0.08] text-slate-300", keyClassName: "border-rose-300/35 bg-rose-300/10 text-rose-100", icon: <X className="h-4 w-4" /> };
+    if (key === result.selectedOption) return { className: "border-rose-300/35 bg-rose-300/[0.08] text-rose-50", keyClassName: "border-rose-300/35 bg-rose-300/10 text-rose-100", icon: <X className="h-4 w-4" /> };
     return { className: "border-white/5 bg-white/[0.015] text-slate-500", keyClassName: "border-white/10 text-slate-600", icon: null };
   }
   if (key === selected) return { className: "border-accent/50 bg-accent/[0.10] text-white", keyClassName: "border-accent/45 bg-accent/15 text-aura", icon: null };

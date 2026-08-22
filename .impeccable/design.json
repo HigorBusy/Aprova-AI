@@ -1,0 +1,28 @@
+{
+  "name": "AprovaAI",
+  "creativeNorthStar": "Mesa de Correcao Noturna",
+  "colors": {
+    "inkNight": "#08111f",
+    "inkDeep": "#050a12",
+    "workSurface": "#0f1e31",
+    "analysisCyan": "#35bfe7",
+    "analysisLight": "#9de8fb",
+    "highlighterYellow": "#f2c94c",
+    "progressGreen": "#65d69e",
+    "correctionCoral": "#ff6b6b",
+    "paperIvory": "#f4f1e8",
+    "paperCool": "#edf2f4",
+    "secondaryText": "#8fa3b8"
+  },
+  "radii": {
+    "control": 8,
+    "surface": 12,
+    "focal": 16
+  },
+  "rules": [
+    "Essay correction leads the hierarchy",
+    "Color always communicates function",
+    "Marketing persuades; product surfaces stay quiet",
+    "No decorative glow or nested cards"
+  ]
+}

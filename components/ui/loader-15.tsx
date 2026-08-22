@@ -35,9 +35,9 @@ export function Loader({ label, size = "md" }: LoaderProps) {
               <feComposite in="SourceGraphic" in2="merged" operator="atop" />
             </filter>
             <linearGradient id={gradientId} x1="40" y1="40" x2="160" y2="160" gradientUnits="userSpaceOnUse">
-              <stop offset="0" stopColor="#3aa7d8" />
-              <stop offset="0.54" stopColor="#9fcf8b" />
-              <stop offset="1" stopColor="#efb65a" />
+              <stop offset="0" stopColor="#35bfe7" />
+              <stop offset="0.62" stopColor="#9de8fb" />
+              <stop offset="1" stopColor="#f2c94c" />
             </linearGradient>
           </defs>
         </svg>
@@ -67,10 +67,10 @@ export function Loader({ label, size = "md" }: LoaderProps) {
         >
           <path
             className="loader-half"
-            stroke="#3aa7d8"
+            stroke="#35bfe7"
             d="m164 100c0-35.346-28.654-64-64-64s-64 28.654-64 64 28.654 64 64 64 64-26.215 64-64-26.92-64-64-64-65.267 26.923-64 64c1.267 37.077 26.703 65.053 64 64 37.297-1.053 64-64 64-64"
           />
-          <circle className="loader-track" stroke="#9fcf8b" cx="100" cy="100" r="64" />
+          <circle className="loader-track" stroke="#f2c94c" cx="100" cy="100" r="64" />
         </svg>
       </div>
       {label && <span>{label}</span>}
@@ -83,7 +83,7 @@ const StyledWrapper = styled.div<{ $dimension: number }>`
   flex-direction: column;
   align-items: center;
   gap: 0.75rem;
-  color: #cbd5e1;
+  color: #9fb1c1;
   font-size: 0.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
