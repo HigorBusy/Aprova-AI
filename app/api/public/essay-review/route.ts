@@ -2,7 +2,7 @@ import { createHmac, randomBytes } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 
 import { normalizeEssayReview, type RawEssayReview } from "@/lib/ai/essay-review";
-import { callGroq, ESSAY_REVIEW_SYSTEM_PROMPT, parseJsonResponse } from "@/lib/ai/groq";
+import { callGroq, parseJsonResponse } from "@/lib/ai/groq";
 import { sanitizeSingleLine, sanitizeTextInput } from "@/lib/security/input";
 import { checkRateLimit, rateLimitResponse } from "@/lib/security/rate-limit";
 import { rejectLargeRequest } from "@/lib/security/request";
@@ -12,6 +12,13 @@ export const runtime = "nodejs";
 
 const TRIAL_COOKIE = "aprovai_free_trial_v1";
 const DEVICE_ID_PATTERN = /^[a-zA-Z0-9_-]{20,100}$/;
+const PUBLIC_REVIEW_PROMPT = `Você é um corretor experiente de redação do ENEM. Avalie somente o texto e o tema enviados.
+Seja rigoroso, específico e não invente evidências. Cada competência vale de 0 a 200 e a nota total deve ser a soma exata.
+C1: norma padrão. C2: tema e repertório produtivo. C3: argumentação. C4: coesão. C5: proposta de intervenção.
+Redação curta, genérica, sem repertório ou sem intervenção completa não pode receber nota alta.
+Responda somente com JSON válido e compacto, sem markdown, usando exatamente esta estrutura:
+{"type":"essay_review","nota_total":0,"nota_competencia_1":0,"nota_competencia_2":0,"nota_competencia_3":0,"nota_competencia_4":0,"nota_competencia_5":0,"diagnostico_geral":"","principais_erros":[""],"pontos_fortes":[""],"plano_de_melhoria":[""],"proxima_tarefa_recomendada":"","competencias":{"c1":{"score":0,"justificativa":""},"c2":{"score":0,"justificativa":""},"c3":{"score":0,"justificativa":""},"c4":{"score":0,"justificativa":""},"c5":{"score":0,"justificativa":""}}}
+Limite cada justificativa a 180 caracteres, o diagnóstico a 300 e cada lista a no máximo 3 itens.`;
 
 export async function POST(request: NextRequest) {
   const oversized = rejectLargeRequest(request, 160 * 1024);
@@ -79,13 +86,13 @@ export async function POST(request: NextRequest) {
   try {
     const rawReview = await callGroq(
       [
-        { role: "system", content: ESSAY_REVIEW_SYSTEM_PROMPT },
+        { role: "system", content: PUBLIC_REVIEW_PROMPT },
         {
           role: "user",
           content: `Corrija esta redação com rigor de banca ENEM. Compare o texto ao tema proposto e responda no JSON solicitado. Toda crítica deve citar evidência real do texto.\n\nTEMA PROPOSTO:\n${theme}\n\nREDAÇÃO DO ALUNO:\n${essay}`
         }
       ],
-      { temperature: 0.2, maxTokens: 1_800 }
+      { temperature: 0.2, maxTokens: 1_400, json: true }
     );
     const review = normalizeEssayReview(parseJsonResponse<RawEssayReview>(rawReview), essay);
 
