@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, Check, ChevronDown, CircleCheck, FilePenLine, Highlighter, Quote, ShieldCheck } from "lucide-react";
+import { ArrowRight, Check, ChevronDown, CircleCheck, FilePenLine, Highlighter, Quote, ShieldCheck, Users } from "lucide-react";
 
 import { FreeEssayTrial } from "@/components/free-essay-trial";
 
@@ -44,6 +44,10 @@ export function LandingPage({ onStart }: LandingPageProps) {
 
       <section id="inicio" className="relative mx-auto grid min-h-[calc(100svh-5rem)] w-full max-w-[1440px] items-center gap-14 px-5 pb-16 pt-10 sm:px-8 lg:grid-cols-[0.88fr_1.12fr] lg:px-12 lg:py-16">
         <div className="relative z-10 max-w-2xl">
+          <div className="mb-7 inline-flex items-center gap-3 rounded-full border border-[#35bfe7]/25 bg-[#0f1e31]/80 px-4 py-2.5 text-sm text-[#b9c8d5] shadow-[0_12px_32px_rgba(2,7,15,0.22)] backdrop-blur-sm">
+            <Users className="h-4 w-4 text-[#f2c94c]" />
+            <span><strong className="font-semibold text-[#f4f1e8]">+4 mil usuários</strong> já escolheram corrigir com direção</span>
+          </div>
           <h1 className="text-balance text-[clamp(3.2rem,7vw,6rem)] font-semibold leading-[0.92] tracking-[-0.04em]">Sua redação já mostra onde você perde pontos.</h1>
           <p className="mt-7 max-w-xl text-lg leading-8 text-[#b9c8d5] sm:text-xl">O AprovaAI lê pelas cinco competências do ENEM, aponta o trecho que enfraqueceu sua nota e mostra o que corrigir na próxima tentativa.</p>
           <div className="mt-9 flex flex-col gap-3 sm:flex-row">
