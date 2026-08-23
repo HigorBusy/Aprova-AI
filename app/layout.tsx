@@ -11,7 +11,23 @@ const spaceGrotesk = Space_Grotesk({
 
 export const metadata: Metadata = {
   title: "AprovaAI | Correção de redação ENEM com IA",
-  description: "Corrija sua redação do ENEM em segundos com IA, nota estimada, competências e plano de melhoria."
+  description: "Corrija sua redação do ENEM em segundos com IA, nota estimada, competências e plano de melhoria.",
+  applicationName: "AprovaAI",
+  manifest: "/manifest.webmanifest",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icons/aprova-ai-192.png", type: "image/png", sizes: "192x192" },
+      { url: "/icons/aprova-ai-512.png", type: "image/png", sizes: "512x512" }
+    ],
+    apple: [{ url: "/icons/aprova-ai-apple-touch.png", type: "image/png", sizes: "180x180" }],
+    shortcut: "/favicon.ico"
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "AprovaAI"
+  }
 };
 
 export const viewport: Viewport = {
