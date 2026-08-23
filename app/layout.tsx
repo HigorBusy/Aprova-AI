@@ -71,12 +71,13 @@ export const metadata: Metadata = {
   manifest: "/manifest.webmanifest",
   icons: {
     icon: [
-      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icons/aprova-ai-tab-48.png?v=2", type: "image/png", sizes: "48x48" },
+      { url: "/favicon.ico?v=2", sizes: "any" },
       { url: "/icons/aprova-ai-192.png", type: "image/png", sizes: "192x192" },
       { url: "/icons/aprova-ai-512.png", type: "image/png", sizes: "512x512" }
     ],
     apple: [{ url: "/icons/aprova-ai-apple-touch.png", type: "image/png", sizes: "180x180" }],
-    shortcut: "/favicon.ico"
+    shortcut: "/icons/aprova-ai-tab-48.png?v=2"
   },
   appleWebApp: {
     capable: true,
