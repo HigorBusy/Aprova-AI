@@ -29,6 +29,9 @@ export const metadata: Metadata = {
   creator: "AprovaAI",
   publisher: "AprovaAI",
   category: "education",
+  verification: {
+    google: "8u5A__DUbwxHcjnIYVU3dWtT6GgNrC0ktTCsCGBjRJQ"
+  },
   alternates: {
     canonical: "/"
   },
