@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
           content: `Corrija esta redação com rigor de banca ENEM. Compare o texto ao tema proposto e responda no JSON solicitado. Toda crítica deve citar evidência real do texto.\n\nTEMA PROPOSTO:\n${theme}\n\nREDAÇÃO DO ALUNO:\n${essay}`
         }
       ],
-      { temperature: 0.2, maxTokens: 2_400, json: true }
+      { temperature: 0.2, maxTokens: 1_800 }
     );
     const review = normalizeEssayReview(parseJsonResponse<RawEssayReview>(rawReview), essay);
 
