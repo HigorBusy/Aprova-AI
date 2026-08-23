@@ -209,7 +209,7 @@ export async function callGroq(messages: GroqMessage[], options: GroqOptions = {
     const nativeJsonFailed = response.status === 400
       && errorPayload?.error?.code === "json_validate_failed"
       && nativeJson;
-    const canTryFallback = (response.status === 404 || response.status === 429 || nativeJsonFailed)
+    const canTryFallback = (response.status === 404 || response.status === 413 || response.status === 429 || nativeJsonFailed)
       && index < attempts.length - 1;
     if (!canTryFallback) throw new Error(`GROQ_REQUEST_FAILED_${response.status}`);
   }

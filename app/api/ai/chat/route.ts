@@ -106,6 +106,7 @@ export async function POST(request: NextRequest) {
         if (timeDifference !== 0) return timeDifference;
         return roleOrder[itemA.role as "user" | "assistant"] - roleOrder[itemB.role as "user" | "assistant"];
       })
+      .filter((item) => !isEssayReviewHistoryMessage(item.role, item.content))
       .map((item) => ({
         role: item.role as "user" | "assistant",
         content: item.content
@@ -164,6 +165,18 @@ export async function POST(request: NextRequest) {
       { error: missingKey ? "O Comandante ainda não foi ativado no servidor." : "O Comandante não conseguiu responder agora. Nenhum crédito foi consumido." },
       { status: missingKey ? 503 : 502 }
     );
+  }
+}
+
+function isEssayReviewHistoryMessage(role: string, content: string) {
+  if (role === "user") return content.trimStart().startsWith("[REDACAO PARA CORRECAO]");
+  if (role !== "assistant" || !content.trimStart().startsWith("{")) return false;
+
+  try {
+    const parsed = JSON.parse(content) as { type?: unknown };
+    return parsed.type === "essay_review";
+  } catch {
+    return false;
   }
 }
 
