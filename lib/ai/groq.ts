@@ -161,10 +161,12 @@ export async function callGroq(messages: GroqMessage[], options: GroqOptions = {
   const models = configuredModel
     ? [configuredModel]
     : [DEFAULT_GROQ_MODEL, FALLBACK_GROQ_MODEL];
-  const attempts = models.flatMap((model) => options.json
-    ? [{ model, nativeJson: true }, { model, nativeJson: false }]
-    : [{ model, nativeJson: false }]
-  );
+  const attempts = options.json
+    ? [
+        ...models.map((model) => ({ model, nativeJson: true })),
+        ...models.map((model) => ({ model, nativeJson: false }))
+      ]
+    : models.map((model) => ({ model, nativeJson: false }));
 
   let response: Response | null = null;
 
@@ -207,7 +209,7 @@ export async function callGroq(messages: GroqMessage[], options: GroqOptions = {
     const nativeJsonFailed = response.status === 400
       && errorPayload?.error?.code === "json_validate_failed"
       && nativeJson;
-    const canTryFallback = (response.status === 404 || nativeJsonFailed)
+    const canTryFallback = (response.status === 404 || response.status === 429 || nativeJsonFailed)
       && index < attempts.length - 1;
     if (!canTryFallback) throw new Error(`GROQ_REQUEST_FAILED_${response.status}`);
   }
