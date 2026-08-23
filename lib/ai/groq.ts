@@ -161,10 +161,15 @@ export async function callGroq(messages: GroqMessage[], options: GroqOptions = {
   const models = configuredModel
     ? [configuredModel]
     : [DEFAULT_GROQ_MODEL, FALLBACK_GROQ_MODEL];
+  const attempts = models.flatMap((model) => options.json
+    ? [{ model, nativeJson: true }, { model, nativeJson: false }]
+    : [{ model, nativeJson: false }]
+  );
 
   let response: Response | null = null;
 
-  for (const [index, model] of models.entries()) {
+  for (const [index, attempt] of attempts.entries()) {
+    const { model, nativeJson } = attempt;
     response = await fetch(GROQ_CHAT_URL, {
       method: "POST",
       headers: {
@@ -176,7 +181,7 @@ export async function callGroq(messages: GroqMessage[], options: GroqOptions = {
         messages,
         temperature: options.temperature ?? 0.45,
         max_completion_tokens: options.maxTokens ?? 900,
-        ...(options.json ? { response_format: { type: "json_object" } } : {})
+        ...(nativeJson ? { response_format: { type: "json_object" } } : {})
       }),
       signal: AbortSignal.timeout(options.timeoutMs ?? 45_000)
     });
@@ -189,6 +194,7 @@ export async function callGroq(messages: GroqMessage[], options: GroqOptions = {
     } | null;
     console.error("Groq request failed", {
       model,
+      nativeJson,
       status: response.status,
       requestId,
       errorCode: errorPayload?.error?.code,
@@ -198,7 +204,11 @@ export async function callGroq(messages: GroqMessage[], options: GroqOptions = {
       tokensRemaining: response.headers.get("x-ratelimit-remaining-tokens")
     });
 
-    const canTryFallback = response.status === 404 && index < models.length - 1;
+    const nativeJsonFailed = response.status === 400
+      && errorPayload?.error?.code === "json_validate_failed"
+      && nativeJson;
+    const canTryFallback = (response.status === 404 || nativeJsonFailed)
+      && index < attempts.length - 1;
     if (!canTryFallback) throw new Error(`GROQ_REQUEST_FAILED_${response.status}`);
   }
 
