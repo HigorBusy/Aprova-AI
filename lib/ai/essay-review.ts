@@ -253,7 +253,16 @@ function inspectEssay(essay: string) {
   const lower = normalizeForHeuristics(essay);
   const words = essay.split(/\s+/).filter(Boolean);
   const paragraphCount = essay.split(/\n+/).map((p) => p.trim()).filter(Boolean).length;
-  const repertoireTerms = ["constituicao", "paulo freire", "bourdieu", "bauman", "milton santos", "hannah arendt", "achille mbembe", "foucault", "george orwell", "aldous huxley", "o cortico", "ibge", "inep", "onu", "oms", "filosof", "sociolog"];
+  const repertoireTerms = [
+    "constituicao", "estatuto da crianca", "lei 10.639", "agenda 2030", "paulo freire",
+    "bourdieu", "bauman", "milton santos", "hannah arendt", "djamila ribeiro",
+    "ailton krenak", "carolina maria de jesus", "quarto de despejo", "graciliano ramos",
+    "vidas secas", "jorge amado", "capitaes da areia", "george orwell", "1984",
+    "aldous huxley", "admiravel mundo novo", "saramago", "ensaio sobre a cegueira",
+    "machado de assis", "o alienista", "chimamanda", "byung-chul han", "amartya sen",
+    "durkheim", "simone de beauvoir", "manuel castells", "silvio almeida", "achille mbembe",
+    "foucault", "ibge", "inep", "onu", "oms", "filosof", "sociolog"
+  ];
   const thesisTerms = ["defende-se", "nesse sentido", "sob essa perspectiva", "torna-se evidente", "e necessario", "observa-se", "nota-se", "configura-se"];
   const developmentTerms = ["primeiramente", "em primeiro lugar", "ademais", "alem disso", "outrossim", "entretanto", "nesse contexto", "desse modo", "sob esse vies", "por conseguinte"];
   const interventionAgents = ["governo", "estado", "ministerio", "poder publico", "escola", "instituicoes", "midia", "sociedade civil", "ongs", "familia"];

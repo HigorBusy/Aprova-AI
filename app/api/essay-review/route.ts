@@ -3,7 +3,7 @@ import { NextRequest } from "next/server";
 import { normalizeEssayReview, type RawEssayReview } from "@/lib/ai/essay-review";
 import { callGroq, ESSAY_REVIEW_SYSTEM_PROMPT, parseJsonResponse } from "@/lib/ai/groq";
 import { formatRepertoryContext, formatStudentContext } from "@/lib/ai/student-context";
-import { sanitizeTextInput } from "@/lib/security/input";
+import { sanitizeSingleLine, sanitizeTextInput } from "@/lib/security/input";
 import { checkRateLimit, rateLimitResponse } from "@/lib/security/rate-limit";
 import { jsonUtf8, rejectLargeRequest } from "@/lib/security/request";
 import { authenticateRequest } from "@/lib/supabase/server";
@@ -27,17 +27,24 @@ export async function POST(request: NextRequest) {
   const oversized = rejectLargeRequest(request, 160 * 1024);
   if (oversized) return oversized;
 
-  let body: { essay?: unknown };
+  let body: { essay?: unknown; theme?: unknown };
   try {
-    body = (await request.json()) as { essay?: unknown };
+    body = (await request.json()) as { essay?: unknown; theme?: unknown };
   } catch {
     return jsonUtf8({ error: "Requisição inválida." }, { status: 400 });
   }
 
   const essay = typeof body.essay === "string" ? sanitizeTextInput(body.essay, 30_000) : "";
+  const theme = typeof body.theme === "string" ? sanitizeSingleLine(body.theme, 300) : "";
   if (essay.length < 50 || essay.length > 30_000) {
     return jsonUtf8(
       { error: "Cole uma redação entre 50 e 30.000 caracteres." },
+      { status: 400 }
+    );
+  }
+  if (theme.length < 8) {
+    return jsonUtf8(
+      { error: "Informe o tema proposto para avaliar a Competência 2." },
       { status: 400 }
     );
   }
@@ -82,7 +89,7 @@ export async function POST(request: NextRequest) {
         { role: "system", content: runtimeContext },
         {
           role: "user",
-          content: `Corrija esta redação com rigor de banca ENEM. Se for curta, genérica, sem repertório ou sem proposta completa, penalize de verdade. Se for excelente, reconheça excelência com base em evidências objetivas e não invente penalizações genéricas.\n\n${essay}`
+          content: `Corrija esta redação com rigor de banca ENEM. Compare o texto ao tema proposto para avaliar abordagem completa, tangenciamento ou fuga. Se for curta, genérica, sem repertório ou sem proposta completa, penalize de verdade. Se for excelente, reconheça excelência com base em evidências objetivas e não invente penalizações genéricas.\n\nTEMA PROPOSTO:\n${theme}\n\nREDAÇÃO DO ALUNO:\n${essay}`
         }
       ],
       { temperature: 0.2, maxTokens: 2_400, json: true }
@@ -98,7 +105,7 @@ export async function POST(request: NextRequest) {
         p_assistant_content: storedAssistantContent,
         p_cost: ESSAY_COST,
         p_description: "Correção de redação pelo Comandante IA",
-        p_theme: inferEssayTheme(essay),
+        p_theme: theme,
         p_score: review.estimatedScore,
         p_c1: review.competencies.c1.score,
         p_c2: review.competencies.c2.score,
@@ -129,9 +136,4 @@ export async function POST(request: NextRequest) {
       { status: missingKey ? 503 : 502 }
     );
   }
-}
-
-function inferEssayTheme(essay: string) {
-  const normalized = essay.replace(/\s+/g, " ").trim();
-  return normalized.length > 90 ? `${normalized.slice(0, 90)}...` : normalized;
 }

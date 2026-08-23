@@ -118,6 +118,7 @@ function WritingCenterCard({
   onBalanceChange: (balance: number) => void;
 }) {
   const [essayText, setEssayText] = useState("");
+  const [essayTheme, setEssayTheme] = useState("");
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [review, setReview] = useState<EssayReview | null>(null);
@@ -168,6 +169,10 @@ function WritingCenterCard({
       setMessage("Cole uma redação com pelo menos 50 caracteres antes de iniciar.");
       return;
     }
+    if (essayTheme.trim().length < 8) {
+      setMessage("Informe o tema proposto para a Competência 2 ser avaliada corretamente.");
+      return;
+    }
 
     const supabase = getSupabaseClient();
     if (!supabase) return;
@@ -186,7 +191,7 @@ function WritingCenterCard({
           Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ essay: essayText.trim() })
+        body: JSON.stringify({ essay: essayText.trim(), theme: essayTheme.trim() })
       });
       const result = (await response.json()) as {
         review?: EssayReview;
@@ -210,7 +215,7 @@ function WritingCenterCard({
           c3: completedReview.competencies.c3.score,
           c4: completedReview.competencies.c4.score,
           c5: completedReview.competencies.c5.score,
-          theme: essayText.trim().slice(0, 90),
+          theme: essayTheme.trim(),
           review: completedReview,
           created_at: new Date().toISOString()
         },
@@ -237,15 +242,27 @@ function WritingCenterCard({
         </div>
       </div>
       <p className="mt-3 max-w-2xl text-sm leading-6 text-muted">
-        Cole sua redação para receber nota estimada, análise das cinco competências e melhorias práticas.
+        Informe o tema e cole sua redação para receber nota estimada, análise das cinco competências e melhorias práticas.
       </p>
+
+      <label className="mt-6 block text-sm font-semibold text-slate-200" htmlFor="essay-theme">
+        Tema proposto
+      </label>
+      <input
+        id="essay-theme"
+        value={essayTheme}
+        onChange={(event) => setEssayTheme(event.target.value)}
+        placeholder="Ex: Desafios para a valorização da herança africana no Brasil"
+        maxLength={300}
+        className="mt-2 min-h-12 w-full rounded-lg border border-[#8fa3b8]/20 bg-[#07101d] px-4 text-sm text-[#e6edf2] outline-none transition placeholder:text-[#60758a] focus:border-[#35bfe7]/65 focus:shadow-[0_0_0_3px_rgba(53,191,231,0.10)]"
+      />
 
       <textarea
         value={essayText}
         onChange={(event) => setEssayText(event.target.value)}
         placeholder="Cole sua redação aqui..."
         maxLength={30_000}
-        className="mt-6 min-h-72 w-full resize-y rounded-lg border border-[#8fa3b8]/20 bg-[#07101d] px-5 py-5 text-base leading-7 text-[#e6edf2] outline-none transition placeholder:text-[#60758a] focus:border-[#35bfe7]/65 focus:shadow-[0_0_0_3px_rgba(53,191,231,0.10)]"
+        className="mt-4 min-h-72 w-full resize-y rounded-lg border border-[#8fa3b8]/20 bg-[#07101d] px-5 py-5 text-base leading-7 text-[#e6edf2] outline-none transition placeholder:text-[#60758a] focus:border-[#35bfe7]/65 focus:shadow-[0_0_0_3px_rgba(53,191,231,0.10)]"
       />
 
       <Button
@@ -270,6 +287,7 @@ function WritingCenterCard({
           review={review}
           onNewEssay={() => {
             setEssayText("");
+            setEssayTheme("");
             setReview(null);
             setMessage("");
           }}
