@@ -126,9 +126,19 @@ export async function POST(request: NextRequest) {
 
     return jsonUtf8({ review, balance: result.balance });
   } catch (error) {
+    const structuredError = error && typeof error === "object"
+      ? error as { message?: unknown; code?: unknown; details?: unknown; hint?: unknown }
+      : null;
     console.error("Essay review failed", {
       userId: user.id,
-      reason: error instanceof Error ? error.message : "unknown"
+      reason: error instanceof Error
+        ? error.message
+        : typeof structuredError?.message === "string"
+          ? structuredError.message
+          : "unknown",
+      code: typeof structuredError?.code === "string" ? structuredError.code : undefined,
+      details: typeof structuredError?.details === "string" ? structuredError.details.slice(0, 240) : undefined,
+      hint: typeof structuredError?.hint === "string" ? structuredError.hint.slice(0, 240) : undefined
     });
     const missingKey = error instanceof Error && error.message === "GROQ_API_KEY_NOT_CONFIGURED";
     return jsonUtf8(
