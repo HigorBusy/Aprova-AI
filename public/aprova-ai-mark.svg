@@ -1,34 +1,16 @@
-<svg width="240" height="200" viewBox="0 0 240 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="capBlue" x1="135" y1="35" x2="202" y2="96" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#9DE8FB"/>
-      <stop offset="1" stop-color="#35BFE7"/>
+    <linearGradient id="aStroke" x1="45" y1="158" x2="158" y2="45" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#35BFE7"/>
+      <stop offset="0.52" stop-color="#9DE8FB"/>
+      <stop offset="1" stop-color="#F4F1E8"/>
     </linearGradient>
-    <linearGradient id="smileGreen" x1="72" y1="111" x2="168" y2="150" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#F2C94C"/>
-      <stop offset="1" stop-color="#F8D866"/>
-    </linearGradient>
-    <filter id="softGlow" x="20" y="10" width="200" height="170" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
-      <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
-      <feGaussianBlur stdDeviation="4" result="effect1_foregroundBlur_1_2"/>
+    <filter id="aGlow" x="15" y="12" width="175" height="177" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="8"/>
     </filter>
   </defs>
-
-  <g filter="url(#softGlow)" opacity="0.36">
-    <path d="M120 22L214 70L120 118L26 70L120 22Z" fill="#35BFE7"/>
-    <path d="M60 98C71 133 94 153 120 153C146 153 169 133 180 98H60Z" fill="#F2C94C"/>
-  </g>
-
-  <path d="M120 18L216 67.5L120 117L24 67.5L120 18Z" fill="#F4F1E8"/>
-  <path d="M120 18L216 67.5L120 117V18Z" fill="url(#capBlue)"/>
-  <path d="M32 68L120 112L208 68" stroke="#08111F" stroke-opacity="0.28" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
-
-  <path d="M61 95H179C171 134 148 158 120 158C92 158 69 134 61 95Z" fill="#F4F1E8"/>
-  <path d="M78 112C88 134 103 145 120 145C137 145 152 134 162 112" stroke="#08111F" stroke-width="14" stroke-linecap="round"/>
-  <path d="M83 113C93 129 106 137 120 137C134 137 147 129 157 113" stroke="url(#smileGreen)" stroke-width="10" stroke-linecap="round"/>
-
-  <path d="M188 75V119" stroke="#F4F1E8" stroke-width="8" stroke-linecap="round"/>
-  <circle cx="188" cy="126" r="12" fill="#F2C94C"/>
-  <path d="M188 140C181 148 178 158 178 170H198C198 158 195 148 188 140Z" fill="#F4F1E8"/>
+  <path d="M43 158L96 43C99 36 109 36 112 43L157 145C162 156 174 158 183 149" stroke="#35BFE7" stroke-width="17" stroke-linecap="round" stroke-linejoin="round" opacity="0.24" filter="url(#aGlow)"/>
+  <path d="M43 158L96 43C99 36 109 36 112 43L157 145C162 156 174 158 183 149" stroke="url(#aStroke)" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M72 119H133" stroke="#F2C94C" stroke-width="11" stroke-linecap="round"/>
+  <path d="M176 151L184 143L187 154L176 151Z" fill="#F2C94C"/>
 </svg>
