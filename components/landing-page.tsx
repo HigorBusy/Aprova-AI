@@ -2,12 +2,14 @@
 
 import { ArrowRight, Check, ChevronDown, CircleCheck, FilePenLine, Highlighter, Quote, ShieldCheck } from "lucide-react";
 
+import { FreeEssayTrial } from "@/components/free-essay-trial";
+
 type LandingPageProps = { onStart: () => void };
 type Plan = { name: string; price: string; credits: string; description: string; daily?: string; featured?: boolean; checkoutUrl?: string };
 
 const TRACKING_PARAMS = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term", "fbclid", "gclid"] as const;
 const plans: Plan[] = [
-  { name: "Teste gratuito", price: "R$0", credits: "3 correções completas", description: "Descubra onde sua redação perde pontos antes de escolher um plano." },
+  { name: "Primeira correção", price: "R$0", credits: "1 correção completa", description: "Sem login e sem cartão. Descubra onde sua redação perde pontos antes de escolher um plano." },
   { name: "Plano mensal", price: "R$29,90/mês", credits: "60 créditos por mês", description: "Treino recorrente para quem quer chegar ao ENEM escrevendo melhor.", daily: "Cerca de R$1 por dia", featured: true, checkoutUrl: "https://pay.cakto.com.br/d7tstmz_1049372" },
   { name: "Plano anual", price: "R$197/ano", credits: "720 créditos no ano", description: "O mesmo ritmo do mensal com o menor custo por correção.", daily: "Melhor custo por crédito", checkoutUrl: "https://pay.cakto.com.br/deea3ts" }
 ];
@@ -25,6 +27,7 @@ function openCheckout(checkoutUrl: string) {
 }
 
 export function LandingPage({ onStart }: LandingPageProps) {
+  const openFreeTrial = () => document.querySelector("#correcao-gratis")?.scrollIntoView({ behavior: "smooth" });
   return (
     <main className="landing-shell min-h-screen overflow-hidden bg-[#08111f] text-[#f4f1e8]">
       <header className="relative z-30 mx-auto flex min-h-20 w-full max-w-[1440px] items-center justify-between px-5 sm:px-8 lg:px-12">
@@ -44,17 +47,19 @@ export function LandingPage({ onStart }: LandingPageProps) {
           <h1 className="text-balance text-[clamp(3.2rem,7vw,6rem)] font-semibold leading-[0.92] tracking-[-0.04em]">Sua redação já mostra onde você perde pontos.</h1>
           <p className="mt-7 max-w-xl text-lg leading-8 text-[#b9c8d5] sm:text-xl">O AprovaAI lê pelas cinco competências do ENEM, aponta o trecho que enfraqueceu sua nota e mostra o que corrigir na próxima tentativa.</p>
           <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-            <button type="button" onClick={onStart} className="inline-flex min-h-14 items-center justify-center gap-2 rounded-lg bg-[#f2c94c] px-6 font-bold text-[#08111f] shadow-[0_18px_48px_rgba(2,7,15,0.34)] transition hover:-translate-y-0.5 hover:bg-[#f8d866]">Corrigir minha redação <ArrowRight className="h-4 w-4" /></button>
+            <button type="button" onClick={openFreeTrial} className="inline-flex min-h-14 items-center justify-center gap-2 rounded-lg bg-[#f2c94c] px-6 font-bold text-[#08111f] shadow-[0_18px_48px_rgba(2,7,15,0.34)] transition hover:-translate-y-0.5 hover:bg-[#f8d866]">Fazer 1ª correção grátis <ArrowRight className="h-4 w-4" /></button>
             <a href="#como-funciona" className="inline-flex min-h-14 items-center justify-center gap-2 rounded-lg border border-[#8fa3b8]/25 bg-[#0f1e31]/70 px-6 font-semibold text-[#dce6ec] transition hover:border-[#35bfe7]/50 hover:bg-[#14263d]">Ver o método <ChevronDown className="h-4 w-4" /></a>
           </div>
           <div className="mt-8 flex flex-wrap gap-x-6 gap-y-3 text-sm text-[#8fa3b8]">
-            <span className="inline-flex items-center gap-2"><CircleCheck className="h-4 w-4 text-[#65d69e]" /> 3 correções grátis</span>
+            <span className="inline-flex items-center gap-2"><CircleCheck className="h-4 w-4 text-[#65d69e]" /> 1 correção grátis, sem login</span>
             <span className="inline-flex items-center gap-2"><CircleCheck className="h-4 w-4 text-[#65d69e]" /> Sem nota inventada</span>
             <span className="inline-flex items-center gap-2"><CircleCheck className="h-4 w-4 text-[#65d69e]" /> Ação prática no final</span>
           </div>
         </div>
         <EssayDiagnosticPreview />
       </section>
+
+      <FreeEssayTrial onLogin={onStart} />
 
       <section className="border-y border-[#8fa3b8]/12 bg-[#050a12]/55">
         <div className="mx-auto grid w-full max-w-[1280px] gap-px bg-[#8fa3b8]/12 sm:grid-cols-3">
@@ -94,12 +99,12 @@ export function LandingPage({ onStart }: LandingPageProps) {
       <section id="planos" className="border-t border-[#8fa3b8]/12 bg-[#050a12]/50 px-5 py-24 sm:px-8 lg:py-32">
         <div className="mx-auto w-full max-w-[1280px]">
           <div className="max-w-3xl"><h2 className="text-balance text-4xl font-semibold leading-[1.02] tracking-[-0.035em] sm:text-6xl">Comece corrigindo. Continue evoluindo.</h2><p className="mt-6 text-lg leading-8 text-[#9fb1c1]">Uma correção completa custa 1 crédito. Você escolhe o ritmo sem pagar R$19,70 por cada texto.</p></div>
-          <div className="mt-12 grid gap-4 lg:grid-cols-3 lg:items-stretch">{plans.map((plan) => <PlanCard key={plan.name} plan={plan} onStart={onStart} />)}</div>
+          <div className="mt-12 grid gap-4 lg:grid-cols-3 lg:items-stretch">{plans.map((plan) => <PlanCard key={plan.name} plan={plan} onStart={plan.checkoutUrl ? onStart : openFreeTrial} />)}</div>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm text-[#8fa3b8]"><span className="inline-flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-[#65d69e]" /> Pagamento processado pela Cakto</span><span className="inline-flex items-center gap-2"><Check className="h-4 w-4 text-[#65d69e]" /> Acesso imediato</span><span className="inline-flex items-center gap-2"><Check className="h-4 w-4 text-[#65d69e]" /> Uso no celular e computador</span></div>
         </div>
       </section>
 
-      <section className="mx-auto w-full max-w-[1280px] px-5 py-24 sm:px-8 lg:py-32"><div className="border-y border-[#8fa3b8]/18 py-16 sm:py-24"><div className="max-w-4xl"><h2 className="text-balance text-4xl font-semibold leading-[1.02] tracking-[-0.035em] sm:text-6xl">Cada erro corrigido hoje é ponto que você deixa de perder na prova.</h2><button type="button" onClick={onStart} className="mt-9 inline-flex min-h-14 items-center justify-center gap-2 rounded-lg bg-[#f2c94c] px-7 font-bold text-[#08111f] transition hover:bg-[#f8d866]">Fazer minha primeira correção <ArrowRight className="h-4 w-4" /></button></div></div></section>
+      <section className="mx-auto w-full max-w-[1280px] px-5 py-24 sm:px-8 lg:py-32"><div className="border-y border-[#8fa3b8]/18 py-16 sm:py-24"><div className="max-w-4xl"><h2 className="text-balance text-4xl font-semibold leading-[1.02] tracking-[-0.035em] sm:text-6xl">Cada erro corrigido hoje é ponto que você deixa de perder na prova.</h2><button type="button" onClick={openFreeTrial} className="mt-9 inline-flex min-h-14 items-center justify-center gap-2 rounded-lg bg-[#f2c94c] px-7 font-bold text-[#08111f] transition hover:bg-[#f8d866]">Fazer minha correção grátis <ArrowRight className="h-4 w-4" /></button></div></div></section>
 
       <footer className="border-t border-[#8fa3b8]/12 px-5 py-8 text-sm text-[#6f8498] sm:px-8"><div className="mx-auto flex w-full max-w-[1280px] flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"><img src="/aprova-ai-logo-lockup.svg" alt="AprovaAI" className="h-8 w-auto self-start object-contain" /><p>Preparação orientada para redação do ENEM.</p></div></footer>
     </main>

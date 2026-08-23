@@ -30,7 +30,7 @@ export function SignInPage({ mode, message, submitting = false, onModeChange, on
   }
 
   const title = mode === "login" ? "Continue de onde parou." : mode === "recovery" ? "Crie uma nova senha." : "Faça sua primeira correção.";
-  const description = mode === "login" ? "Entre para acessar suas correções, créditos e evolução." : mode === "recovery" ? "Use uma senha segura com pelo menos seis caracteres." : "Sua conta começa com três correções completas para você conhecer o método.";
+  const description = mode === "login" ? "Entre para acessar suas correções, créditos e evolução." : mode === "recovery" ? "Use uma senha segura com pelo menos seis caracteres." : "Crie sua conta para acessar o AprovaAI.";
 
   return (
     <main className="grid min-h-[100dvh] bg-[#08111f] text-[#f4f1e8] lg:grid-cols-[0.94fr_1.06fr]">
@@ -48,7 +48,7 @@ export function SignInPage({ mode, message, submitting = false, onModeChange, on
       </section>
 
       <section className="relative flex min-h-[100dvh] items-center justify-center px-5 py-10 sm:px-8">
-        {mode === "login" && onBackToLanding ? <button type="button" onClick={onBackToLanding} className="absolute left-5 top-5 inline-flex min-h-10 items-center gap-2 rounded-lg px-2 text-sm font-semibold text-[#8fa3b8] transition hover:text-[#f4f1e8] sm:left-8 sm:top-8"><ArrowLeft className="h-4 w-4" /> Voltar</button> : null}
+        {onBackToLanding ? <button type="button" onClick={onBackToLanding} className="absolute left-5 top-5 inline-flex min-h-10 items-center gap-2 rounded-lg px-2 text-sm font-semibold text-[#8fa3b8] transition hover:text-[#f4f1e8] sm:left-8 sm:top-8"><ArrowLeft className="h-4 w-4" /> Voltar</button> : null}
         <div className="w-full max-w-[440px] animate-float-in">
           <div className="mb-9 flex justify-center lg:hidden"><img src="/aprova-ai-logo-lockup.svg" alt="AprovaAI" className="h-12 w-auto max-w-[240px] object-contain" /></div>
           <h1 className="text-balance text-4xl font-semibold leading-[1.02] tracking-[-0.035em] sm:text-5xl">{title}</h1>
@@ -65,7 +65,7 @@ export function SignInPage({ mode, message, submitting = false, onModeChange, on
           </form>
 
           {message ? <p role="status" className="mt-5 rounded-lg border border-[#8fa3b8]/18 bg-[#0f1e31] p-4 text-sm leading-6 text-[#c7d4df]">{message}</p> : null}
-          {mode !== "recovery" ? <div className="mt-7 space-y-4 text-center text-sm text-[#8fa3b8]"><p>{mode === "login" ? "Ainda não testou?" : "Já possui conta?"} <button type="button" onClick={() => onModeChange?.(mode === "login" ? "signup" : "login")} className="font-semibold text-[#9de8fb] hover:text-white">{mode === "login" ? "Faça três correções grátis" : "Entrar"}</button></p><p>Comprou um plano? <a href="/ativar" className="font-semibold text-[#9de8fb] hover:text-white">Ativar acesso</a></p></div> : null}
+          {mode !== "recovery" ? <div className="mt-7 space-y-4 text-center text-sm text-[#8fa3b8]">{mode === "login" && onBackToLanding ? <p>Ainda não testou? <button type="button" onClick={onBackToLanding} className="font-semibold text-[#9de8fb] hover:text-white">Faça 1 correção grátis sem login</button></p> : <p>Já possui conta? <button type="button" onClick={() => onModeChange?.("login")} className="font-semibold text-[#9de8fb] hover:text-white">Entrar</button></p>}<p>Comprou um plano? <a href="/ativar" className="font-semibold text-[#9de8fb] hover:text-white">Ativar acesso</a></p></div> : null}
         </div>
       </section>
     </main>
