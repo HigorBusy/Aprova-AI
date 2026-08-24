@@ -6,6 +6,7 @@ import type { User } from "@supabase/supabase-js";
 import { ArrowRight, Bot, CheckCircle2, CreditCard, FileText, Target } from "lucide-react";
 
 import { AuthCard } from "@/components/auth-card";
+import { EssayThemeGenerator } from "@/components/essay-theme-generator";
 import { Button, Card } from "@/components/ui";
 import { Loader } from "@/components/ui/loader-15";
 import type { EssayReview } from "@/lib/ai/types";
@@ -242,11 +243,19 @@ function WritingCenterCard({
         </div>
       </div>
       <p className="mt-3 max-w-2xl text-sm leading-6 text-muted">
-        Informe o tema e cole sua redação para receber nota estimada, análise das cinco competências e melhorias práticas.
+        Escolha uma proposta de treino ou informe seu próprio tema. Depois, cole a redação para receber a análise completa.
       </p>
 
+      <EssayThemeGenerator
+        onSelect={(proposal) => {
+          setEssayTheme(proposal.title);
+          setReview(null);
+          setMessage("Tema selecionado. Agora escreva sua redação e envie para correção.");
+        }}
+      />
+
       <label className="mt-6 block text-sm font-semibold text-slate-200" htmlFor="essay-theme">
-        Tema proposto
+        Tema escolhido
       </label>
       <input
         id="essay-theme"
