@@ -33,11 +33,12 @@ def make_icon(size: int = 1024, safe: bool = False) -> Image.Image:
         return offset + x * scale * safe_scale, offset + y * scale * safe_scale
 
     points = [
-        point(154, 383), point(154, 131), point(272, 131), point(309, 134),
-        point(342, 153), point(358, 184), point(358, 215), point(343, 246),
-        point(311, 266), point(272, 269), point(154, 269)
+        point(126, 381), point(183, 142), point(190, 129), point(203, 121),
+        point(220, 118), point(281, 118), point(313, 122), point(341, 140),
+        point(356, 168), point(358, 199), point(346, 229), point(320, 250),
+        point(283, 260), point(165, 260)
     ]
-    stroke_width = round(27 * scale * safe_scale)
+    stroke_width = round(28 * scale * safe_scale)
 
     glow = Image.new("RGBA", image.size, (0, 0, 0, 0))
     ImageDraw.Draw(glow).line(points, fill=(53, 191, 231, 130), width=round(42 * scale * safe_scale), joint="curve")
@@ -66,7 +67,7 @@ def make_icon(size: int = 1024, safe: bool = False) -> Image.Image:
     image.alpha_composite(Image.composite(gradient, Image.new("RGBA", image.size), mask))
 
     draw = ImageDraw.Draw(image)
-    draw.polygon((point(154, 383), point(132, 417), point(178, 399)), fill=(242, 201, 76, 255))
+    draw.polygon((point(126, 381), point(105, 414), point(145, 394)), fill=(242, 201, 76, 255))
     return image
 
 

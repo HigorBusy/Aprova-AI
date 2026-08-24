@@ -71,13 +71,13 @@ export const metadata: Metadata = {
   manifest: "/manifest.webmanifest",
   icons: {
     icon: [
-      { url: "/icons/pontuei-tab-48.png?v=3", type: "image/png", sizes: "48x48" },
-      { url: "/favicon.ico?v=2", sizes: "any" },
+      { url: "/icons/pontuei-tab-48.png?v=4", type: "image/png", sizes: "48x48" },
+      { url: "/favicon.ico?v=4", sizes: "any" },
       { url: "/icons/pontuei-192.png", type: "image/png", sizes: "192x192" },
       { url: "/icons/pontuei-512.png", type: "image/png", sizes: "512x512" }
     ],
     apple: [{ url: "/icons/pontuei-apple-touch.png", type: "image/png", sizes: "180x180" }],
-    shortcut: "/icons/pontuei-tab-48.png?v=3"
+    shortcut: "/icons/pontuei-tab-48.png?v=4"
   },
   appleWebApp: {
     capable: true,
