@@ -19,8 +19,10 @@ export function EssayThemeGenerator({ onSelect }: EssayThemeGeneratorProps) {
   const [category, setCategory] = useState<"all" | EssayThemeCategory>("all");
   const [origin, setOrigin] = useState<"all" | EssayThemeOrigin>("all");
   const [proposal, setProposal] = useState<EssayThemeProposal | null>(null);
+  const [searched, setSearched] = useState(false);
 
   function generate() {
+    setSearched(true);
     setProposal((current) => pickEssayTheme(category, origin, current?.id));
   }
 
@@ -84,7 +86,7 @@ export function EssayThemeGenerator({ onSelect }: EssayThemeGeneratorProps) {
           </div>
         </div>
       ) : (
-        <div className="flex min-h-32 items-center justify-center gap-3 p-5 text-sm text-[#8fa3b8]"><History className="h-5 w-5 text-[#35bfe7]" /> Selecione os filtros e sorteie sua primeira proposta.</div>
+        <div className="flex min-h-32 items-center justify-center gap-3 p-5 text-center text-sm text-[#8fa3b8]"><History className="h-5 w-5 shrink-0 text-[#35bfe7]" /> {searched ? "Não há tema oficial nesse recorte. Escolha ‘Oficiais e autorais’ para ampliar o sorteio." : "Selecione os filtros e sorteie sua primeira proposta."}</div>
       )}
     </section>
   );

@@ -322,6 +322,7 @@ export function pickEssayTheme(
     (category === "all" || proposal.category === category) &&
     (origin === "all" || proposal.origin === origin)
   );
+  if (matching.length === 0) return null;
   const withoutPrevious = matching.length > 1 ? matching.filter((proposal) => proposal.id !== previousId) : matching;
-  return withoutPrevious[Math.floor(Math.random() * withoutPrevious.length)] ?? ESSAY_THEME_PROPOSALS[0];
+  return withoutPrevious[Math.floor(Math.random() * withoutPrevious.length)] ?? null;
 }
