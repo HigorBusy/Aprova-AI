@@ -3,6 +3,7 @@
 import { ArrowRight, CheckCircle2, LockKeyhole } from "lucide-react";
 import { useState } from "react";
 
+import { EssayThemeGenerator } from "@/components/essay-theme-generator";
 import { Loader } from "@/components/ui/loader-15";
 import type { EssayReview } from "@/lib/ai/types";
 
@@ -95,7 +96,13 @@ export function FreeEssayTrial({ onLogin }: FreeEssayTrialProps) {
           <p className="mt-6 flex items-start gap-2 text-sm leading-6 text-[#8fa3b8]"><LockKeyhole className="mt-0.5 h-4 w-4 shrink-0 text-[#65d69e]" /> Uma correção gratuita por dispositivo. Seu texto não é publicado.</p>
         </div>
         <div className="rounded-2xl border border-[#8fa3b8]/18 bg-[#0b1829] p-5 shadow-[0_30px_90px_rgba(2,7,15,0.45)] sm:p-8">
-          <label className="grid gap-2 text-sm font-semibold text-[#dce6ec]">Tema proposto<input value={theme} onChange={(event) => setTheme(event.target.value)} maxLength={300} placeholder="Ex: Desafios para a valorização da herança africana no Brasil" className="min-h-12 rounded-lg border border-[#8fa3b8]/20 bg-[#08111f] px-4 text-base font-normal outline-none transition placeholder:text-[#607689] focus:border-[#35bfe7]/65" /></label>
+          <EssayThemeGenerator
+            onSelect={(proposal) => {
+              setTheme(proposal.title);
+              setMessage("Tema selecionado. Escreva sua redação abaixo.");
+            }}
+          />
+          <label className="mt-5 grid gap-2 text-sm font-semibold text-[#dce6ec]">Tema escolhido<input value={theme} onChange={(event) => setTheme(event.target.value)} maxLength={300} placeholder="Ex: Desafios para a valorização da herança africana no Brasil" className="min-h-12 rounded-lg border border-[#8fa3b8]/20 bg-[#08111f] px-4 text-base font-normal outline-none transition placeholder:text-[#607689] focus:border-[#35bfe7]/65" /></label>
           <label className="mt-5 grid gap-2 text-sm font-semibold text-[#dce6ec]">Sua redação<textarea value={essay} onChange={(event) => setEssay(event.target.value)} maxLength={30_000} rows={12} placeholder="Cole sua redação completa aqui..." className="min-h-[280px] resize-y rounded-lg border border-[#8fa3b8]/20 bg-[#08111f] p-4 text-base font-normal leading-7 outline-none transition placeholder:text-[#607689] focus:border-[#35bfe7]/65" /></label>
           <div className="mt-3 flex items-center justify-between gap-4 text-xs text-[#8fa3b8]"><span>{wordCount} palavras</span><span>1 correção gratuita</span></div>
           {message ? <p role="status" className="mt-4 rounded-lg border border-[#ff8b8b]/25 bg-[#ff6b6b]/10 p-4 text-sm leading-6 text-[#ffd0d0]">{message}</p> : null}
