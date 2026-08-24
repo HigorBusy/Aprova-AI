@@ -3,6 +3,7 @@
 import { ArrowRight, Check, ChevronDown, CircleCheck, FilePenLine, Highlighter, Quote, ShieldCheck, Users } from "lucide-react";
 
 import { FreeEssayTrial } from "@/components/free-essay-trial";
+import { PRODUCT_CONFIG } from "@/lib/product-config";
 
 type LandingPageProps = { onStart: () => void };
 type Plan = { name: string; price: string; credits: string; description: string; daily?: string; featured?: boolean; checkoutUrl?: string };
@@ -10,8 +11,8 @@ type Plan = { name: string; price: string; credits: string; description: string;
 const TRACKING_PARAMS = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term", "fbclid", "gclid"] as const;
 const plans: Plan[] = [
   { name: "Primeira correção", price: "R$0", credits: "1 correção completa", description: "Sem login e sem cartão. Descubra onde sua redação perde pontos antes de escolher um plano." },
-  { name: "Plano mensal", price: "R$29,90/mês", credits: "60 créditos por mês", description: "Treino recorrente para quem quer chegar ao ENEM escrevendo melhor.", daily: "Cerca de R$1 por dia", featured: true, checkoutUrl: "https://pay.cakto.com.br/d7tstmz_1049372" },
-  { name: "Plano anual", price: "R$197/ano", credits: "720 créditos no ano", description: "O mesmo ritmo do mensal com o menor custo por correção.", daily: "Melhor custo por crédito", checkoutUrl: "https://pay.cakto.com.br/deea3ts" }
+  { name: "Plano mensal", price: "R$29,90/mês", credits: `${PRODUCT_CONFIG.plans.monthlyCredits} créditos por mês`, description: "Treino recorrente para quem quer chegar ao ENEM escrevendo melhor.", daily: "Cerca de R$1 por dia", featured: true, checkoutUrl: "https://pay.cakto.com.br/d7tstmz_1049372" },
+  { name: "Plano anual", price: "R$197/ano", credits: `${PRODUCT_CONFIG.plans.annualCredits.toLocaleString("pt-BR")} créditos no ano`, description: "Créditos para manter uma rotina intensa até a prova com o menor custo por correção.", daily: "Melhor custo por crédito", checkoutUrl: "https://pay.cakto.com.br/deea3ts" }
 ];
 
 function openCheckout(checkoutUrl: string) {

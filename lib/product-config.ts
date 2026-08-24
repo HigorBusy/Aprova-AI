@@ -11,6 +11,10 @@ export const PRODUCT_CONFIG = {
     tutorTool: 1,
     fileAnalysis: 2
   },
+  plans: {
+    monthlyCredits: 120,
+    annualCredits: 3000
+  },
   features: {
     presentations: false,
     questions: true
