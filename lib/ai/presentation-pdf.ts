@@ -25,8 +25,8 @@ export async function renderPresentationPdf(deck: PresentationDeck): Promise<Dec
   const pdf = await PDFDocument.create();
   pdf.setTitle(deck.title);
   pdf.setSubject(deck.objective);
-  pdf.setAuthor("AprovaAI");
-  pdf.setCreator("AprovaAI Tutor IA");
+  pdf.setAuthor("Pontuei");
+  pdf.setCreator("Pontuei Tutor IA");
 
   const regular = await pdf.embedFont(StandardFonts.Helvetica);
   const bold = await pdf.embedFont(StandardFonts.HelveticaBold);
@@ -38,7 +38,7 @@ export async function renderPresentationPdf(deck: PresentationDeck): Promise<Dec
   const bytes = await pdf.save();
   return {
     bytes,
-    fileName: `${slugify(deck.title || "apresentacao-aprovaai")}.pdf`
+    fileName: `${slugify(deck.title || "apresentacao-pontuei")}.pdf`
   };
 }
 
@@ -189,7 +189,7 @@ function drawSlide(page: PDFPage, deck: PresentationDeck, slide: PresentationSli
 function drawBackPage(page: PDFPage, deck: PresentationDeck, regular: PDFFont, bold: PDFFont) {
   drawBackground(page);
   drawBrand(page, bold);
-  drawPill(page, "AprovaAI", MARGIN, 92, 15, 140);
+  drawPill(page, "Pontuei", MARGIN, 92, 15, 140);
   drawText(page, "Agora execute.", {
     x: MARGIN,
     y: 540,
@@ -236,7 +236,7 @@ function drawBackground(page: PDFPage) {
 }
 
 function drawBrand(page: PDFPage, font: PDFFont) {
-  page.drawText("AprovaAI", {
+  page.drawText("Pontuei", {
     x: PAGE_WIDTH - 172,
     y: PAGE_HEIGHT - 54,
     size: 18,
@@ -363,5 +363,5 @@ function slugify(value: string) {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "")
     .slice(0, 80);
-  return slug || "apresentacao-aprovaai";
+  return slug || "apresentacao-pontuei";
 }

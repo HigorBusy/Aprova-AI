@@ -12,7 +12,7 @@ Estudantes brasileiros se preparando para o ENEM, especialmente quem precisa ele
 
 ## Product Purpose
 
-O AprovaAI transforma uma redacao em diagnostico acionavel: nota estimada, avaliacao pelas cinco competencias do ENEM, evidencia dos erros no texto e uma proxima tarefa clara. O produto tambem oferece suporte complementar com questoes, evolucao e Tutor IA, mas a correcao de redacao e o nucleo da experiencia e da promessa comercial.
+O Pontuei transforma uma redacao em diagnostico acionavel: nota estimada, avaliacao pelas cinco competencias do ENEM, evidencia dos erros no texto e uma proxima tarefa clara. O produto tambem oferece suporte complementar com questoes, evolucao e Tutor IA, mas a correcao de redacao e o nucleo da experiencia e da promessa comercial.
 
 ## Positioning
 
@@ -34,7 +34,7 @@ O aluno costuma usar o produto a noite ou depois da escola, com a redacao aberta
 
 ## Brand Commitments
 
-- Nome: AprovaAI.
+- Nome: Pontuei.
 - Marca: simbolo minimalista de lapis, sorriso e chapeu de formatura ja presente nos assets do produto.
 - Voz: direta, humana, firme e util; sem infantilidade, ficcao cientifica, frases motivacionais vazias ou linguagem de cursinho generico.
 - Experiencia predominantemente escura e confortavel para estudo prolongado.

@@ -1,4 +1,4 @@
-# AprovaAI Ecosystem Redesign
+# Pontuei Ecosystem Redesign
 
 Concept seed: `9b139f20`
 
@@ -6,7 +6,7 @@ Concept seed: `9b139f20`
 
 **Creative North Star:** Mesa de Correcao Noturna
 
-O AprovaAI parece o ambiente de trabalho de um aluno serio durante uma sessao noturna de redacao: concentrado, editorial e humano. A interface usa o vocabulario visual do papel corrigido, da caneta e do marca-texto sem imitar um caderno escolar ou transformar o produto em brincadeira.
+O Pontuei parece o ambiente de trabalho de um aluno serio durante uma sessao noturna de redacao: concentrado, editorial e humano. A interface usa o vocabulario visual do papel corrigido, da caneta e do marca-texto sem imitar um caderno escolar ou transformar o produto em brincadeira.
 
 ## Product Mechanism
 

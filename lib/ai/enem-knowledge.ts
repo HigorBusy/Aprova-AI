@@ -1,5 +1,5 @@
 export const ENEM_BASE_KNOWLEDGE = `
-BASE FIXA DO APROVAAI PARA ENEM
+BASE FIXA DO PONTUEI PARA ENEM
 
 REDACAO ENEM
 - A nota vai de 0 a 1000 e soma cinco competencias de 0 a 200.

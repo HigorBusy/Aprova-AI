@@ -131,7 +131,7 @@ function getAuthConnectionMessage(error: unknown) {
     normalized.includes("bad gateway") ||
     normalized.includes("networkerror")
   ) {
-    return "Não foi possível conectar ao servidor de login agora. O backend do AprovaAI pode estar iniciando; aguarde alguns minutos e tente novamente.";
+    return "Não foi possível conectar ao servidor de login agora. O backend do Pontuei pode estar iniciando; aguarde alguns minutos e tente novamente.";
   }
 
   return "Não foi possível concluir a conexão. Verifique sua internet e tente novamente.";

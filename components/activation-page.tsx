@@ -67,13 +67,13 @@ export function ActivationPage() {
 
       <section className="relative z-10 w-full max-w-[500px] rounded-[2rem] border border-[#e8eee8]/15 bg-[#061014]/78 p-5 shadow-[0_34px_110px_rgba(0,0,0,0.48)] backdrop-blur-2xl sm:p-7">
         <div className="mx-auto mb-7 flex h-24 w-full max-w-[300px] items-center justify-center rounded-[2rem] border border-[#e8eee8]/10 bg-[#071014]/38 px-7 shadow-[0_0_70px_rgba(58,167,216,0.08)] backdrop-blur-xl">
-          <img src="/aprova-ai-logo-lockup.svg" alt="AprovaAI" className="h-16 w-auto max-w-full object-contain" />
+          <img src="/pontuei-logo-lockup.svg" alt="Pontuei" className="h-16 w-auto max-w-full object-contain" />
         </div>
 
         <div className="rounded-2xl border border-[#efb65a]/25 bg-[#efb65a]/10 p-4">
           <p className="font-mono text-[0.68rem] font-bold uppercase tracking-[0.16em] text-[#f0c777]">Acesso após compra</p>
           <h1 className="mt-3 text-3xl font-semibold leading-tight tracking-[-0.06em] text-[#e8eee8] sm:text-4xl">
-            Ative sua conta do AprovaAI.
+            Ative sua conta do Pontuei.
           </h1>
           <p className="mt-3 text-sm leading-6 text-[#c9d4cc]">
             Use o e-mail informado na Cakto e o código do pedido exibido no comprovante. Cada compra só pode ser ativada uma vez.

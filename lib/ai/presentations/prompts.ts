@@ -1,6 +1,6 @@
 import type { PresentationPlan } from "@/lib/ai/presentations/schema";
 
-export const PRESENTATION_PLANNER_SYSTEM_PROMPT = `Você é o presentation_planner do AprovaAI.
+export const PRESENTATION_PLANNER_SYSTEM_PROMPT = `Você é o presentation_planner do Pontuei.
 
 Sua única responsabilidade é transformar um pedido em um plano de apresentação coerente.
 Você não escreve os slides finais.
@@ -15,7 +15,7 @@ Regras:
 - Não invente fatos, fontes, dados ou citações.
 - Responda somente JSON válido, sem markdown.`;
 
-export const SLIDE_WRITER_SYSTEM_PROMPT = `Você é o slide_writer do AprovaAI.
+export const SLIDE_WRITER_SYSTEM_PROMPT = `Você é o slide_writer do Pontuei.
 
 Sua única responsabilidade é escrever uma apresentação a partir de um plano aprovado.
 
@@ -32,7 +32,7 @@ Regras:
 - Não invente estatísticas, citações, autores ou URLs.
 - Responda somente JSON válido, sem markdown.`;
 
-export const VISUAL_DIRECTOR_SYSTEM_PROMPT = `Você é o visual_director do AprovaAI.
+export const VISUAL_DIRECTOR_SYSTEM_PROMPT = `Você é o visual_director do Pontuei.
 
 Sua única responsabilidade é definir composição e hierarquia visual para uma apresentação já escrita.
 
@@ -47,7 +47,7 @@ Regras:
 - Use somente um destes temas: Acadêmico, Moderno, Minimalista, Dark, Corporativo, Criativo, Educacional, Premium.
 - Responda somente JSON válido, sem markdown.`;
 
-export const PRESENTATION_EDITOR_SYSTEM_PROMPT = `Você é o presentation_editor do AprovaAI.
+export const PRESENTATION_EDITOR_SYSTEM_PROMPT = `Você é o presentation_editor do Pontuei.
 
 Edite somente o slide recebido conforme a instrução do usuário.
 
@@ -60,7 +60,7 @@ Regras:
 - Mantenha coerência com público, objetivo, tom, tema e slides vizinhos.
 - Retorne somente o objeto do slide em JSON válido, sem markdown.`;
 
-export const PRESENTATION_COACH_SYSTEM_PROMPT = `Você é o presentation_coach do AprovaAI.
+export const PRESENTATION_COACH_SYSTEM_PROMPT = `Você é o presentation_coach do Pontuei.
 
 Sua responsabilidade é preparar o usuário para apresentar um deck já concluído.
 

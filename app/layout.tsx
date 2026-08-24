@@ -10,24 +10,24 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://aprova-ai-gray.vercel.app"),
+  metadataBase: new URL("https://pontuei-enem.vercel.app"),
   title: {
-    default: "AprovaAI | Corretor de Redação ENEM com IA",
-    template: "%s | AprovaAI"
+    default: "Pontuei | Corretor de Redação ENEM com IA",
+    template: "%s | Pontuei"
   },
   description: "Corrija sua redação do ENEM por competência, descubra onde perdeu pontos e receba um plano prático para melhorar.",
-  applicationName: "AprovaAI",
+  applicationName: "Pontuei",
   keywords: [
     "corretor de redação ENEM",
     "correção de redação ENEM",
     "redação ENEM com IA",
     "nota redação ENEM",
     "competências ENEM",
-    "AprovaAI"
+    "Pontuei"
   ],
-  authors: [{ name: "AprovaAI", url: "https://aprova-ai-gray.vercel.app" }],
-  creator: "AprovaAI",
-  publisher: "AprovaAI",
+  authors: [{ name: "Pontuei", url: "https://pontuei-enem.vercel.app" }],
+  creator: "Pontuei",
+  publisher: "Pontuei",
   category: "education",
   verification: {
     google: "8u5A__DUbwxHcjnIYVU3dWtT6GgNrC0ktTCsCGBjRJQ"
@@ -50,39 +50,39 @@ export const metadata: Metadata = {
     type: "website",
     locale: "pt_BR",
     url: "/",
-    siteName: "AprovaAI",
-    title: "AprovaAI | Corretor de Redação ENEM com IA",
+    siteName: "Pontuei",
+    title: "Pontuei | Corretor de Redação ENEM com IA",
     description: "Veja sua nota por competência, os trechos que enfraquecem o texto e o próximo passo para evoluir.",
     images: [
       {
-        url: "/aprova-ai-checkout-banner.png",
+        url: "/pontuei-social-banner.png",
         width: 1536,
         height: 1024,
-        alt: "AprovaAI, corretor de redação para o ENEM"
+        alt: "Pontuei, corretor de redação para o ENEM"
       }
     ]
   },
   twitter: {
     card: "summary_large_image",
-    title: "AprovaAI | Corretor de Redação ENEM com IA",
+    title: "Pontuei | Corretor de Redação ENEM com IA",
     description: "Corrija sua redação pelas cinco competências e descubra exatamente onde melhorar.",
-    images: ["/aprova-ai-checkout-banner.png"]
+    images: ["/pontuei-social-banner.png"]
   },
   manifest: "/manifest.webmanifest",
   icons: {
     icon: [
-      { url: "/icons/aprova-ai-tab-48.png?v=2", type: "image/png", sizes: "48x48" },
+      { url: "/icons/pontuei-tab-48.png?v=3", type: "image/png", sizes: "48x48" },
       { url: "/favicon.ico?v=2", sizes: "any" },
-      { url: "/icons/aprova-ai-192.png", type: "image/png", sizes: "192x192" },
-      { url: "/icons/aprova-ai-512.png", type: "image/png", sizes: "512x512" }
+      { url: "/icons/pontuei-192.png", type: "image/png", sizes: "192x192" },
+      { url: "/icons/pontuei-512.png", type: "image/png", sizes: "512x512" }
     ],
-    apple: [{ url: "/icons/aprova-ai-apple-touch.png", type: "image/png", sizes: "180x180" }],
-    shortcut: "/icons/aprova-ai-tab-48.png?v=2"
+    apple: [{ url: "/icons/pontuei-apple-touch.png", type: "image/png", sizes: "180x180" }],
+    shortcut: "/icons/pontuei-tab-48.png?v=3"
   },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "AprovaAI"
+    title: "Pontuei"
   }
 };
 
@@ -96,10 +96,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    name: "AprovaAI",
+    name: "Pontuei",
     applicationCategory: "EducationalApplication",
     operatingSystem: "Web",
-    url: "https://aprova-ai-gray.vercel.app",
+    url: "https://pontuei-enem.vercel.app",
     description: "Corretor de redação ENEM com análise por competência e plano de melhoria.",
     inLanguage: "pt-BR",
     offers: {

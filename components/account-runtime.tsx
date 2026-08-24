@@ -111,7 +111,7 @@ export function AccountRuntime() {
           </div>
           <h2 className="mt-5 text-2xl font-semibold">Acesso temporariamente bloqueado</h2>
           <p className="mt-3 text-sm leading-6 text-slate-400">
-            Sua conta foi pausada pela equipe do AprovaAI. Entre em contato com o suporte para mais informações.
+            Sua conta foi pausada pela equipe do Pontuei. Entre em contato com o suporte para mais informações.
           </p>
           <button
             type="button"

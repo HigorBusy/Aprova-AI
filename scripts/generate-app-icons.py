@@ -33,9 +33,9 @@ def make_icon(size: int = 1024, safe: bool = False) -> Image.Image:
         return offset + x * scale * safe_scale, offset + y * scale * safe_scale
 
     points = [
-        point(132, 382), point(239, 149), point(247, 141), point(260, 141),
-        point(273, 149), point(364, 355), point(370, 367), point(383, 375),
-        point(398, 375), point(416, 363)
+        point(154, 383), point(154, 131), point(272, 131), point(309, 134),
+        point(342, 153), point(358, 184), point(358, 215), point(343, 246),
+        point(311, 266), point(272, 269), point(154, 269)
     ]
     stroke_width = round(27 * scale * safe_scale)
 
@@ -66,20 +66,14 @@ def make_icon(size: int = 1024, safe: bool = False) -> Image.Image:
     image.alpha_composite(Image.composite(gradient, Image.new("RGBA", image.size), mask))
 
     draw = ImageDraw.Draw(image)
-    bar_start, bar_end = point(191, 303), point(315, 303)
-    bar_width = round(23 * scale * safe_scale)
-    draw.line((bar_start, bar_end), fill=(242, 201, 76, 255), width=bar_width)
-    for x, y in (bar_start, bar_end):
-        radius = bar_width / 2
-        draw.ellipse((x - radius, y - radius, x + radius, y + radius), fill=(242, 201, 76, 255))
-    draw.polygon((point(401, 367), point(418, 350), point(424, 373)), fill=(242, 201, 76, 255))
+    draw.polygon((point(154, 383), point(132, 417), point(178, 399)), fill=(242, 201, 76, 255))
     return image
 
 
 master = make_icon()
-master.resize((512, 512), Image.Resampling.LANCZOS).save(OUTPUT / "aprova-ai-512.png", optimize=True)
-master.resize((192, 192), Image.Resampling.LANCZOS).save(OUTPUT / "aprova-ai-192.png", optimize=True)
-master.resize((180, 180), Image.Resampling.LANCZOS).save(OUTPUT / "aprova-ai-apple-touch.png", optimize=True)
-master.resize((48, 48), Image.Resampling.LANCZOS).save(OUTPUT / "aprova-ai-tab-48.png", optimize=True)
-make_icon(safe=True).resize((512, 512), Image.Resampling.LANCZOS).save(OUTPUT / "aprova-ai-maskable-512.png", optimize=True)
+master.resize((512, 512), Image.Resampling.LANCZOS).save(OUTPUT / "pontuei-512.png", optimize=True)
+master.resize((192, 192), Image.Resampling.LANCZOS).save(OUTPUT / "pontuei-192.png", optimize=True)
+master.resize((180, 180), Image.Resampling.LANCZOS).save(OUTPUT / "pontuei-apple-touch.png", optimize=True)
+master.resize((48, 48), Image.Resampling.LANCZOS).save(OUTPUT / "pontuei-tab-48.png", optimize=True)
+make_icon(safe=True).resize((512, 512), Image.Resampling.LANCZOS).save(OUTPUT / "pontuei-maskable-512.png", optimize=True)
 master.save(ROOT / "public" / "favicon.ico", format="ICO", sizes=[(16, 16), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)])

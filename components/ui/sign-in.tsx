@@ -30,12 +30,12 @@ export function SignInPage({ mode, message, submitting = false, onModeChange, on
   }
 
   const title = mode === "login" ? "Continue de onde parou." : mode === "recovery" ? "Crie uma nova senha." : "Faça sua primeira correção.";
-  const description = mode === "login" ? "Entre para acessar suas correções, créditos e evolução." : mode === "recovery" ? "Use uma senha segura com pelo menos seis caracteres." : "Crie sua conta para acessar o AprovaAI.";
+  const description = mode === "login" ? "Entre para acessar suas correções, créditos e evolução." : mode === "recovery" ? "Use uma senha segura com pelo menos seis caracteres." : "Crie sua conta para acessar o Pontuei.";
 
   return (
     <main className="grid min-h-[100dvh] bg-[#08111f] text-[#f4f1e8] lg:grid-cols-[0.94fr_1.06fr]">
       <section className="relative hidden overflow-hidden border-r border-[#8fa3b8]/15 bg-[#edf2f4] p-10 text-[#0b1726] lg:flex lg:flex-col lg:justify-between xl:p-14">
-        <img src="/aprova-ai-logo-lockup.svg" alt="AprovaAI" className="h-11 w-auto self-start object-contain brightness-[0.34] saturate-[1.4]" />
+        <img src="/pontuei-logo-lockup.svg" alt="Pontuei" className="h-11 w-auto self-start object-contain brightness-[0.34] saturate-[1.4]" />
         <div className="relative mx-auto w-full max-w-xl rotate-[-1.2deg] rounded-2xl bg-white p-9 shadow-[0_34px_100px_rgba(20,43,63,0.16)]">
           <div className="flex items-center justify-between border-b border-[#d8e1e6] pb-5"><span className="text-sm font-semibold text-[#05799a]">Correção em andamento</span><strong className="font-mono text-3xl tabular-nums">760</strong></div>
           <div className="mt-7 space-y-5 text-[0.95rem] leading-8 text-[#344b5f]">
@@ -50,7 +50,7 @@ export function SignInPage({ mode, message, submitting = false, onModeChange, on
       <section className="relative flex min-h-[100dvh] items-center justify-center px-5 py-10 sm:px-8">
         {onBackToLanding ? <button type="button" onClick={onBackToLanding} className="absolute left-5 top-5 inline-flex min-h-10 items-center gap-2 rounded-lg px-2 text-sm font-semibold text-[#8fa3b8] transition hover:text-[#f4f1e8] sm:left-8 sm:top-8"><ArrowLeft className="h-4 w-4" /> Voltar</button> : null}
         <div className="w-full max-w-[440px] animate-float-in">
-          <div className="mb-9 flex justify-center lg:hidden"><img src="/aprova-ai-logo-lockup.svg" alt="AprovaAI" className="h-12 w-auto max-w-[240px] object-contain" /></div>
+          <div className="mb-9 flex justify-center lg:hidden"><img src="/pontuei-logo-lockup.svg" alt="Pontuei" className="h-12 w-auto max-w-[240px] object-contain" /></div>
           <h1 className="text-balance text-4xl font-semibold leading-[1.02] tracking-[-0.035em] sm:text-5xl">{title}</h1>
           <p className="mt-4 max-w-md text-base leading-7 text-[#9fb1c1]">{description}</p>
 

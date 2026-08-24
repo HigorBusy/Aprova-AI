@@ -107,7 +107,7 @@ export async function POST(request: Request) {
       ok: true,
       createdAccount,
       message: createdAccount
-        ? "Conta criada. Faça login para entrar no AprovaAI."
+        ? "Conta criada. Faça login para entrar no Pontuei."
         : "Compra vinculada à sua conta existente. Use sua senha atual para entrar."
     },
     200

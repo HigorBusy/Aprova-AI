@@ -4,7 +4,7 @@ import { QuestionCenter } from "@/components/question-center";
 import type { QuestionAreaKey } from "@/lib/questions";
 
 export const metadata: Metadata = {
-  title: "Questões | AprovaAI",
+  title: "Questões | Pontuei",
   description: "Treine questões, entenda seus erros e descubra o próximo assunto que precisa melhorar."
 };
 

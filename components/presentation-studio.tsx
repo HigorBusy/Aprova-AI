@@ -591,7 +591,7 @@ export function PresentationStudio() {
               </span>
               <h1 className="mt-6 text-4xl font-semibold leading-tight sm:text-6xl">Crie sua apresentação.</h1>
               <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-muted sm:text-lg">
-                Diga o tema. O AprovaAI estrutura, escreve e monta os slides para você editar.
+                Diga o tema. O Pontuei estrutura, escreve e monta os slides para você editar.
               </p>
             </div>
 
@@ -673,7 +673,7 @@ function StudioHeader({ balance }: { balance: number | null }) {
       <Link href="/" className="inline-flex min-h-11 items-center gap-2 rounded-lg px-2 text-sm text-slate-300 transition-colors duration-200 hover:text-white">
         <ArrowLeft className="h-4 w-4" /> Início
       </Link>
-      <Image src="/aprova-ai-logo-lockup.svg" alt="AprovaAI" width={640} height={220} priority className="h-9 w-auto object-contain" />
+      <Image src="/pontuei-logo-lockup.svg" alt="Pontuei" width={640} height={220} priority className="h-9 w-auto object-contain" />
       <span className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-3 text-sm text-slate-300">
         <CircleDollarSign className="h-4 w-4 text-aura" /> {balance ?? 0}
       </span>

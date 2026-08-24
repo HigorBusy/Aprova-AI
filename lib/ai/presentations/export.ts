@@ -106,7 +106,7 @@ export async function createPresentationPdf(deck: PresentationStudioDeck) {
   const bold = await document.embedFont(StandardFonts.HelveticaBold);
   document.setTitle(cleanText(deck.title));
   document.setSubject(cleanText(deck.objective));
-  document.setCreator("AprovaAI");
+  document.setCreator("Pontuei");
   deck.slides.forEach((slide, index) => {
     const page = document.addPage([960, 540]);
     drawPdfSlide(page, deck, slide, index, { regular, bold });
@@ -156,8 +156,8 @@ function addPptxSlide(pptx: PptxGenJS, deck: PresentationStudioDeck, item: Prese
 export async function createPresentationPptx(deck: PresentationStudioDeck) {
   const pptx = new PptxGenJS();
   pptx.layout = "LAYOUT_WIDE";
-  pptx.author = "AprovaAI";
-  pptx.company = "AprovaAI";
+  pptx.author = "Pontuei";
+  pptx.company = "Pontuei";
   pptx.subject = cleanText(deck.objective);
   pptx.title = cleanText(deck.title);
   pptx.theme = {

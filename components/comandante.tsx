@@ -1179,7 +1179,7 @@ function PresentationDeckView({ deck }: { deck: PresentationDeck }) {
           <Layers3 className="h-4 w-4" />
           <span className="text-[0.68rem] font-semibold uppercase tracking-[0.18em]">{deck.template ?? "Apresentação"}</span>
         </div>
-        <h3 className="mt-3 text-2xl font-semibold leading-tight text-white">{deck.title ?? "Apresentação AprovaAI"}</h3>
+        <h3 className="mt-3 text-2xl font-semibold leading-tight text-white">{deck.title ?? "Apresentação Pontuei"}</h3>
         <p className="mt-2 text-sm leading-6 text-slate-300">{deck.objective ?? "Plano de execução gerado para orientar seus estudos."}</p>
         <p className="mt-3 text-xs font-semibold text-muted">Tempo estimado: {deck.estimatedExecutionTime ?? "Sob medida"}</p>
       </div>
@@ -1235,12 +1235,12 @@ function PresentationPdfCard({ payload }: { payload: PresentationPdfPayload }) {
           <Layers3 className="h-4 w-4" />
           <span className="text-[0.68rem] font-semibold uppercase tracking-[0.18em]">PDF pronto</span>
         </div>
-        <h3 className="mt-3 text-2xl font-semibold leading-tight text-white">{payload.title ?? deck?.title ?? "Apresentação AprovaAI"}</h3>
+        <h3 className="mt-3 text-2xl font-semibold leading-tight text-white">{payload.title ?? deck?.title ?? "Apresentação Pontuei"}</h3>
         <p className="mt-2 text-sm leading-6 text-slate-300">{deck?.objective ?? "PDF gerado para orientar sua execução."}</p>
         <div className="mt-4 grid gap-2 rounded-lg border border-white/10 bg-black/20 p-3 text-xs text-muted sm:grid-cols-3">
           <span>{slides.length} slides</span>
           <span>{deck?.estimatedExecutionTime ?? "Sob medida"}</span>
-          <span>{payload.fileName ?? "apresentacao-aprovaai.pdf"}</span>
+          <span>{payload.fileName ?? "apresentacao-pontuei.pdf"}</span>
         </div>
         {canDownload ? (
           <button
@@ -1273,7 +1273,7 @@ function PresentationLegacyCard({ deck }: { deck: PresentationDeck }) {
         <Layers3 className="h-4 w-4" />
         <span className="text-[0.68rem] font-semibold uppercase tracking-[0.18em]">Apresentação antiga</span>
       </div>
-      <h3 className="mt-3 text-xl font-semibold leading-tight text-white">{deck.title ?? "Apresentação AprovaAI"}</h3>
+      <h3 className="mt-3 text-xl font-semibold leading-tight text-white">{deck.title ?? "Apresentação Pontuei"}</h3>
       <p className="mt-2 text-sm leading-6 text-slate-300">
         Esta apresentação foi gerada antes do modo PDF. Gere novamente pelo painel lateral para receber o arquivo pronto para baixar.
       </p>
@@ -1320,10 +1320,10 @@ function formatAssistantContent(content: string) {
       return `Correção de redação concluída. Nota estimada: ${parsed.estimatedScore ?? 0}/1000. ${parsed.summary ?? ""}`;
     }
     if (parsed.type === "presentation_pdf") {
-      return `PDF de apresentação pronto: ${parsed.title ?? "Apresentação AprovaAI"}.`;
+      return `PDF de apresentação pronto: ${parsed.title ?? "Apresentação Pontuei"}.`;
     }
     if (parsed.type === "presentation") {
-      return `Apresentação antiga: ${parsed.title ?? "Apresentação AprovaAI"}.`;
+      return `Apresentação antiga: ${parsed.title ?? "Apresentação Pontuei"}.`;
     }
   } catch {
     return content;
@@ -1350,7 +1350,7 @@ function downloadBase64Pdf(base64: string, fileName: string) {
   const url = URL.createObjectURL(new Blob([bytes], { type: "application/pdf" }));
   const anchor = document.createElement("a");
   anchor.href = url;
-  anchor.download = fileName || "apresentacao-aprovaai.pdf";
+  anchor.download = fileName || "apresentacao-pontuei.pdf";
   document.body.appendChild(anchor);
   anchor.click();
   anchor.remove();

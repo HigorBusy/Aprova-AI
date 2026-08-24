@@ -25,7 +25,7 @@ export function SharedPresentation({ deck }: { deck: PresentationStudioDeck }) {
   return (
     <main className={`${fullscreen ? "fixed inset-0 z-50" : "min-h-[100dvh]"} mission-grid flex flex-col bg-canvas text-white`}>
       <header className={`${fullscreen ? "absolute inset-x-0 top-0 z-10 opacity-0 hover:opacity-100" : ""} flex min-h-16 items-center justify-between border-b border-white/10 bg-black/45 px-4 transition-opacity`}>
-        <Link href="/" className="inline-flex min-h-10 items-center gap-2 text-sm text-slate-300 hover:text-white"><ArrowLeft className="h-4 w-4" /> AprovaAI</Link>
+        <Link href="/" className="inline-flex min-h-10 items-center gap-2 text-sm text-slate-300 hover:text-white"><ArrowLeft className="h-4 w-4" /> Pontuei</Link>
         <div className="min-w-0 text-center"><p className="truncate text-sm font-semibold">{deck.title}</p><p className="text-xs text-muted">Somente leitura</p></div>
         <button type="button" title="Apresentar em tela cheia" onClick={() => setFullscreen((value) => !value)} className="grid h-10 w-10 place-items-center rounded-md border border-white/10 text-slate-300 hover:border-white/25 hover:text-white"><Maximize2 className="h-4 w-4" /></button>
       </header>

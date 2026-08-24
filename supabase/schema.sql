@@ -1,5 +1,5 @@
--- Aprova.AI - schema inicial Supabase
--- Execute em um projeto Supabase dedicado ao Aprova.AI.
+-- Pontuei - schema inicial Supabase
+-- Execute em um projeto Supabase dedicado ao Pontuei.
 
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,

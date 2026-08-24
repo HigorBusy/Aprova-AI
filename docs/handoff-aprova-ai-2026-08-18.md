@@ -1,9 +1,9 @@
-# Handoff AprovaAI - 18/08/2026
+# Handoff Pontuei - 18/08/2026
 
 ## Estado atual
 
-- Produção: https://aprova-ai-gray.vercel.app
-- Estúdio: https://aprova-ai-gray.vercel.app/apresentacoes
+- Produção: https://pontuei-enem.vercel.app
+- Estúdio: https://pontuei-enem.vercel.app/apresentacoes
 - Vercel project: `aprova-ai`
 - Vercel project ID: `prj_cCgQof0MxKEVlehT0SYHascofNXB`
 - Supabase project: `vlusabbvvbzdncxwcqzv`
@@ -14,7 +14,7 @@
 
 ## Promessa central preservada
 
-O AprovaAI não deve virar uma coleção genérica de ferramentas. O coração comercial continua sendo a evolução do aluno, com o corretor de redação como prova principal. O Estúdio de Apresentações foi reconstruído como um entregável completo, não como texto devolvido por chatbot.
+O Pontuei não deve virar uma coleção genérica de ferramentas. O coração comercial continua sendo a evolução do aluno, com o corretor de redação como prova principal. O Estúdio de Apresentações foi reconstruído como um entregável completo, não como texto devolvido por chatbot.
 
 ## Estúdio de Apresentações concluído
 
@@ -100,7 +100,7 @@ Não copie, remova ou recrie essas variáveis sem necessidade.
 
 ## Teste obrigatório quando voltar ao computador
 
-1. Acesse https://aprova-ai-gray.vercel.app e entre na conta.
+1. Acesse https://pontuei-enem.vercel.app e entre na conta.
 2. Abra `/apresentacoes`.
 3. Crie: `Revolução Francesa em 8 slides para o ensino médio, duração de 8 minutos`.
 4. Revise o plano, mova um slide e aprove a geração.
@@ -209,7 +209,7 @@ npx.cmd --yes vercel@latest --prod --yes
 Confirme no final que aparece:
 
 - `readyState: READY`
-- `Aliased https://aprova-ai-gray.vercel.app`
+- `Aliased https://pontuei-enem.vercel.app`
 
 ## Arquivos centrais
 

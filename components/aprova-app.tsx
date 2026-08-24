@@ -158,7 +158,7 @@ export function AprovaApp() {
 
         const profile = profileResult.data;
         if (profile?.is_blocked) {
-          setAccountError("Seu acesso ao AprovaAI está bloqueado. Entre em contato com o suporte para revisar sua conta.");
+          setAccountError("Seu acesso ao Pontuei está bloqueado. Entre em contato com o suporte para revisar sua conta.");
           return;
         }
         if (profile) {
@@ -345,8 +345,8 @@ export function AprovaApp() {
       <aside className="sticky top-0 hidden h-screen flex-col border-r border-[#8fa3b8]/15 bg-[#07101d]/95 px-5 py-6 backdrop-blur-xl lg:flex">
         <div className="flex h-11 items-center">
           <Image
-            src="/aprova-ai-logo-lockup.svg"
-            alt="AprovaAI"
+            src="/pontuei-logo-lockup.svg"
+            alt="Pontuei"
             width={640}
             height={220}
             priority
@@ -405,8 +405,8 @@ export function AprovaApp() {
           <div className="flex items-center justify-between gap-3">
             <div className="flex h-12 w-40 items-center justify-center">
               <Image
-                src="/aprova-ai-logo-lockup.svg"
-                alt="AprovaAI"
+                src="/pontuei-logo-lockup.svg"
+                alt="Pontuei"
                 width={640}
                 height={220}
                 priority

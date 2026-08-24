@@ -15,10 +15,10 @@ export function InternalNav({ active }: { active: InternalSection }) {
   return (
     <>
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-[#8fa3b8]/15 bg-[#07101d]/95 px-5 py-6 backdrop-blur-xl lg:flex">
-        <Link href="/" className="flex h-11 items-center" aria-label="AprovaAI - Hoje">
+        <Link href="/" className="flex h-11 items-center" aria-label="Pontuei - Hoje">
           <Image
-            src="/aprova-ai-logo-lockup.svg"
-            alt="AprovaAI"
+            src="/pontuei-logo-lockup.svg"
+            alt="Pontuei"
             width={640}
             height={220}
             priority
@@ -50,7 +50,7 @@ export function InternalNav({ active }: { active: InternalSection }) {
         </nav>
 
         <p className="mt-auto border-t border-[#8fa3b8]/15 pt-5 text-xs leading-5 text-[#6f8498]">
-          AprovaAI · preparação orientada para o ENEM
+          Pontuei · preparação orientada para o ENEM
         </p>
       </aside>
 

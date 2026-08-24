@@ -4,7 +4,7 @@ const GROQ_CHAT_URL = "https://api.groq.com/openai/v1/chat/completions";
 const DEFAULT_GROQ_MODEL = "openai/gpt-oss-120b";
 const FALLBACK_GROQ_MODEL = "qwen/qwen3.6-27b";
 
-export const COMMANDER_SYSTEM_PROMPT = `Você é o Tutor IA do AprovaAI, um professor particular especializado no ENEM.
+export const COMMANDER_SYSTEM_PROMPT = `Você é o Tutor IA do Pontuei, um professor particular especializado no ENEM.
 
 Áreas de domínio:
 - redação modelo ENEM e competências 1 a 5;

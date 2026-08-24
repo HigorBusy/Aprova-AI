@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "AprovaAI",
-    short_name: "AprovaAI",
+    name: "Pontuei",
+    short_name: "Pontuei",
     description: "Correção estratégica de redação para o ENEM.",
     start_url: "/",
     display: "standalone",
@@ -12,19 +12,19 @@ export default function manifest(): MetadataRoute.Manifest {
     orientation: "portrait-primary",
     icons: [
       {
-        src: "/icons/aprova-ai-192.png",
+        src: "/icons/pontuei-192.png",
         sizes: "192x192",
         type: "image/png",
         purpose: "any"
       },
       {
-        src: "/icons/aprova-ai-512.png",
+        src: "/icons/pontuei-512.png",
         sizes: "512x512",
         type: "image/png",
         purpose: "any"
       },
       {
-        src: "/icons/aprova-ai-maskable-512.png",
+        src: "/icons/pontuei-maskable-512.png",
         sizes: "512x512",
         type: "image/png",
         purpose: "maskable"

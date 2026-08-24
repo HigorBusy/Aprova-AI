@@ -1,10 +1,10 @@
-# Auditoria da reforma do produto autenticado AprovaAI
+# Auditoria da reforma do produto autenticado Pontuei
 
 Data: 21/08/2026
 
 ## Resumo executivo
 
-O AprovaAI ja possui um corretor de redacao funcional, historico estruturado por competencia, memoria inicial de fraquezas, Tutor com contexto das ultimas redacoes, autenticacao Supabase e consumo atomico de creditos no backend.
+O Pontuei ja possui um corretor de redacao funcional, historico estruturado por competencia, memoria inicial de fraquezas, Tutor com contexto das ultimas redacoes, autenticacao Supabase e consumo atomico de creditos no backend.
 
 O produto, porem, ainda nao forma um ciclo unico de preparacao. A home mistura redacao, apresentacoes, Tutor, telemetria local e componentes herdados da antiga narrativa espacial. O proximo passo usa apenas dados de redacao, grande parte do progresso geral vive em localStorage e nao existe uma arquitetura real de questoes ou simulados.
 

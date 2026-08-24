@@ -1,4 +1,4 @@
-# AprovaAI — Fases 3 a 5
+# Pontuei — Fases 3 a 5
 
 ## Fase 3 — Simulados
 

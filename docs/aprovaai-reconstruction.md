@@ -1,8 +1,8 @@
-# AprovaAI Reconstruction Plan
+# Pontuei Reconstruction Plan
 
 ## Promessa central
 
-O AprovaAI corrige sua redacao do ENEM por competencia e mostra exatamente o que fazer para subir nota na proxima.
+O Pontuei corrige sua redacao do ENEM por competencia e mostra exatamente o que fazer para subir nota na proxima.
 
 ## Direcao de produto
 
@@ -89,4 +89,4 @@ Conclusao: a calibragem atual evita alguns absurdos, mas ainda nao prova qualida
 
 ## Critério comercial
 
-Antes de campanha, o AprovaAI precisa corrigir uma redacao ruim sem inflar nota, reconhecer uma redacao excelente sem inventar defeitos e entregar um plano de melhoria claro para a proxima tentativa.
+Antes de campanha, o Pontuei precisa corrigir uma redacao ruim sem inflar nota, reconhecer uma redacao excelente sem inventar defeitos e entregar um plano de melhoria claro para a proxima tentativa.

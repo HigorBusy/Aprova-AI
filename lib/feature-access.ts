@@ -5,7 +5,7 @@ export function presentationsDisabledResponse() {
   if (PRODUCT_CONFIG.features.presentations) return null;
 
   return jsonUtf8(
-    { error: "A criação de apresentações não faz mais parte do AprovaAI." },
+    { error: "A criação de apresentações não faz mais parte do Pontuei." },
     { status: 410 }
   );
 }

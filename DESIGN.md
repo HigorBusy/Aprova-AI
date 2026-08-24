@@ -1,5 +1,5 @@
 ---
-name: AprovaAI
+name: Pontuei
 description: Sistema editorial noturno para correcao e evolucao em redacao ENEM.
 colors:
   ink-night: "#08111f"
@@ -54,13 +54,13 @@ components:
     height: "52px"
 ---
 
-# Design System: AprovaAI
+# Design System: Pontuei
 
 ## Overview
 
 **Creative North Star: "Mesa de Correcao Noturna"**
 
-O AprovaAI e uma bancada digital para estudantes que escrevem, revisam e reescrevem por longos periodos. A interface combina a concentracao de uma mesa noturna com a precisao editorial de uma redacao corrigida. Papel, marca-texto e caneta aparecem como linguagem funcional, nunca como decoracao escolar.
+O Pontuei e uma bancada digital para estudantes que escrevem, revisam e reescrevem por longos periodos. A interface combina a concentracao de uma mesa noturna com a precisao editorial de uma redacao corrigida. Papel, marca-texto e caneta aparecem como linguagem funcional, nunca como decoracao escolar.
 
 Landing pages podem usar contraste de escala e alternar superficies escuras e papel frio. O aplicativo permanece mais silencioso: navegacao previsivel, conteudo amplo e cor reservada a estados ou acoes.
 

@@ -31,8 +31,8 @@ export function LandingPage({ onStart }: LandingPageProps) {
   return (
     <main className="landing-shell min-h-screen overflow-hidden bg-[#08111f] text-[#f4f1e8]">
       <header className="relative z-30 mx-auto flex min-h-20 w-full max-w-[1440px] items-center justify-between px-5 sm:px-8 lg:px-12">
-        <a href="#inicio" aria-label="AprovaAI - início" className="flex items-center">
-          <img src="/aprova-ai-logo-lockup.svg" alt="AprovaAI" className="h-10 w-auto object-contain sm:h-11" />
+        <a href="#inicio" aria-label="Pontuei - início" className="flex items-center">
+          <img src="/pontuei-logo-lockup.svg" alt="Pontuei" className="h-10 w-auto object-contain sm:h-11" />
         </a>
         <nav className="hidden items-center gap-8 text-sm font-medium text-[#8fa3b8] md:flex" aria-label="Navegação da página">
           <a className="transition-colors hover:text-[#f4f1e8]" href="#como-funciona">Como funciona</a>
@@ -49,7 +49,7 @@ export function LandingPage({ onStart }: LandingPageProps) {
             <span><strong className="font-semibold text-[#f4f1e8]">+4 mil usuários</strong> já escolheram corrigir com direção</span>
           </div>
           <h1 className="text-balance text-[clamp(3.2rem,7vw,6rem)] font-semibold leading-[0.92] tracking-[-0.04em]">Sua redação já mostra onde você perde pontos.</h1>
-          <p className="mt-7 max-w-xl text-lg leading-8 text-[#b9c8d5] sm:text-xl">O AprovaAI lê pelas cinco competências do ENEM, aponta o trecho que enfraqueceu sua nota e mostra o que corrigir na próxima tentativa.</p>
+          <p className="mt-7 max-w-xl text-lg leading-8 text-[#b9c8d5] sm:text-xl">O Pontuei lê pelas cinco competências do ENEM, aponta o trecho que enfraqueceu sua nota e mostra o que corrigir na próxima tentativa.</p>
           <div className="mt-9 flex flex-col gap-3 sm:flex-row">
             <button type="button" onClick={openFreeTrial} className="inline-flex min-h-14 items-center justify-center gap-2 rounded-lg bg-[#f2c94c] px-6 font-bold text-[#08111f] shadow-[0_18px_48px_rgba(2,7,15,0.34)] transition hover:-translate-y-0.5 hover:bg-[#f8d866]">Fazer 1ª correção grátis <ArrowRight className="h-4 w-4" /></button>
             <a href="#como-funciona" className="inline-flex min-h-14 items-center justify-center gap-2 rounded-lg border border-[#8fa3b8]/25 bg-[#0f1e31]/70 px-6 font-semibold text-[#dce6ec] transition hover:border-[#35bfe7]/50 hover:bg-[#14263d]">Ver o método <ChevronDown className="h-4 w-4" /></a>
@@ -86,7 +86,7 @@ export function LandingPage({ onStart }: LandingPageProps) {
 
       <section id="correcao" className="bg-[#edf2f4] text-[#0b1726]">
         <div className="mx-auto grid w-full max-w-[1440px] gap-12 px-5 py-24 sm:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:px-12 lg:py-32">
-          <div className="max-w-xl"><Highlighter className="h-9 w-9 text-[#05799a]" /><h2 className="mt-6 text-balance text-4xl font-semibold leading-[1.02] tracking-[-0.035em] sm:text-6xl">A crítica precisa apontar o trecho. Não inventar um defeito.</h2><p className="mt-6 text-lg leading-8 text-[#4f6477]">O AprovaAI foi calibrado para reconhecer textos fracos e também excelência. Toda penalização precisa explicar o trecho, o problema e o impacto na competência.</p></div>
+          <div className="max-w-xl"><Highlighter className="h-9 w-9 text-[#05799a]" /><h2 className="mt-6 text-balance text-4xl font-semibold leading-[1.02] tracking-[-0.035em] sm:text-6xl">A crítica precisa apontar o trecho. Não inventar um defeito.</h2><p className="mt-6 text-lg leading-8 text-[#4f6477]">O Pontuei foi calibrado para reconhecer textos fracos e também excelência. Toda penalização precisa explicar o trecho, o problema e o impacto na competência.</p></div>
           <div className="relative rounded-2xl bg-white p-6 shadow-[0_28px_80px_rgba(20,43,63,0.14)] sm:p-9">
             <div className="flex items-center justify-between gap-4 border-b border-[#d8e1e6] pb-5"><div><p className="text-sm font-semibold text-[#05799a]">Competência 3</p><p className="mt-1 text-sm text-[#6c7f8f]">Argumentação e projeto de texto</p></div><strong className="font-mono text-3xl tabular-nums">160/200</strong></div>
             <blockquote className="mt-7 border-l border-[#ff6b6b] pl-5 text-lg leading-8 text-[#24384a]">“A educação é importante para resolver diversos problemas da sociedade.”</blockquote>
@@ -110,7 +110,7 @@ export function LandingPage({ onStart }: LandingPageProps) {
 
       <section className="mx-auto w-full max-w-[1280px] px-5 py-24 sm:px-8 lg:py-32"><div className="border-y border-[#8fa3b8]/18 py-16 sm:py-24"><div className="max-w-4xl"><h2 className="text-balance text-4xl font-semibold leading-[1.02] tracking-[-0.035em] sm:text-6xl">Cada erro corrigido hoje é ponto que você deixa de perder na prova.</h2><button type="button" onClick={openFreeTrial} className="mt-9 inline-flex min-h-14 items-center justify-center gap-2 rounded-lg bg-[#f2c94c] px-7 font-bold text-[#08111f] transition hover:bg-[#f8d866]">Fazer minha correção grátis <ArrowRight className="h-4 w-4" /></button></div></div></section>
 
-      <footer className="border-t border-[#8fa3b8]/12 px-5 py-8 text-sm text-[#6f8498] sm:px-8"><div className="mx-auto flex w-full max-w-[1280px] flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"><img src="/aprova-ai-logo-lockup.svg" alt="AprovaAI" className="h-8 w-auto self-start object-contain" /><p>Preparação orientada para redação do ENEM.</p></div></footer>
+      <footer className="border-t border-[#8fa3b8]/12 px-5 py-8 text-sm text-[#6f8498] sm:px-8"><div className="mx-auto flex w-full max-w-[1280px] flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"><img src="/pontuei-logo-lockup.svg" alt="Pontuei" className="h-8 w-auto self-start object-contain" /><p>Preparação orientada para redação do ENEM.</p></div></footer>
     </main>
   );
 }

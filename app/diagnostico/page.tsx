@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { DiagnosticPage } from "@/components/diagnostic-page";
 
 export const metadata: Metadata = {
-  title: "Diagnóstico | AprovaAI",
+  title: "Diagnóstico | Pontuei",
   description: "Veja suas competências, padrões recorrentes e o próximo foco para evoluir na redação do ENEM."
 };
 

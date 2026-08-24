@@ -1,4 +1,4 @@
-# Aprova.AI
+# Pontuei
 
 App web mobile-first para estudantes do ENEM começarem do zero com diagnóstico, plano diário, progresso visual, gamificação, conquistas e mentor de dúvidas.
 
@@ -12,8 +12,10 @@ App web mobile-first para estudantes do ENEM começarem do zero com diagnóstico
 
 ## Status da integração
 
-- Repositório: `HigorBusy/Aprova-AI`
-- Supabase: projeto `Aprova-AI` (`vlusabbvvbzdncxwcqzv`)
+- Repositório: `HigorBusy/Pontuei`
+- Supabase: projeto `Pontuei` (`vlusabbvvbzdncxwcqzv`)
+- Produção: `https://pontuei-enem.vercel.app`
+- Alias legado preservado: `https://aprova-ai-gray.vercel.app`
 - Schema: aplicado via migrations `initial_aprova_ai_schema` e `add_indexes_and_refine_subjects_policies`
 - RLS: habilitado em todas as tabelas públicas do app
 - Vercel: pronto para importar/deployar o repositório como projeto Next.js

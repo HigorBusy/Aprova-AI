@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { Comandante } from "@/components/comandante";
 
 export const metadata: Metadata = {
-  title: "Tutor IA | AprovaAI",
+  title: "Tutor IA | Pontuei",
   description: "Orientação estratégica para estudantes do ENEM."
 };
 

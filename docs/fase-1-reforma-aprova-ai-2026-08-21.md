@@ -1,4 +1,4 @@
-# AprovaAI - Fase 1 da reforma
+# Pontuei - Fase 1 da reforma
 
 Data: 21 de agosto de 2026
 
@@ -33,7 +33,7 @@ Ela adiciona os campos academicos do onboarding, cria a RPC segura de conclusao 
 - cadastro gratuito: interface e saldo inicial exibidos corretamente;
 - endpoint de apresentacoes: HTTP 410 antes de autenticacao, creditos ou IA;
 - producao: deployment `dpl_9pL3rbYY3n7iXuBADTRhVMxsQ64C` marcado como Ready e Current;
-- dominio: `https://aprova-ai-gray.vercel.app`;
+- dominio: `https://pontuei-enem.vercel.app`;
 - teste autenticado: dashboard, creditos, historico de redacoes e Tutor contextual carregados.
 
 ## Fora da Fase 1

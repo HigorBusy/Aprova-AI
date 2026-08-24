@@ -15,7 +15,7 @@
 
 ## Integridade editorial
 
-Todas as questões desta primeira carga estão marcadas como `authored`, com fonte `AprovaAI` e aviso explícito de que não são questões oficiais do ENEM. O gabarito não possui política de leitura direta: ele é entregue pelas funções autenticadas somente durante a correção.
+Todas as questões desta primeira carga estão marcadas como `authored`, com fonte `Pontuei` e aviso explícito de que não são questões oficiais do ENEM. O gabarito não possui política de leitura direta: ele é entregue pelas funções autenticadas somente durante a correção.
 
 ## Banco e segurança
 

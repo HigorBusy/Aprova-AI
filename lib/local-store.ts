@@ -1,13 +1,14 @@
 import { defaultTasks, defaultTopics, initialState } from "@/lib/study-data";
 import type { ProfileKind, StudyState, TopicStatus } from "@/lib/types";
 
-const STORAGE_KEY = "aprova-ai-state";
+const STORAGE_KEY = "pontuei-state";
+const LEGACY_STORAGE_KEY = "aprova-ai-state";
 
 export function loadLocalState(): StudyState {
   if (typeof window === "undefined") return initialState();
 
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
+    const raw = window.localStorage.getItem(STORAGE_KEY) ?? window.localStorage.getItem(LEGACY_STORAGE_KEY);
     if (!raw) return initialState();
     return migrateLocalState({ ...initialState(), ...JSON.parse(raw) } as StudyState);
   } catch {

@@ -28,7 +28,7 @@ export function AchievementsPage() {
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <div className="text-right">
-          <p className="text-xs font-black uppercase tracking-[0.18em] text-cyan">Aprova.AI</p>
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-cyan">Pontuei</p>
           <h1 className="text-2xl font-black text-white">ARSENAL</h1>
         </div>
       </header>
